@@ -41,3 +41,6 @@
 
 # debug information files
 *.dwo
+/CSAPI-lib/x64/Debug
+/x64/Debug
+/CSAPI-test/x64/Debug
