@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{79a4b6b0-9ca1-42aa-9b79-3b5cb91252f3}</ProjectGuid>
-    <RootNamespace>ConnectedSystemsAPICPP</RootNamespace>
+    <ProjectGuid>{7aedcc9e-20ec-40c7-a6e7-dbdb997ff9c8}</ProjectGuid>
+    <RootNamespace>CSAPIlib</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -104,6 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -119,6 +120,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -127,10 +129,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="APIRequest.h" />
+    <ClInclude Include="APIResponse.h" />
+    <ClInclude Include="ConnectedSystemsAPI.h" />
     <ClInclude Include="framework.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="ConnectedSystemsAPI.cpp" />
+    <ClInclude Include="OptionalTimePoint.h" />
+    <ClInclude Include="Properties.h" />
+    <ClInclude Include="System.h" />
+    <ClInclude Include="SystemsAPI.h" />
+    <ClInclude Include="TimeExtent.h" />
+    <ClInclude Include="TimeUtils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
