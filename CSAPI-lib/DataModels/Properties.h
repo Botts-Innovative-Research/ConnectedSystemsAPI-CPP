@@ -1,6 +1,5 @@
 #pragma once
 
-#include <iostream>
 #include <string>
 #include <nlohmann/json.hpp>
 #include "TimeExtent.h"
@@ -15,6 +14,7 @@ namespace ConnectedSystemsAPI {
 			std::string description;
 			std::string assetType;
 			std::optional<TimeExtent> validTime;
+
 		public:
 			Properties() = default;
 			Properties(const std::string& featureType,
@@ -26,11 +26,17 @@ namespace ConnectedSystemsAPI {
 				: featureType(featureType), uid(uid), name(name), description(description), assetType(assetType), validTime(validTime) {
 			}
 
+			/// <returns>Identifier of the feature, either a URI, a CURIE, or a simple token.</returns>
 			const std::string& getFeatureType() const { return featureType; }
+			/// <returns>Globally unique identifier of the feature.</returns>
 			const std::string& getUid() const { return uid; }
+			/// <returns>Human-readable name of the feature.</returns>
 			const std::string& getName() const { return name; }
+			/// <returns>Human-readable description of the feature.</returns>
 			const std::string& getDescription() const { return description; }
+			/// <returns>Type of asset represented by this system.</returns>
 			const std::string& getAssetType() const { return assetType; }
+			/// <returns>Time period during which the system description is valid.</returns>
 			const std::optional<TimeExtent>& getValidTime() const { return validTime; }
 		};
 
@@ -46,11 +52,10 @@ namespace ConnectedSystemsAPI {
 		}
 
 		inline void to_json(nlohmann::ordered_json& j, const Properties& p) {
-			j = nlohmann::ordered_json{
-				{"featureType", p.getFeatureType()},
-				{"uid", p.getUid()},
-				{"name", p.getName()}
-			};
+			j = nlohmann::ordered_json::object();
+			j["featureType"] = p.getFeatureType();
+			j["uid"] = p.getUid();
+			j["name"] = p.getName();
 
 			if (!p.getDescription().empty()) {
 				j["description"] = p.getDescription();
@@ -68,6 +73,5 @@ namespace ConnectedSystemsAPI {
 			ConnectedSystemsAPI::DataModels::to_json(j, p);
 			return os << j.dump(4);
 		}
-
 	}
 }

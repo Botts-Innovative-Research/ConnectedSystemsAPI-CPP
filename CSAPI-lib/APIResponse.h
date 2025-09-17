@@ -61,4 +61,27 @@ namespace ConnectedSystemsAPI {
 			return items;
 		}
 	};
+
+	template <>
+	class APIResponse<void> {
+	private:
+		int responseCode;
+		std::string responseMessage;
+		std::string responseBody;
+		std::map<std::string, std::vector<std::string>> headers;
+
+	public:
+		APIResponse(int responseCode, const std::string& responseMessage, const std::string& responseBody, const std::map<std::string, std::vector<std::string>>& headers)
+			: responseCode(responseCode), responseMessage(responseMessage), responseBody(responseBody), headers(headers) {
+		}
+
+		bool isSuccessful() const {
+			return responseCode >= 200 && responseCode < 400;
+		}
+
+		int getResponseCode() const { return responseCode; }
+		const std::string& getResponseMessage() const { return responseMessage; }
+		const std::string& getResponseBody() const { return responseBody; }
+		const std::map<std::string, std::vector<std::string>>& getHeaders() const { return headers; }
+	};
 }

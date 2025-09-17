@@ -132,12 +132,17 @@
     <ClInclude Include="APIRequest.h" />
     <ClInclude Include="APIResponse.h" />
     <ClInclude Include="ConnectedSystemsAPI.h" />
+    <ClInclude Include="DataModels\Link.h" />
+    <ClInclude Include="DataModels\Properties.h" />
+    <ClInclude Include="DataModels\PropertiesBuilder.h" />
+    <ClInclude Include="DataModels\System.h" />
+    <ClInclude Include="DataModels\SystemBuilder.h" />
+    <ClInclude Include="DataModels\TimeExtent.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="OptionalTimePoint.h" />
-    <ClInclude Include="Properties.h" />
-    <ClInclude Include="System.h" />
+    <ClInclude Include="Query\QueryParameters.h" />
+    <ClInclude Include="Query\SystemsQuery.h" />
     <ClInclude Include="SystemsAPI.h" />
-    <ClInclude Include="TimeExtent.h" />
     <ClInclude Include="TimeUtils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

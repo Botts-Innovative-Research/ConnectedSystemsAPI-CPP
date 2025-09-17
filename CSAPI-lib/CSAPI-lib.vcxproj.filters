@@ -19,6 +19,9 @@
     <Filter Include="Header Files\Util">
       <UniqueIdentifier>{5f2184e7-00be-4a1b-b6ca-531629b94bb6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Query">
+      <UniqueIdentifier>{86d8700a-e917-4bd9-96e8-189e1b1a7030}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -39,17 +42,32 @@
     <ClInclude Include="SystemsAPI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Properties.h">
-      <Filter>Header Files\DataModels</Filter>
-    </ClInclude>
-    <ClInclude Include="System.h">
-      <Filter>Header Files\DataModels</Filter>
-    </ClInclude>
-    <ClInclude Include="TimeExtent.h">
-      <Filter>Header Files\DataModels</Filter>
-    </ClInclude>
     <ClInclude Include="TimeUtils.h">
       <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\System.h">
+      <Filter>Header Files\DataModels</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\SystemBuilder.h">
+      <Filter>Header Files\DataModels</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Link.h">
+      <Filter>Header Files\DataModels</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Properties.h">
+      <Filter>Header Files\DataModels</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\TimeExtent.h">
+      <Filter>Header Files\DataModels</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\PropertiesBuilder.h">
+      <Filter>Header Files\DataModels</Filter>
+    </ClInclude>
+    <ClInclude Include="Query\QueryParameters.h">
+      <Filter>Header Files\Query</Filter>
+    </ClInclude>
+    <ClInclude Include="Query\SystemsQuery.h">
+      <Filter>Header Files\Query</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

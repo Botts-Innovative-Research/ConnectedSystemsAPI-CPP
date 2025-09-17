@@ -8,6 +8,13 @@
 #include "APIResponse.h"
 
 namespace ConnectedSystemsAPI {
+	struct RawHttpResponse {
+		int responseCode = 0;
+		std::string responseMessage;
+		std::string responseBody;
+		std::map<std::string, std::vector<std::string>> headers;
+	};
+
 	class APIRequest {
 	private:
 		std::string apiRoot;
@@ -23,13 +30,13 @@ namespace ConnectedSystemsAPI {
 	public:
 		template<typename T>
 		APIResponse<T> execute() {
-			std::string rawResponse = execute();
-			return APIResponse<T>(0, "", rawResponse, {});
+			RawHttpResponse rawResponse = execute();
+			return APIResponse<T>(rawResponse.responseCode, rawResponse.responseMessage, rawResponse.responseBody, rawResponse.headers);
 		}
 
-		std::string execute() const {
+		RawHttpResponse execute() const {
 			CURL* curl = curl_easy_init();
-			std::string response;
+			RawHttpResponse response;
 			if (curl) {
 				std::string url = apiRoot + endpoint;
 				struct curl_slist* header_list = nullptr;
@@ -40,7 +47,10 @@ namespace ConnectedSystemsAPI {
 				curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 				curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header_list);
 				curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-				curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+				curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response.responseBody);
+
+				curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, HeaderCallback);
+				curl_easy_setopt(curl, CURLOPT_HEADERDATA, &response);
 
 				if (requestMethod == "POST") {
 					curl_easy_setopt(curl, CURLOPT_POST, 1L);
@@ -58,6 +68,8 @@ namespace ConnectedSystemsAPI {
 				if (res != CURLE_OK)
 					std::cerr << "cURL error: " << curl_easy_strerror(res) << std::endl;
 
+				curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response.responseCode);
+
 				curl_slist_free_all(header_list);
 				curl_easy_cleanup(curl);
 			}
@@ -69,6 +81,42 @@ namespace ConnectedSystemsAPI {
 			auto* response = static_cast<std::string*>(userdata);
 			response->append(ptr, size * nmemb);
 			return size * nmemb;
+		}
+
+		static size_t HeaderCallback(char* buffer, size_t size, size_t nitems, void* userdata) {
+			size_t totalSize = size * nitems;
+			auto* response = static_cast<RawHttpResponse*>(userdata);
+			std::string headerLine(buffer, totalSize);
+
+			// Check for the status line (e.g., "HTTP/1.1 200 OK\r\n")
+			if (headerLine.find("HTTP/") == 0) {
+				// Remove trailing \r\n
+				headerLine.erase(headerLine.find_last_not_of("\r\n") + 1);
+				// Remove "HTTP/1.1 " prefix to get the status message
+				size_t firstSpace = headerLine.find(' ');
+				if (firstSpace != std::string::npos) {
+					size_t secondSpace = headerLine.find(' ', firstSpace + 1);
+					if (secondSpace != std::string::npos) {
+						response->responseMessage = headerLine.substr(secondSpace + 1);
+					}
+				}
+				else
+					response->responseMessage = headerLine;
+			}
+			else {
+				// Parse header: "Key: Value"
+				auto colonPos = headerLine.find(':');
+				if (colonPos != std::string::npos) {
+					std::string key = headerLine.substr(0, colonPos);
+					std::string value = headerLine.substr(colonPos + 1);
+					// Trim whitespace and trailing \r\n
+					key.erase(key.find_last_not_of(" \t\r\n") + 1);
+					value.erase(0, value.find_first_not_of(" \t"));
+					value.erase(value.find_last_not_of("\r\n") + 1);
+					response->headers[key].push_back(value);
+				}
+			}
+			return totalSize;
 		}
 
 	public:
