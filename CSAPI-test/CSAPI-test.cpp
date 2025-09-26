@@ -2,6 +2,7 @@
 #include <string>
 #include "pch.h"
 #include "CppUnitTest.h"
+#include "DataModels/DataStream.h"
 #include "DataModels/System.h"
 #include "DataModels/SystemBuilder.h"
 #include "DataModels/Properties.h"
@@ -179,6 +180,13 @@ namespace CSAPItest {
 
 		TEST_METHOD_CLEANUP(MethodCleanup) {
 			cleanupTestSystem();
+		}
+
+		TEST_METHOD(GetDataStreams) {
+			auto response = csapi.getDataStreamsAPI().getSystems();
+			std::cout << "Response: " << response.getResponseBody() << std::endl;
+			Assert::IsTrue(response.isSuccessful());
+			std::cout << "DataStream: " << response.getItems().at(0) << std::endl;
 		}
 	};
 }

@@ -69,5 +69,14 @@
     <ClInclude Include="Query\SystemsQuery.h">
       <Filter>Header Files\Query</Filter>
     </ClInclude>
+    <ClInclude Include="DataModels\DataStream.h">
+      <Filter>Header Files\DataModels</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\ObservedProperty.h">
+      <Filter>Header Files\DataModels</Filter>
+    </ClInclude>
+    <ClInclude Include="DataStreamsAPI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

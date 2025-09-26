@@ -5,6 +5,7 @@
 #include <iostream>
 #include "APIRequest.h"
 #include "SystemsAPI.h"
+#include "DataStreamsAPI.h"
 
 namespace ConnectedSystemsAPI {
 	class ConSysAPI {
@@ -12,6 +13,7 @@ namespace ConnectedSystemsAPI {
 		std::string apiRoot;
 		std::string authHeader;
 		SystemsAPI systemsAPI;
+		DataStreamsAPI dataStreamsAPI;
 
 	public:
 		/// <param name="apiRoot">e.g. "localhost:8181/sensorhub/api"</param>
@@ -26,6 +28,7 @@ namespace ConnectedSystemsAPI {
 				authHeader = "Authorization: Bearer " + authenticationToken;
 			}
 			systemsAPI = SystemsAPI(apiRoot, authHeader);
+			dataStreamsAPI = DataStreamsAPI(apiRoot, authHeader);
 		}
 
 		/// <param name="apiRoot">e.g. "localhost:8181/sensorhub/api"</param>
@@ -38,6 +41,7 @@ namespace ConnectedSystemsAPI {
 		const std::string& getApiRoot() const { return apiRoot; }
 		const std::string& getAuthHeader() const { return authHeader; }
 		SystemsAPI& getSystemsAPI() { return systemsAPI; }
+		DataStreamsAPI& getDataStreamsAPI() { return dataStreamsAPI; }
 	private:
 		std::string base64_encode(const std::string& in) {
 			static const std::string base64_chars =

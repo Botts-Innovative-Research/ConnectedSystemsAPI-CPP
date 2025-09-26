@@ -132,12 +132,15 @@
     <ClInclude Include="APIRequest.h" />
     <ClInclude Include="APIResponse.h" />
     <ClInclude Include="ConnectedSystemsAPI.h" />
+    <ClInclude Include="DataModels\DataStream.h" />
     <ClInclude Include="DataModels\Link.h" />
+    <ClInclude Include="DataModels\ObservedProperty.h" />
     <ClInclude Include="DataModels\Properties.h" />
     <ClInclude Include="DataModels\PropertiesBuilder.h" />
     <ClInclude Include="DataModels\System.h" />
     <ClInclude Include="DataModels\SystemBuilder.h" />
     <ClInclude Include="DataModels\TimeExtent.h" />
+    <ClInclude Include="DataStreamsAPI.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="OptionalTimePoint.h" />
     <ClInclude Include="Query\QueryParameters.h" />
