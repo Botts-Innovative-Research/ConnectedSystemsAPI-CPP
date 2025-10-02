@@ -28,7 +28,7 @@ namespace ConnectedSystemsAPI {
 			std::string resultTimeInterval;
 			std::string dataStreamType;
 			std::string resultType;
-			bool live;
+			std::optional<bool> live;
 			std::optional<std::vector<Link>> links;
 			//std::optional<ObservationSchema> schema;
 
@@ -52,7 +52,7 @@ namespace ConnectedSystemsAPI {
 				const std::string& resultTimeInterval,
 				const std::string& dataStreamType,
 				const std::string& resultType,
-				bool live,
+				const std::optional<bool> live,
 				const std::optional<std::vector<Link>>& links)
 				: id(id), name(name), description(description), validTime(validTime), formats(formats),
 				systemLink(systemLink), outputName(outputName), procedureLink(procedureLink),
@@ -104,7 +104,7 @@ namespace ConnectedSystemsAPI {
 			/// <returns>The type of result for observations in the datastream.</returns>
 			const std::string& getResultType() const { return resultType; }
 			/// <returns>Indicates whether live data is available from the datastream.</returns>
-			bool isLive() const { return live; }
+			const std::optional<bool>& isLive() const { return live; }
 			/// <returns>List of links associated with the data stream.</returns>
 			const std::optional<std::vector<Link>>& getLinks() const { return links; }
 		};
@@ -129,7 +129,7 @@ namespace ConnectedSystemsAPI {
 				j.value("resultTimeInterval", ""),
 				j.value("type", ""),
 				j.value("resultType", ""),
-				j.value("live", false),
+				j.value("live", std::optional<bool>{}),
 				j.value("links", std::optional<std::vector<Link>>{})
 			);
 		}
@@ -171,7 +171,8 @@ namespace ConnectedSystemsAPI {
 				j["type"] = ds.getDataStreamType();
 			if (!ds.getResultType().empty())
 				j["resultType"] = ds.getResultType();
-			j["live"] = ds.isLive();
+			if (ds.isLive())
+				j["live"] = ds.isLive().value();
 			if (ds.getLinks())
 				j["links"] = ds.getLinks().value();
 		}

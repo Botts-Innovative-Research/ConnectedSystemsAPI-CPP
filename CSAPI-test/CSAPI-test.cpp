@@ -17,7 +17,7 @@ namespace CSAPItest {
 	{
 	private:
 		static constexpr const char* TEST_SYSTEM_UID = "test-system-001";
-		ConnectedSystemsAPI::ConSysAPI csapi{ "localhost:8181/sensorhub/api"s, "admin"s, "admin"s };
+		ConnectedSystemsAPI::ConSysAPI csapi{ "localhost:8282/sensorhub/api"s, "admin"s, "admin"s };
 
 		ConnectedSystemsAPI::APIResponse<void> createTestSystem() {
 			auto system = ConnectedSystemsAPI::DataModels::SystemBuilder()
@@ -114,6 +114,13 @@ namespace CSAPItest {
 		}
 
 	public:
+		/// <summary>
+		/// Remove any existing test system after each test method.
+		/// </summary>
+		TEST_METHOD_CLEANUP(MethodCleanup) {
+			cleanupTestSystem();
+		}
+
 		TEST_METHOD(GetSystems) {
 			createTestSystem();
 			auto response = csapi.getSystemsAPI().getSystems();
@@ -178,15 +185,31 @@ namespace CSAPItest {
 			Assert::IsTrue(response.isSuccessful());
 		}
 
-		TEST_METHOD_CLEANUP(MethodCleanup) {
-			cleanupTestSystem();
-		}
-
 		TEST_METHOD(GetDataStreams) {
-			auto response = csapi.getDataStreamsAPI().getSystems();
+			auto response = csapi.getDataStreamsAPI().getDataStreams();
 			std::cout << "Response: " << response.getResponseBody() << std::endl;
 			Assert::IsTrue(response.isSuccessful());
 			std::cout << "DataStream: " << response.getItems().at(0) << std::endl;
+		}
+
+		TEST_METHOD(GetObservationSchema) {
+			auto response = csapi.getDataStreamsAPI().getDataStreams();
+			std::string id = response.getItems().at(0).getId();
+			std::cout << "DataStream ID: " << id << std::endl;
+
+			auto response2 = csapi.getDataStreamsAPI().getObservationSchema(id);
+			std::cout << "Schema Response: " << response2.getResponseBody() << std::endl;
+			Assert::IsTrue(response2.isSuccessful());
+			std::cout << "ObservationSchema: " << response2.getItems().at(0) << std::endl;
+
+			//const ConnectedSystemsAPI::DataModels::Component::DataComponent* basePtr = response2.getItems().at(0).getResultSchema();
+
+			//if (const ConnectedSystemsAPI::DataModels::Component::DataRecord* record = dynamic_cast<const ConnectedSystemsAPI::DataModels::Component::DataRecord*>(basePtr)) {
+			//	std::cout << "Schema: " << *record << std::endl;
+			//}
+			//else {
+			//	std::cout << "ResultSchema is an unknown or base DataComponent type" << std::endl;
+			//}
 		}
 	};
 }

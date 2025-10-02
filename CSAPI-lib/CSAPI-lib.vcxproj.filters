@@ -22,6 +22,9 @@
     <Filter Include="Header Files\Query">
       <UniqueIdentifier>{86d8700a-e917-4bd9-96e8-189e1b1a7030}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\DataModels\Component">
+      <UniqueIdentifier>{f6e2dae1-77d1-44c3-b6b7-50b98264f96e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -34,9 +37,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ConnectedSystemsAPI.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OptionalTimePoint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SystemsAPI.h">
@@ -77,6 +77,72 @@
     </ClInclude>
     <ClInclude Include="DataStreamsAPI.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Query\DataStreamsQuery.h">
+      <Filter>Header Files\Query</Filter>
+    </ClInclude>
+    <ClInclude Include="Query\DataStreamsOfSystemQuery.h">
+      <Filter>Header Files\Query</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Component\DataComponent.h">
+      <Filter>Header Files\DataModels\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Component\Quantity.h">
+      <Filter>Header Files\DataModels\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\ObservationSchema.h">
+      <Filter>Header Files\DataModels</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Component\SimpleComponent.h">
+      <Filter>Header Files\DataModels\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Component\UnitOfMeasure.h">
+      <Filter>Header Files\DataModels\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Component\DataComponentRegistry.h">
+      <Filter>Header Files\DataModels\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Component\DataRecord.h">
+      <Filter>Header Files\DataModels\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="RegistryInit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Component\NilValue.h">
+      <Filter>Header Files\DataModels\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Component\ScalarComponent.h">
+      <Filter>Header Files\DataModels\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Component\Text.h">
+      <Filter>Header Files\DataModels\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Component\Count.h">
+      <Filter>Header Files\DataModels\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Component\Time.h">
+      <Filter>Header Files\DataModels\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Component\Category.h">
+      <Filter>Header Files\DataModels\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Component\Boolean.h">
+      <Filter>Header Files\DataModels\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Component\CountRange.h">
+      <Filter>Header Files\DataModels\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Component\QuantityRange.h">
+      <Filter>Header Files\DataModels\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Component\TimeRange.h">
+      <Filter>Header Files\DataModels\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Component\CategoryRange.h">
+      <Filter>Header Files\DataModels\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Component\Vector.h">
+      <Filter>Header Files\DataModels\Component</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

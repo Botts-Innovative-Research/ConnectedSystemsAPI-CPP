@@ -31,6 +31,15 @@ namespace ConnectedSystemsAPI {
 				params[key] = oss.str();
 			}
 
+			void addParameter(const std::string& key, const std::vector<std::string>& values) {
+				std::ostringstream oss;
+				for (size_t i = 0; i < values.size(); ++i) {
+					if (i > 0) oss << ",";
+					oss << values[i];
+				}
+				params[key] = oss.str();
+			}
+
 			std::string toString() const {
 				if (params.empty()) return "";
 

@@ -6,6 +6,7 @@
 #include "APIRequest.h"
 #include "SystemsAPI.h"
 #include "DataStreamsAPI.h"
+#include "RegistryInit.h"
 
 namespace ConnectedSystemsAPI {
 	class ConSysAPI {

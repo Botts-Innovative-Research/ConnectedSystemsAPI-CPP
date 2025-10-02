@@ -123,7 +123,7 @@ namespace ConnectedSystemsAPI {
 		inline std::ostream& operator<<(std::ostream& os, const TimeExtent& t) {
 			nlohmann::ordered_json j;
 			ConnectedSystemsAPI::DataModels::to_json(j, t);
-			return os << j.dump(4);
+			return os << j.dump(2);
 		}
 	}
 }
