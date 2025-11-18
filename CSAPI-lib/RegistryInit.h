@@ -8,6 +8,8 @@
 #include "DataModels/Component/CategoryRange.h"
 #include "DataModels/Component/Count.h"
 #include "DataModels/Component/CountRange.h"
+#include "DataModels/Component/DataArray.h"
+#include "DataModels/Component/DataChoice.h"
 #include "DataModels/Component/DataRecord.h"
 #include "DataModels/Component/Quantity.h"
 #include "DataModels/Component/QuantityRange.h"

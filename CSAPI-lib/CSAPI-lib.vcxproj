@@ -137,6 +137,8 @@
     <ClInclude Include="DataModels\Component\CategoryRange.h" />
     <ClInclude Include="DataModels\Component\Count.h" />
     <ClInclude Include="DataModels\Component\CountRange.h" />
+    <ClInclude Include="DataModels\Component\DataArray.h" />
+    <ClInclude Include="DataModels\Component\DataChoice.h" />
     <ClInclude Include="DataModels\Component\DataComponent.h" />
     <ClInclude Include="DataModels\Component\DataComponentRegistry.h" />
     <ClInclude Include="DataModels\Component\DataRecord.h" />

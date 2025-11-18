@@ -10,11 +10,11 @@ namespace ConnectedSystemsAPI {
 			private:
 				std::string type;
 				std::optional<std::string> id;
-				std::string label;
+				std::optional<std::string> label;
 				std::optional<std::string> description;
 				std::optional<bool> updatable;
 				std::optional<bool> optional;
-				std::string definition;
+				std::optional<std::string> definition;
 
 			public:
 				virtual ~DataComponent() = default;
@@ -23,8 +23,6 @@ namespace ConnectedSystemsAPI {
 				void validate() const {
 					if (type.empty())
 						throw std::invalid_argument("DataComponent: type is required.");
-					if (label.empty())
-						throw std::invalid_argument("DataComponent: label is required.");
 				}
 
 				/// <summary>Type of the component.</summary>
@@ -38,9 +36,9 @@ namespace ConnectedSystemsAPI {
 				void setId(const std::optional<std::string> id) { this->id = id; }
 
 				/// <summary>Human-readable label for the object.</summary>
-				const std::string& getLabel() const { return label; }
+				const std::optional<std::string> getLabel() const { return label; }
 				/// <summary>Human-readable label for the object.</summary>
-				void setLabel(const std::string& label) { this->label = label; }
+				void setLabel(const std::optional<std::string> label) { this->label = label; }
 
 				/// <summary>Human-readable description of the object.</summary>
 				const std::optional<std::string> getDescription() const { return description; }
@@ -58,9 +56,9 @@ namespace ConnectedSystemsAPI {
 				void setOptional(const std::optional<bool>& optional) { this->optional = optional; }
 
 				/// <summary>The definition of the property whose value is provided by this component (semantic link).</summary>
-				const std::string& getDefinition() const { return definition; }
+				const std::optional<std::string> getDefinition() const { return definition; }
 				/// <summary>The definition of the property whose value is provided by this component (semantic link).</summary>
-				void setDefinition(const std::string& definition) { this->definition = definition; }
+				void setDefinition(const std::optional<std::string> definition) { this->definition = definition; }
 			};
 
 			inline void from_json(const nlohmann::json& j, DataComponent& c) {
@@ -85,14 +83,16 @@ namespace ConnectedSystemsAPI {
 				j["type"] = c.getType();
 				if (c.getId())
 					j["id"] = c.getId();
-				j["label"] = c.getLabel();
+				if (c.getLabel())
+					j["label"] = c.getLabel();
 				if (c.getDescription())
 					j["description"] = c.getDescription();
 				if (c.isUpdatable())
 					j["updatable"] = c.isUpdatable().value();
 				if (c.isOptional())
 					j["optional"] = c.isOptional().value();
-				j["definition"] = c.getDefinition();
+				if (c.getDefinition())
+					j["definition"] = c.getDefinition();
 			}
 
 			inline std::ostream& operator<<(std::ostream& os, const DataComponent& c) {

@@ -61,7 +61,6 @@ namespace ConnectedSystemsAPI {
 					v.setValue(j.at("value").get<double>());
 				else
 					v.setValue(std::nullopt);
-				std::cout << "from_json:--" << j.at("uom").dump() << "--"; // for debug
 				v.setUnitOfMeasure(j.at("uom").get<UnitOfMeasure>());
 			}
 

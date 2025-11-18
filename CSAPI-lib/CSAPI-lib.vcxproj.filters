@@ -144,5 +144,11 @@
     <ClInclude Include="DataModels\Component\Vector.h">
       <Filter>Header Files\DataModels\Component</Filter>
     </ClInclude>
+    <ClInclude Include="DataModels\Component\DataArray.h">
+      <Filter>Header Files\DataModels\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Component\DataChoice.h">
+      <Filter>Header Files\DataModels\Component</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

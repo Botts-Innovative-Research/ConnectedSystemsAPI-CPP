@@ -28,6 +28,7 @@ namespace ConnectedSystemsAPI {
 					if (it != registry.end()) {
 						return it->second(j);
 					}
+					std::cout << "Unknown component type during deserialization: " << type << std::endl;
 					throw std::runtime_error("DataComponentRegistry: Unknown component type: " + type);
 				}
 
