@@ -89,6 +89,11 @@ namespace ConnectedSystemsAPI {
 			return response;
 		}
 
+		/// <summary>
+		/// Get the observation schema for a specific data stream by its ID.
+		/// </summary>
+		/// <param name="dataStreamId">The local identifier of a data stream.</param>
+		/// <returns>A response object containing the observation schema.</returns>	
 		APIResponse<DataModels::ObservationSchema> getObservationSchema(const std::string& dataStreamId) {
 			auto response = APIRequest::Builder()
 				.setApiRoot(apiRoot)
@@ -97,6 +102,28 @@ namespace ConnectedSystemsAPI {
 				.setResourcePath("/datastreams/" + dataStreamId + "/schema")
 				.build()
 				.execute<DataModels::ObservationSchema>();
+			return response;
+		}
+
+		/// <summary>
+		/// Create a new data stream under the specified parent system.
+		/// </summary>
+		/// <param name="systemId">The local identifier of the parent system.</param>
+		/// <param name="dataStream">The data stream to create.</param>
+		/// <returns>A response object indicating success or failure.</returns>
+		APIResponse<void> createDataStream(const std::string& systemId, const DataModels::DataStream& dataStream) {
+			nlohmann::ordered_json j;
+			ConnectedSystemsAPI::DataModels::to_json(j, dataStream);
+
+			auto response = APIRequest::Builder()
+				.setApiRoot(apiRoot)
+				.setMethod("POST")
+				.setAuthHeader(authHeader)
+				.addHeader("Content-Type", "application/json")
+				.setResourcePath("/systems/" + systemId + "/datastreams")
+				.setBody(j.dump())
+				.build()
+				.execute<void>();
 			return response;
 		}
 	};

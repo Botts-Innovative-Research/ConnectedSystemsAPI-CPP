@@ -2,7 +2,9 @@
 
 #include <chrono>
 #include <string>
+#include <optional>
 #include <nlohmann/json.hpp>
+
 #include "../TimeUtils.h"
 
 namespace ConnectedSystemsAPI {
@@ -35,9 +37,9 @@ namespace ConnectedSystemsAPI {
 			const std::optional<TimePoint>& getEnd() const { return end; }
 
 			/// <returns>True if the start time is a defined value (not 'now' and not unbounded).</returns>
-			bool hasStart() const { return start.has_value() && start.value() != TimePoint::min(); }
+			bool hasStart() const { return start.has_value() && start.value() != (TimePoint::min)(); }
 			/// <returns>True if the end time is a defined value (not 'now' and not unbounded).</returns>
-			bool hasEnd() const { return end.has_value() && end.value() != TimePoint::max(); }
+			bool hasEnd() const { return end.has_value() && end.value() != (TimePoint::max)(); }
 			/// <returns>True if the range is unbounded at both ends, representing all times.</returns>
 			bool isUnbounded() const { return !hasStart() && !hasEnd(); }
 			/// <returns>True if the start is unbounded, representing all times before the end.</returns>
@@ -73,14 +75,14 @@ namespace ConnectedSystemsAPI {
 				if (startsNow())
 					startStr = nowStr;
 				else if (isUnboundedStart())
-					startStr = allowSpecialValues ? SPECIAL_VALUE_UNBOUNDED : TimeUtils::timePointToString(TimePoint::min());
+					startStr = allowSpecialValues ? SPECIAL_VALUE_UNBOUNDED : TimeUtils::timePointToString((TimePoint::min)());
 				else
 					startStr = TimeUtils::timePointToString(start.value());
 
 				if (endsNow())
 					endStr = nowStr;
 				else if (isUnboundedEnd())
-					endStr = allowSpecialValues ? SPECIAL_VALUE_UNBOUNDED : TimeUtils::timePointToString(TimePoint::max());
+					endStr = allowSpecialValues ? SPECIAL_VALUE_UNBOUNDED : TimeUtils::timePointToString((TimePoint::max)());
 				else
 					endStr = TimeUtils::timePointToString(end.value());
 

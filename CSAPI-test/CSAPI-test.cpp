@@ -2,12 +2,18 @@
 #include <string>
 #include "pch.h"
 #include "CppUnitTest.h"
+#include "ConnectedSystemsAPI.h"
 #include "DataModels/DataStream.h"
+#include "DataModels/DataStreamBuilder.h"
 #include "DataModels/System.h"
 #include "DataModels/SystemBuilder.h"
+#include "DataModels/ObservationSchema.h"
+#include "DataModels/ObservationSchemaBuilder.h"
 #include "DataModels/Properties.h"
 #include "DataModels/PropertiesBuilder.h"
-#include "ConnectedSystemsAPI.h"
+#include "DataModels/Component/BooleanBuilder.h"
+#include "DataModels/Component/DataComponent.h"
+#include "DataModels/Component/DataRecordBuilder.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace std::string_literals;
@@ -192,24 +198,62 @@ namespace CSAPItest {
 			std::cout << "DataStream: " << response.getItems().at(0) << std::endl;
 		}
 
+		TEST_METHOD(GetDataStreamById) {
+			auto response = csapi.getDataStreamsAPI().getDataStreams();
+			std::string id = response.getItems().at(0).getId().value_or("");
+			std::cout << "DataStream ID: " << id << std::endl;
+
+			auto response2 = csapi.getDataStreamsAPI().getDataStreamById(id);
+			std::cout << "DataStream Response: " << response2.getResponseBody() << std::endl;
+			Assert::IsTrue(response2.isSuccessful());
+			std::cout << "DataStream: " << response2.getItems().at(0) << std::endl;
+		}
+
 		TEST_METHOD(GetObservationSchema) {
 			auto response = csapi.getDataStreamsAPI().getDataStreams();
-			std::string id = response.getItems().at(0).getId();
+			std::string id = response.getItems().at(0).getId().value_or("");
 			std::cout << "DataStream ID: " << id << std::endl;
 
 			auto response2 = csapi.getDataStreamsAPI().getObservationSchema(id);
 			std::cout << "Schema Response: " << response2.getResponseBody() << std::endl;
 			Assert::IsTrue(response2.isSuccessful());
 			std::cout << "ObservationSchema: " << response2.getItems().at(0) << std::endl;
+		}
 
-			//const ConnectedSystemsAPI::DataModels::Component::DataComponent* basePtr = response2.getItems().at(0).getResultSchema();
+		TEST_METHOD(CreateDataStream) {
+			createTestSystem();
+			std::string systemId = getTestSystemId();
 
-			//if (const ConnectedSystemsAPI::DataModels::Component::DataRecord* record = dynamic_cast<const ConnectedSystemsAPI::DataModels::Component::DataRecord*>(basePtr)) {
-			//	std::cout << "Schema: " << *record << std::endl;
-			//}
-			//else {
-			//	std::cout << "ResultSchema is an unknown or base DataComponent type" << std::endl;
-			//}
+			auto booleanField = ConnectedSystemsAPI::DataModels::Component::BooleanBuilder()
+				.withType("Boolean"s)
+				.withName("Test Boolean Field"s)
+				.withDescription("This is a test boolean field"s)
+				.build();
+
+			auto resultSchemaPtr = std::make_unique<ConnectedSystemsAPI::DataModels::Component::DataRecord>(
+				ConnectedSystemsAPI::DataModels::Component::DataRecordBuilder()
+				.withType("DataRecord")
+				.addField(std::make_unique<ConnectedSystemsAPI::DataModels::Component::Boolean>(booleanField))
+				.build()
+			);
+
+			auto observationSchemaPtr = std::make_unique<ConnectedSystemsAPI::DataModels::ObservationSchema>(
+				ConnectedSystemsAPI::DataModels::ObservationSchemaBuilder()
+				.withObservationFormat("application/om+json"s)
+				.withResultSchema(std::move(resultSchemaPtr))
+				.build()
+			);
+
+			auto dataStream = ConnectedSystemsAPI::DataModels::DataStreamBuilder()
+				.withName("Test DataStream 001"s)
+				.withOutputName("test_output_001"s)
+				.withDescription("This is a test data stream created by CSAPI-test"s)
+				.withSchema(std::move(observationSchemaPtr))
+				.build();
+
+
+			auto response = csapi.getDataStreamsAPI().createDataStream(systemId, dataStream);
+			Assert::IsTrue(response.isSuccessful());
 		}
 	};
 }

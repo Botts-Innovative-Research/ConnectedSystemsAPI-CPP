@@ -2,6 +2,7 @@
 
 #include <string>
 #include <nlohmann/json.hpp>
+
 #include "Link.h"
 #include "Component/DataComponent.h"
 #include "Component/DataComponentRegistry.h"
@@ -25,15 +26,28 @@ namespace ConnectedSystemsAPI {
 				: observationFormat(observationFormat), resultSchema(std::move(resultSchema)), resultLink(resultLink) {
 			}
 
-			/// <returns>Encoding format of the observation.</returns>
+			ObservationSchema(const ObservationSchema&) = delete;
+			ObservationSchema& operator=(const ObservationSchema&) = delete;
+			ObservationSchema(ObservationSchema&&) noexcept = default;
+			ObservationSchema& operator=(ObservationSchema&&) noexcept = default;
+
+			/// <summary>
+			/// Encoding format of the observation.
+			/// </summary>
 			const std::string& getObservationFormat() const { return observationFormat; }
-			/// <summary>Record schema for the observation parameters property. If omitted, parameters are not included in the datastream.</summary>
+			/// <summary>
+			/// Record schema for the observation parameters property. If omitted, parameters are not included in the datastream.
+			/// </summary>
 			const std::optional<Component::DataRecord>& getParametersSchema() const { return parametersSchema; }
-			/// <returns>Schema for the observation result property.
+			/// <summary>
+			/// Schema for the observation result property.
 			/// this describes the observed properties included in the result
-			/// and how they are structured if the result is a record, a vector quantity or a coverage.</returns>
+			/// and how they are structured if the result is a record, a vector quantity or a coverage.
+			/// </summary>
 			const Component::DataComponent* getResultSchema() const { return resultSchema.get(); }
-			/// <returns>Encoding information in case the result is provided out-of-band via the result@link property.</returns>
+			/// <summary>
+			/// Encoding information in case the result is provided out-of-band via the result@link property.
+			/// </summary>
 			const std::optional<Link>& getResultLink() const { return resultLink; }
 		};
 
@@ -53,7 +67,8 @@ namespace ConnectedSystemsAPI {
 			if (o.getParametersSchema())
 				j["parametersSchema"] = o.getParametersSchema().value().toJson();
 
-			j["resultSchema"] = o.getResultSchema()->toJson();
+			if (o.getResultSchema())
+				j["resultSchema"] = o.getResultSchema()->toJson();
 
 			if (o.getResultLink())
 				j["resultLink"] = o.getResultLink().value();

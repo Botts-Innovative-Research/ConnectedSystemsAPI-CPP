@@ -136,6 +136,7 @@
     <ClInclude Include="APIResponse.h" />
     <ClInclude Include="ConnectedSystemsAPI.h" />
     <ClInclude Include="DataModels\Component\Boolean.h" />
+    <ClInclude Include="DataModels\Component\BooleanBuilder.h" />
     <ClInclude Include="DataModels\Component\Category.h" />
     <ClInclude Include="DataModels\Component\CategoryRange.h" />
     <ClInclude Include="DataModels\Component\Count.h" />
@@ -143,8 +144,10 @@
     <ClInclude Include="DataModels\Component\DataArray.h" />
     <ClInclude Include="DataModels\Component\DataChoice.h" />
     <ClInclude Include="DataModels\Component\DataComponent.h" />
+    <ClInclude Include="DataModels\Component\DataComponentBuilder.h" />
     <ClInclude Include="DataModels\Component\DataComponentRegistry.h" />
     <ClInclude Include="DataModels\Component\DataRecord.h" />
+    <ClInclude Include="DataModels\Component\DataRecordBuilder.h" />
     <ClInclude Include="DataModels\Component\NilValue.h" />
     <ClInclude Include="DataModels\Component\Quantity.h" />
     <ClInclude Include="DataModels\Component\QuantityRange.h" />
@@ -156,8 +159,10 @@
     <ClInclude Include="DataModels\Component\UnitOfMeasure.h" />
     <ClInclude Include="DataModels\Component\Vector.h" />
     <ClInclude Include="DataModels\DataStream.h" />
+    <ClInclude Include="DataModels\DataStreamBuilder.h" />
     <ClInclude Include="DataModels\Link.h" />
     <ClInclude Include="DataModels\ObservationSchema.h" />
+    <ClInclude Include="DataModels\ObservationSchemaBuilder.h" />
     <ClInclude Include="DataModels\ObservedProperty.h" />
     <ClInclude Include="DataModels\Properties.h" />
     <ClInclude Include="DataModels\PropertiesBuilder.h" />

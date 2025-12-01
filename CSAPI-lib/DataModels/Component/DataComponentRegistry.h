@@ -1,8 +1,10 @@
 #pragma once
 
+#include <iostream>
 #include <string>
 #include <unordered_map>
 #include <nlohmann/json.hpp>
+
 #include "DataComponent.h"
 
 namespace ConnectedSystemsAPI {

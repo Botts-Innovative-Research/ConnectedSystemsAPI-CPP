@@ -153,5 +153,20 @@
     <ClInclude Include="Util\JsonUtils.h">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
+    <ClInclude Include="DataModels\DataStreamBuilder.h">
+      <Filter>Header Files\DataModels</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\ObservationSchemaBuilder.h">
+      <Filter>Header Files\DataModels</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Component\DataComponentBuilder.h">
+      <Filter>Header Files\DataModels\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Component\DataRecordBuilder.h">
+      <Filter>Header Files\DataModels\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Component\BooleanBuilder.h">
+      <Filter>Header Files\DataModels\Component</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
