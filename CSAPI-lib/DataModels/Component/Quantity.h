@@ -1,9 +1,12 @@
 #pragma once
 
 #include <string>
+#include <optional>
+#include <ostream>
 #include <nlohmann/json.hpp>
 #include "ScalarComponent.h"
 #include "UnitOfMeasure.h"
+#include "Util/JsonUtils.h"
 
 namespace ConnectedSystemsAPI {
 	namespace DataModels {
@@ -18,8 +21,13 @@ namespace ConnectedSystemsAPI {
 
 			public:
 				Quantity() = default;
+				Quantity(const Quantity&) = default;
+				Quantity(Quantity&&) noexcept = default;
+				Quantity& operator=(const Quantity&) = default;
+				Quantity& operator=(Quantity&&) noexcept = default;
+				~Quantity() override = default;
 
-				void validate() const {
+				void validate() const override {
 					ScalarComponent::validate();
 					unitOfMeasure.validate();
 				}
@@ -30,44 +38,40 @@ namespace ConnectedSystemsAPI {
 					return j;
 				}
 
-				/// <summary>Inline value(s) for the component.
-				/// This property is optional to enable structure to act as a schema for values provided separately (e.g., in a datastream)</summary>
-				std::optional<double> getValue() const { return value; }
-				/// <summary>Inline value(s) for the component.
-				/// This property is optional to enable structure to act as a schema for values provided separately (e.g., in a datastream)</summary>
-				void setValue(const std::optional<double>& value) { this->value = value; }
-				/// <summary>Unit of measure used to express the value of this data component.</summary>
-				const UnitOfMeasure& getUnitOfMeasure() const { return unitOfMeasure; }
-				/// <summary>Unit of measure used to express the value of this data component.</summary>
-				void setUnitOfMeasure(const UnitOfMeasure& unitOfMeasure) { this->unitOfMeasure = unitOfMeasure; }
+				/// <summary>
+				/// Inline value(s) for the component.
+				/// This property is optional to enable structure to act as a schema for values provided separately (e.g., in a datastream)
+				/// </summary>
+				const std::optional<double>& getValue() const noexcept { return value; }
+				void setValue(const std::optional<double>& v) noexcept { value = v; }
+				void setValue(std::optional<double>&& v) noexcept { value = std::move(v); }
+				void setValue(double v) noexcept { value = v; }
+				bool hasValue() const noexcept { return value.has_value(); }
+				void clearValue() noexcept { value.reset(); }
+
+				/// <summary>
+				/// Unit of measure used to express the value of this data component.
+				/// </summary>
+				const UnitOfMeasure& getUnitOfMeasure() const noexcept { return unitOfMeasure; }
+				void setUnitOfMeasure(const UnitOfMeasure& uom) { unitOfMeasure = uom; }
+				void setUnitOfMeasure(UnitOfMeasure&& uom) noexcept { unitOfMeasure = std::move(uom); }
 			};
 
-			// Register with the DataComponentRegistry
-			struct QuantityRegistrar {
-				QuantityRegistrar() {
-					ConnectedSystemsAPI::DataModels::Component::DataComponentRegistry::registerType(
-						"Quantity", [](const nlohmann::json& j) {
-						return std::make_unique<ConnectedSystemsAPI::DataModels::Component::Quantity>(j.get<ConnectedSystemsAPI::DataModels::Component::Quantity>());
-					}
-					);
-				}
-			};
-			static QuantityRegistrar quantityRegistrar;
+			inline DataComponent::Registrar<Quantity> registerQuantity{ "Quantity" };
+			inline bool operator==(const Quantity& a, const Quantity& b) { return a.toJson() == b.toJson(); }
+			inline bool operator!=(const Quantity& a, const Quantity& b) { return !(a == b); }
 
 			inline void from_json(const nlohmann::json& j, Quantity& v) {
 				from_json(j, static_cast<ScalarComponent&>(v));
 
-				if (j.contains("value") && j["value"].is_number())
-					v.setValue(j.at("value").get<double>());
-				else
-					v.setValue(std::nullopt);
+				v.setValue(ConnectedSystemsAPI::JsonUtils::tryParseDouble(j, "value"));
 				v.setUnitOfMeasure(j.at("uom").get<UnitOfMeasure>());
 			}
 
 			inline void to_json(nlohmann::ordered_json& j, const Quantity& v) {
 				to_json(j, static_cast<const ScalarComponent&>(v));
-				if (v.getValue())
-					j["value"] = v.getValue().value();
+
+				if (v.getValue()) j["value"] = v.getValue().value();
 				j["uom"] = v.getUnitOfMeasure();
 			}
 

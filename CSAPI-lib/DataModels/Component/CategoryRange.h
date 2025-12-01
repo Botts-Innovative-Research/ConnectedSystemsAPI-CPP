@@ -1,8 +1,12 @@
 #pragma once
 
 #include <string>
+#include <optional>
+#include <ostream>
+#include <vector>
 #include <nlohmann/json.hpp>
 #include "SimpleComponent.h"
+#include "Util/JsonUtils.h"
 
 namespace ConnectedSystemsAPI {
 	namespace DataModels {
@@ -17,8 +21,13 @@ namespace ConnectedSystemsAPI {
 
 			public:
 				CategoryRange() = default;
+				CategoryRange(const CategoryRange&) = default;
+				CategoryRange(CategoryRange&&) noexcept = default;
+				CategoryRange& operator=(const CategoryRange&) = default;
+				CategoryRange& operator=(CategoryRange&&) noexcept = default;
+				~CategoryRange() override = default;
 
-				void validate() const {
+				void validate() const override {
 					SimpleComponent::validate();
 				}
 
@@ -28,52 +37,51 @@ namespace ConnectedSystemsAPI {
 					return j;
 				}
 
-				/// <summary>Inline value(s) for the component.
-				/// This property is optional to enable structure to act as a schema for values provided separately (e.g., in a datastream)</summary>
-				std::optional<std::vector<std::string>> getValue() const { return value; }
-				/// <summary>Inline value(s) for the component.
-				/// This property is optional to enable structure to act as a schema for values provided separately (e.g., in a datastream)</summary>
-				void setValue(const std::optional<std::vector<std::string>>& value) { this->value = value; }
-				/// <summary>Name of the dictionary where the possible values for this component are listed and defined.</summary>
-				std::optional<std::string> getCodeSpace() const { return codeSpace; }
-				/// <summary>Name of the dictionary where the possible values for this component are listed and defined.</summary>
-				void setCodeSpace(const std::optional<std::string>& codeSpace) { this->codeSpace = codeSpace; }
+				/// <summary>
+				/// Inline value(s) for the component.
+				/// This property is optional to enable structure to act as a schema for values provided separately (e.g., in a datastream)
+				/// </summary>
+				const std::optional<std::vector<std::string>>& getValue() const noexcept { return value; }
+				void setValue(std::optional<std::vector<std::string>> v) noexcept { value = std::move(v); }
+				void setValue(std::vector<std::string> v) noexcept { value = std::move(v); }
+				void setValue(std::initializer_list<std::string> il) { value = std::vector<std::string>(il); }
+				bool hasValue() const noexcept { return value.has_value(); }
+				void clearValue() noexcept { value = std::nullopt; }
+				void addValue(const std::string& v) {
+					if (!value) value = std::vector<std::string>{};
+					value->push_back(v);
+				}
+				void addValue(std::string&& v) {
+					if (!value) value = std::vector<std::string>{};
+					value->push_back(std::move(v));
+				}
+
+				/// <summary>
+				/// Name of the dictionary where the possible values for this component are listed and defined.
+				/// </summary>
+				const std::optional<std::string>& getCodeSpace() const noexcept { return codeSpace; }
+				void setCodeSpace(std::optional<std::string> cs) noexcept { codeSpace = std::move(cs); }
+				void setCodeSpace(std::string cs) { codeSpace = std::move(cs); }
+				bool hasCodeSpace() const noexcept { return codeSpace.has_value(); }
+				void clearCodeSpace() noexcept { codeSpace = std::nullopt; }
 			};
 
-			// Register with the DataComponentRegistry
-			struct CategoryRangeRegistrar {
-				CategoryRangeRegistrar() {
-					ConnectedSystemsAPI::DataModels::Component::DataComponentRegistry::registerType(
-						"CategoryRange", [](const nlohmann::json& j) {
-						return std::make_unique<ConnectedSystemsAPI::DataModels::Component::CategoryRange>(j.get<ConnectedSystemsAPI::DataModels::Component::CategoryRange>());
-					}
-					);
-				}
-			};
-			static CategoryRangeRegistrar categoryRangeRegistrar;
+			inline DataComponent::Registrar<CategoryRange> registerCategoryRange{ "CategoryRange" };
+			inline bool operator==(const CategoryRange& a, const CategoryRange& b) { return a.toJson() == b.toJson(); }
+			inline bool operator!=(const CategoryRange& a, const CategoryRange& b) { return !(a == b); }
 
 			inline void from_json(const nlohmann::json& j, CategoryRange& v) {
 				from_json(j, static_cast<SimpleComponent&>(v));
 
-				if (j.contains("value") && j["value"].is_array())
-					v.setValue(j["value"].get<std::vector<std::string>>());
-				else
-					v.setValue(std::nullopt);
-
-				if (j.contains("codeSpace") && j["codeSpace"].is_string())
-					v.setCodeSpace(j["codeSpace"].get<std::string>());
-				else
-					v.setCodeSpace(std::nullopt);
+				v.setValue(ConnectedSystemsAPI::JsonUtils::tryParseStringArray(j, "value"));
+				v.setCodeSpace(ConnectedSystemsAPI::JsonUtils::tryParseString(j, "codeSpace"));
 			}
 
 			inline void to_json(nlohmann::ordered_json& j, const CategoryRange& v) {
 				to_json(j, static_cast<const SimpleComponent&>(v));
 
-				if (v.getValue())
-					j["value"] = v.getValue().value();
-
-				if (v.getCodeSpace())
-					j["codeSpace"] = v.getCodeSpace().value();
+				if (v.getValue()) j["value"] = v.getValue().value();
+				if (v.getCodeSpace()) j["codeSpace"] = v.getCodeSpace().value();
 			}
 
 			inline std::ostream& operator<<(std::ostream& os, const CategoryRange& v) {

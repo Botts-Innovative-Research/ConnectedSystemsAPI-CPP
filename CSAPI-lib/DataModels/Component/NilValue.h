@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <ostream>
 #include <nlohmann/json.hpp>
 
 namespace ConnectedSystemsAPI {
@@ -15,24 +16,38 @@ namespace ConnectedSystemsAPI {
 				NilValue(const std::string& reason, const std::string& value)
 					: reason(reason), value(value) {
 				}
+				NilValue(const NilValue&) = default;
+				NilValue(NilValue&&) noexcept = default;
+				NilValue& operator=(const NilValue&) = default;
+				NilValue& operator=(NilValue&&) noexcept = default;
+				~NilValue() = default;
 
-				/// Validates the NilValue instance.
 				void validate() const {
 					if (reason.empty())
-						throw std::invalid_argument("NilValue: reason is required.");
+						throw std::invalid_argument("NilValue.reason is required.");
 					if (value.empty())
-						throw std::invalid_argument("NilValue: value is required.");
+						throw std::invalid_argument("NilValue.value is required.");
 				}
 
-				/// <summary>The reason for using the reserved value.</summary>
-				const std::string& getReason() const { return reason; }
-				/// <summary>The reason for using the reserved value.</summary>
+				/// <summary>
+				/// The reason for using the reserved value.
+				/// </summary>
+				const std::string& getReason() const noexcept { return reason; }
 				void setReason(const std::string& reason) { this->reason = reason; }
-				/// <summary>The reserved value itself.</summary>
-				const std::string& getValue() const { return value; }
-				/// <summary>The reserved value itself.</summary>
+
+				/// <summary>
+				/// The reserved value itself.
+				/// </summary>
+				const std::string& getValue() const noexcept { return value; }
 				void setValue(const std::string& value) { this->value = value; }
 			};
+
+			inline bool operator==(const NilValue& a, const NilValue& b) {
+				return a.getReason() == b.getReason() && a.getValue() == b.getValue();
+			}
+			inline bool operator!=(const NilValue& a, const NilValue& b) {
+				return !(a == b);
+			}
 
 			inline void from_json(const nlohmann::json& j, NilValue& n) {
 				n = NilValue();

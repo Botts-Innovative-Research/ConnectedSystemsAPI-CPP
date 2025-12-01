@@ -1,98 +1,139 @@
 #pragma once
 
 #include <string>
+#include <optional>
+#include <ostream>
 #include <nlohmann/json.hpp>
+#include "Util/JsonUtils.h"
 
 namespace ConnectedSystemsAPI {
 	namespace DataModels {
 		namespace Component {
+			/// <summary>
+			/// Base class for all data components.
+			/// Derived types must:
+			/// - Implement the toJson() method for serialization.
+			/// - Use the DataComponent::Registrar to register themselves with the DataComponentRegistry for polymorphic deserialization.
+			/// - Implement from_json and to_json functions for JSON (de)serialization.
+			/// - Be added to RegistryInit.h to ensure registration occurs if they aren't directly referenced in the codebase.
+			/// </summary>
 			class DataComponent {
 			private:
 				std::string type;
 				std::optional<std::string> id;
+				std::optional<std::string> name;
 				std::optional<std::string> label;
 				std::optional<std::string> description;
 				std::optional<bool> updatable;
 				std::optional<bool> optional;
 				std::optional<std::string> definition;
 
+			protected:
+				DataComponent() = default;
+
 			public:
 				virtual ~DataComponent() = default;
 				virtual nlohmann::ordered_json toJson() const = 0;
 
-				void validate() const {
+				virtual	void validate() const {
 					if (type.empty())
-						throw std::invalid_argument("DataComponent: type is required.");
+						throw std::invalid_argument("DataComponent.type is required.");
 				}
 
-				/// <summary>Type of the component.</summary>
-				const std::string& getType() const { return type; }
-				/// <summary>Type of the component.</summary>
-				void setType(const std::string& type) { this->type = type; }
+				/// <summary>
+				/// Type of the component.
+				/// </summary>
+				const std::string& getType() const noexcept { return type; }
+				void setType(std::string t) noexcept { type = std::move(t); }
 
-				/// <summary>The ID of the object, referenceable using a URI fragment.</summary>
-				const std::optional<std::string> getId() const { return id; }
-				/// <summary>The ID of the object, referenceable using a URI fragment.</summary>
-				void setId(const std::optional<std::string> id) { this->id = id; }
+				/// <summary>
+				/// Name of the component.
+				/// </summary>
+				const std::optional<std::string>& getName() const noexcept { return name; }
+				void setName(std::optional<std::string> n) noexcept { name = std::move(n); }
+				void clearName() noexcept { name.reset(); }
 
-				/// <summary>Human-readable label for the object.</summary>
-				const std::optional<std::string> getLabel() const { return label; }
-				/// <summary>Human-readable label for the object.</summary>
-				void setLabel(const std::optional<std::string> label) { this->label = label; }
+				/// <summary>
+				/// The ID of the object, referenceable using a URI fragment.
+				/// </summary>
+				const std::optional<std::string>& getId() const noexcept { return id; }
+				void setId(std::optional<std::string> i) noexcept { id = std::move(i); }
+				void clearId() noexcept { id.reset(); }
 
-				/// <summary>Human-readable description of the object.</summary>
-				const std::optional<std::string> getDescription() const { return description; }
-				/// <summary>Human-readable description of the object.</summary>
-				void setDescription(const std::optional<std::string> description) { this->description = description; }
+				/// <summary>
+				/// Human-readable label for the object.
+				/// </summary>
+				const std::optional<std::string>& getLabel() const noexcept { return label; }
+				void setLabel(std::optional<std::string> l) noexcept { label = std::move(l); }
+				void clearLabel() noexcept { label.reset(); }
 
-				/// <summary>Specifies if the value of a data component can be updated externally (i.e., is variable).</summary>
-				const std::optional<bool>& isUpdatable() const { return updatable; }
-				/// <summary>Specifies if the value of a data component can be updated externally (i.e., is variable).</summary>
-				void setUpdatable(const std::optional<bool>& updatable) { this->updatable = updatable; }
+				/// <summary>
+				/// Human-readable description of the object.
+				/// </summary>
+				const std::optional<std::string>& getDescription() const noexcept { return description; }
+				void setDescription(std::optional<std::string> d) noexcept { description = std::move(d); }
+				void clearDescription() noexcept { description.reset(); }
 
-				/// <summary>Specifies if the data for this component can be omitted in the data stream.</summary>
-				const std::optional<bool>& isOptional() const { return optional; }
-				/// <summary>Specifies if the data for this component can be omitted in the data stream.</summary>
-				void setOptional(const std::optional<bool>& optional) { this->optional = optional; }
+				/// <summary>
+				/// Specifies if the value of a data component can be updated externally (i.e., is variable).
+				/// </summary>
+				const std::optional<bool>& isUpdatable() const noexcept { return updatable; }
+				void setUpdatable(std::optional<bool> u) noexcept { updatable = std::move(u); }
+				void clearUpdatable() noexcept { updatable.reset(); }
 
-				/// <summary>The definition of the property whose value is provided by this component (semantic link).</summary>
-				const std::optional<std::string> getDefinition() const { return definition; }
-				/// <summary>The definition of the property whose value is provided by this component (semantic link).</summary>
-				void setDefinition(const std::optional<std::string> definition) { this->definition = definition; }
+				/// <summary>
+				/// Specifies if the data for this component can be omitted in the data stream.
+				/// </summary>
+				const std::optional<bool>& isOptional() const noexcept { return optional; }
+				void setOptional(std::optional<bool> o) noexcept { optional = std::move(o); }
+				void clearOptional() noexcept { optional.reset(); }
+
+				/// <summary>
+				/// The definition of the property whose value is provided by this component (semantic link).
+				/// </summary>
+				const std::optional<std::string>& getDefinition() const noexcept { return definition; }
+				void setDefinition(std::optional<std::string> d) noexcept { definition = std::move(d); }
+				void clearDefinition() noexcept { definition.reset(); }
+
+				/// <summary>
+				/// Registrar for DataComponent derived types.
+				/// All derived types must have a static instance of this registrar to register themselves with the DataComponentRegistry.
+				/// This enables polymorphic deserialization based on the "type" field in the JSON.
+				/// </summary>
+				template<typename T>
+				struct Registrar {
+					Registrar(const std::string& typeName) {
+						ConnectedSystemsAPI::DataModels::Component::DataComponentRegistry::registerType(
+							typeName, [](const nlohmann::json& j) {
+							// Deserialize a T from json and return a polymorphic unique_ptr
+							return std::make_unique<T>(j.get<T>());
+						}
+						);
+					}
+				};
 			};
 
-			inline void from_json(const nlohmann::json& j, DataComponent& c) {
-				if (j.contains("type"))
-					c.setType(j.at("type").get<std::string>());
-				if (j.contains("id"))
-					c.setId(j.at("id").get<std::string>());
-				if (j.contains("label"))
-					c.setLabel(j.at("label").get<std::string>());
-				if (j.contains("description"))
-					c.setDescription(j.at("description").get<std::string>());
-				if (j.contains("updatable"))
-					c.setUpdatable(j.at("updatable").get<std::optional<bool>>());
-				if (j.contains("optional"))
-					c.setOptional(j.at("optional").get<std::optional<bool>>());
-				if (j.contains("definition"))
-					c.setDefinition(j.at("definition").get<std::string>());
+			inline void from_json(const nlohmann::json& j, DataComponent& v) {
+				v.setType(j.at("type").get<std::string>());
+				v.setName(ConnectedSystemsAPI::JsonUtils::tryParseString(j, "name"));
+				v.setId(ConnectedSystemsAPI::JsonUtils::tryParseString(j, "id"));
+				v.setLabel(ConnectedSystemsAPI::JsonUtils::tryParseString(j, "label"));
+				v.setDescription(ConnectedSystemsAPI::JsonUtils::tryParseString(j, "description"));
+				v.setUpdatable(ConnectedSystemsAPI::JsonUtils::tryParseBoolean(j, "updatable"));
+				v.setOptional(ConnectedSystemsAPI::JsonUtils::tryParseBoolean(j, "optional"));
+				v.setDefinition(ConnectedSystemsAPI::JsonUtils::tryParseString(j, "definition"));
 			}
 
 			inline void to_json(nlohmann::ordered_json& j, const DataComponent& c) {
 				j = nlohmann::ordered_json::object();
 				j["type"] = c.getType();
-				if (c.getId())
-					j["id"] = c.getId();
-				if (c.getLabel())
-					j["label"] = c.getLabel();
-				if (c.getDescription())
-					j["description"] = c.getDescription();
-				if (c.isUpdatable())
-					j["updatable"] = c.isUpdatable().value();
-				if (c.isOptional())
-					j["optional"] = c.isOptional().value();
-				if (c.getDefinition())
-					j["definition"] = c.getDefinition();
+				if (c.getName()) j["name"] = c.getName().value();
+				if (c.getId()) j["id"] = c.getId().value();
+				if (c.getLabel()) j["label"] = c.getLabel().value();
+				if (c.getDescription()) j["description"] = c.getDescription().value();
+				if (c.isUpdatable()) j["updatable"] = c.isUpdatable().value();
+				if (c.isOptional()) j["optional"] = c.isOptional().value();
+				if (c.getDefinition()) j["definition"] = c.getDefinition().value();
 			}
 
 			inline std::ostream& operator<<(std::ostream& os, const DataComponent& c) {

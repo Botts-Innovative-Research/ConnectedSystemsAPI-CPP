@@ -150,5 +150,8 @@
     <ClInclude Include="DataModels\Component\DataChoice.h">
       <Filter>Header Files\DataModels\Component</Filter>
     </ClInclude>
+    <ClInclude Include="Util\JsonUtils.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

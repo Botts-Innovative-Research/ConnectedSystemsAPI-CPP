@@ -1,8 +1,11 @@
 #pragma once
 
 #include <string>
+#include <optional>
+#include <ostream>
 #include <nlohmann/json.hpp>
 #include "ScalarComponent.h"
+#include "Util/JsonUtils.h"
 
 namespace ConnectedSystemsAPI {
 	namespace DataModels {
@@ -16,8 +19,13 @@ namespace ConnectedSystemsAPI {
 
 			public:
 				Text() = default;
+				Text(const Text&) = default;
+				Text(Text&&) noexcept = default;
+				Text& operator=(const Text&) = default;
+				Text& operator=(Text&&) noexcept = default;
+				~Text() override = default;
 
-				void validate() const {
+				void validate() const override {
 					ScalarComponent::validate();
 				}
 
@@ -27,38 +35,33 @@ namespace ConnectedSystemsAPI {
 					return j;
 				}
 
-				/// <summary>Inline value(s) for the component.
-				/// This property is optional to enable structure to act as a schema for values provided separately (e.g., in a datastream)</summary>
-				std::optional<std::string> getValue() const { return value; }
-				/// <summary>Inline value(s) for the component.
-				/// This property is optional to enable structure to act as a schema for values provided separately (e.g., in a datastream)</summary>
+				/// <summary>
+				/// Inline value(s) for the component.
+				/// This property is optional to enable structure to act as a schema for values provided separately (e.g., in a datastream)
+				/// </summary>
+				std::optional<std::string> getValue() const noexcept { return value; }
 				void setValue(const std::optional<std::string>& value) { this->value = value; }
+				void setValue(std::optional<std::string>&& value) noexcept { this->value = std::move(value); }
+				void setValue(const std::string& value) { this->value = value; }
+				void setValue(std::string&& value) noexcept { this->value = std::move(value); }
+				bool hasValue() const noexcept { return value.has_value(); }
+				void clearValue() noexcept { value.reset(); }
 			};
 
-			// Register with the DataComponentRegistry
-			struct TextRegistrar {
-				TextRegistrar() {
-					ConnectedSystemsAPI::DataModels::Component::DataComponentRegistry::registerType(
-						"Text", [](const nlohmann::json& j) {
-						return std::make_unique<ConnectedSystemsAPI::DataModels::Component::Text>(j.get<ConnectedSystemsAPI::DataModels::Component::Text>());
-					}
-					);
-				}
-			};
-			static TextRegistrar textRegistrar;
+			inline DataComponent::Registrar<Text> registerText{ "Text" };
+			inline bool operator==(const Text& a, const Text& b) { return a.toJson() == b.toJson(); }
+			inline bool operator!=(const Text& a, const Text& b) { return !(a == b); }
 
 			inline void from_json(const nlohmann::json& j, Text& v) {
 				from_json(j, static_cast<ScalarComponent&>(v));
-				if (j.contains("value") && j["value"].is_string())
-					v.setValue(j["value"].get<std::string>());
-				else
-					v.setValue(std::nullopt);
+
+				v.setValue(ConnectedSystemsAPI::JsonUtils::tryParseString(j, "value"));
 			}
 
 			inline void to_json(nlohmann::ordered_json& j, const Text& v) {
 				to_json(j, static_cast<const ScalarComponent&>(v));
-				if (v.getValue())
-					j["value"] = v.getValue().value();
+
+				if (v.getValue()) j["value"] = v.getValue().value();
 			}
 
 			inline std::ostream& operator<<(std::ostream& os, const Text& v) {
