@@ -48,6 +48,50 @@ namespace ConnectedSystemsAPI {
 
 		public:
 			DataStreamBuilder() = default;
+			DataStreamBuilder(const DataStream& ds) { withDataStream(ds); }
+
+			/// <summary>
+			/// Initialize the builder with values from an existing DataStream instance.
+			/// Note: This will perform a deep copy of all fields; use before modifying any fields or they will be overwritten.
+			/// </summary>
+			/// <param name="ds">The DataStream instance to copy values from.</param>
+			/// <returns>The builder instance.</returns>
+			DataStreamBuilder& withDataStream(const DataStream& ds) {
+				id = ds.getId();
+				name = ds.getName();
+				description = ds.getDescription();
+				validTime = ds.getValidTime();
+				formats = ds.getFormats();
+				systemLink = ds.getSystemLink();
+				outputName = ds.getOutputName();
+				procedureLink = ds.getProcedureLink();
+				deploymentLink = ds.getDeploymentLink();
+				featureOfInterestLink = ds.getFeatureOfInterestLink();
+				samplingFeatureLink = ds.getSamplingFeatureLink();
+				observedProperties = ds.getObservedProperties();
+				phenomenonTime = ds.getPhenomenonTime();
+				phenomenonTimeInterval = ds.getPhenomenonTimeInterval();
+				resultTime = ds.getResultTime();
+				resultTimeInterval = ds.getResultTimeInterval();
+				dataStreamType = ds.getDataStreamType();
+				resultType = ds.getResultType();
+				live = ds.isLive();
+				links = ds.getLinks();
+
+				// ObservationSchema is non-copyable; clone via JSON round-trip (to_json/from_json)
+				if (ds.getSchema()) {
+					nlohmann::ordered_json j;
+					to_json(j, *ds.getSchema());
+					auto copy = std::make_unique<ObservationSchema>();
+					from_json(j, *copy);
+					schema = std::move(copy);
+				}
+				else {
+					schema.reset();
+				}
+
+				return *this;
+			}
 
 			DataStreamBuilder& withId(const std::string& v) { id = v; return *this; }
 			DataStreamBuilder& withName(const std::string& v) { name = v; return *this; }

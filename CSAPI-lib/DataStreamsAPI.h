@@ -126,5 +126,62 @@ namespace ConnectedSystemsAPI {
 				.execute<void>();
 			return response;
 		}
+
+		/// <summary>
+		/// Update an existing data stream by its ID.
+		/// Note: Data streams with observations cannot be updated.
+		/// </summary>
+		/// <param name="dataStreamId">The local identifier of the data stream to update.</param>
+		/// <param name="dataStream">The updated data stream.</param>
+		/// <returns>A response object indicating success or failure.</returns>
+		APIResponse<void> updateDataStream(const std::string& dataStreamId, const DataModels::DataStream& dataStream) {
+			nlohmann::ordered_json j;
+			ConnectedSystemsAPI::DataModels::to_json(j, dataStream);
+
+			auto response = APIRequest::Builder()
+				.setApiRoot(apiRoot)
+				.setMethod("PUT")
+				.setAuthHeader(authHeader)
+				.addHeader("Content-Type", "application/json")
+				.setResourcePath("/datastreams/" + dataStreamId)
+				.setBody(j.dump())
+				.build()
+				.execute<void>();
+			return response;
+		}
+
+		/// <summary>
+		/// Delete a data stream by its ID.
+		/// </summary>
+		/// <param name="dataStreamId">The local identifier of the data stream to delete.</param>
+		/// <returns>A response object indicating success or failure.</returns>
+		APIResponse<void> deleteDataStream(const std::string& dataStreamId) {
+			auto response = APIRequest::Builder()
+				.setApiRoot(apiRoot)
+				.setMethod("DELETE")
+				.setAuthHeader(authHeader)
+				.setResourcePath("/datastreams/" + dataStreamId)
+				.build()
+				.execute<void>();
+			return response;
+		}
+
+		/// <summary>
+		/// Delete a data stream by its ID, with an option to delete all associated observations.
+		/// </summary>
+		/// <param name="dataStreamId">The local identifier of the data stream to delete.</param>
+		/// <param name="cascade">If true, all associated observations will also be deleted.</param>
+		/// <returns>A response object indicating success or failure.</returns>
+		APIResponse<void> deleteDataStream(const std::string& dataStreamId, bool cascade) {
+			std::string queryString = cascade ? "?cascade=true" : "";
+			auto response = APIRequest::Builder()
+				.setApiRoot(apiRoot)
+				.setMethod("DELETE")
+				.setAuthHeader(authHeader)
+				.setResourcePath("/datastreams/" + dataStreamId + queryString)
+				.build()
+				.execute<void>();
+			return response;
+		}
 	};
 }

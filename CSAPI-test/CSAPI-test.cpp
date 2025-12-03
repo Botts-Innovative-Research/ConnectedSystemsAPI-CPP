@@ -90,6 +90,37 @@ namespace CSAPItest {
 			}
 		}
 
+		ConnectedSystemsAPI::DataModels::DataStream createDataStream() {
+			auto booleanField = ConnectedSystemsAPI::DataModels::Component::BooleanBuilder()
+				.withType("Boolean"s)
+				.withName("Test Boolean Field"s)
+				.withDescription("This is a test boolean field"s)
+				.build();
+
+			auto resultSchemaPtr = std::make_unique<ConnectedSystemsAPI::DataModels::Component::DataRecord>(
+				ConnectedSystemsAPI::DataModels::Component::DataRecordBuilder()
+				.withType("DataRecord")
+				.addField(std::make_unique<ConnectedSystemsAPI::DataModels::Component::Boolean>(booleanField))
+				.build()
+			);
+
+			auto observationSchemaPtr = std::make_unique<ConnectedSystemsAPI::DataModels::ObservationSchema>(
+				ConnectedSystemsAPI::DataModels::ObservationSchemaBuilder()
+				.withObservationFormat("application/om+json"s)
+				.withResultSchema(std::move(resultSchemaPtr))
+				.build()
+			);
+
+			auto dataStream = ConnectedSystemsAPI::DataModels::DataStreamBuilder()
+				.withName("Test DataStream 001"s)
+				.withOutputName("test_output_001"s)
+				.withDescription("This is a test data stream created by CSAPI-test"s)
+				.withSchema(std::move(observationSchemaPtr))
+				.build();
+
+			return dataStream;
+		}
+
 		//Debug stuff
 		template<typename T>
 		void printResponse(const ConnectedSystemsAPI::APIResponse<T>& response) {
@@ -223,37 +254,17 @@ namespace CSAPItest {
 		TEST_METHOD(CreateDataStream) {
 			createTestSystem();
 			std::string systemId = getTestSystemId();
-
-			auto booleanField = ConnectedSystemsAPI::DataModels::Component::BooleanBuilder()
-				.withType("Boolean"s)
-				.withName("Test Boolean Field"s)
-				.withDescription("This is a test boolean field"s)
-				.build();
-
-			auto resultSchemaPtr = std::make_unique<ConnectedSystemsAPI::DataModels::Component::DataRecord>(
-				ConnectedSystemsAPI::DataModels::Component::DataRecordBuilder()
-				.withType("DataRecord")
-				.addField(std::make_unique<ConnectedSystemsAPI::DataModels::Component::Boolean>(booleanField))
-				.build()
-			);
-
-			auto observationSchemaPtr = std::make_unique<ConnectedSystemsAPI::DataModels::ObservationSchema>(
-				ConnectedSystemsAPI::DataModels::ObservationSchemaBuilder()
-				.withObservationFormat("application/om+json"s)
-				.withResultSchema(std::move(resultSchemaPtr))
-				.build()
-			);
-
-			auto dataStream = ConnectedSystemsAPI::DataModels::DataStreamBuilder()
-				.withName("Test DataStream 001"s)
-				.withOutputName("test_output_001"s)
-				.withDescription("This is a test data stream created by CSAPI-test"s)
-				.withSchema(std::move(observationSchemaPtr))
-				.build();
-
-
+			auto dataStream = createDataStream();
 			auto response = csapi.getDataStreamsAPI().createDataStream(systemId, dataStream);
 			Assert::IsTrue(response.isSuccessful());
+		}
+
+		TEST_METHOD(DeleteDataStream) {
+			createTestSystem();
+			std::string systemId = getTestSystemId();
+			auto dataStream = createDataStream();
+			auto dsId = dataStream.getId().value_or("");
+			csapi.getDataStreamsAPI().deleteDataStream(dsId, true);
 		}
 	};
 }
