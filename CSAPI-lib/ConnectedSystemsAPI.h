@@ -32,6 +32,11 @@ namespace ConnectedSystemsAPI {
 			observationsAPI = ObservationsAPI(apiRoot, authHeader);
 		}
 
+		// Overload to accept C-style string literals to avoid list-initialization narrowing issues
+		ConSysAPI(const char* apiRootC, const char* usernameC, const char* passwordC)
+			: ConSysAPI(std::string(apiRootC), std::string(usernameC), std::string(passwordC)) {
+		}
+
 		/// <param name="apiRoot">e.g. "localhost:8181/sensorhub/api"</param>
 		/// <param name="username">Username for Basic authentication</param>
 		/// <param name="password">Password for Basic authentication</param>

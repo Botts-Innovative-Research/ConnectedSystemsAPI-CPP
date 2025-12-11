@@ -7,7 +7,7 @@
 
 namespace ConnectedSystemsAPI {
 	namespace TimeUtils {
-		std::chrono::system_clock::time_point parseTimeStringUTC(const std::string& timeStr) {
+		inline std::chrono::system_clock::time_point parseTimeStringUTC(const std::string& timeStr) {
 			std::istringstream ss(timeStr);
 			std::tm tm = {};
 			char discard;
@@ -29,7 +29,7 @@ namespace ConnectedSystemsAPI {
 			return tp;
 		}
 
-		static std::string timePointToString(const std::chrono::system_clock::time_point& tp) {
+		inline static std::string timePointToString(const std::chrono::system_clock::time_point& tp) {
 			std::tm gmt{};
 			time_t time = std::chrono::system_clock::to_time_t(tp);
 			gmtime_s(&gmt, &time);
