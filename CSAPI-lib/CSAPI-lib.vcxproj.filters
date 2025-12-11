@@ -195,5 +195,11 @@
     <ClInclude Include="DataModels\ObservationBuilder.h">
       <Filter>Header Files\DataModels</Filter>
     </ClInclude>
+    <ClInclude Include="Query\ObservationsQuery.h">
+      <Filter>Header Files\Query</Filter>
+    </ClInclude>
+    <ClInclude Include="Query\ObservationsOfDataStreamQuery.h">
+      <Filter>Header Files\Query</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

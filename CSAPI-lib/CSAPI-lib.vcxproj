@@ -181,6 +181,8 @@
     <ClInclude Include="ObservationsAPI.h" />
     <ClInclude Include="Query\DataStreamsOfSystemQuery.h" />
     <ClInclude Include="Query\DataStreamsQuery.h" />
+    <ClInclude Include="Query\ObservationsOfDataStreamQuery.h" />
+    <ClInclude Include="Query\ObservationsQuery.h" />
     <ClInclude Include="Query\QueryParameters.h" />
     <ClInclude Include="Query\SystemsQuery.h" />
     <ClInclude Include="RegistryInit.h" />
