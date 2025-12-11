@@ -1,12 +1,10 @@
 #pragma once
 
-#include <curl/curl.h>
 #include <string>
-#include <iostream>
-#include "APIRequest.h"
-#include "SystemsAPI.h"
+
 #include "DataStreamsAPI.h"
-#include "RegistryInit.h"
+#include "ObservationsAPI.h"
+#include "SystemsAPI.h"
 
 namespace ConnectedSystemsAPI {
 	class ConSysAPI {
@@ -15,6 +13,7 @@ namespace ConnectedSystemsAPI {
 		std::string authHeader;
 		SystemsAPI systemsAPI;
 		DataStreamsAPI dataStreamsAPI;
+		ObservationsAPI observationsAPI;
 
 	public:
 		/// <param name="apiRoot">e.g. "localhost:8181/sensorhub/api"</param>
@@ -30,6 +29,7 @@ namespace ConnectedSystemsAPI {
 			}
 			systemsAPI = SystemsAPI(apiRoot, authHeader);
 			dataStreamsAPI = DataStreamsAPI(apiRoot, authHeader);
+			observationsAPI = ObservationsAPI(apiRoot, authHeader);
 		}
 
 		/// <param name="apiRoot">e.g. "localhost:8181/sensorhub/api"</param>
@@ -43,6 +43,7 @@ namespace ConnectedSystemsAPI {
 		const std::string& getAuthHeader() const { return authHeader; }
 		SystemsAPI& getSystemsAPI() { return systemsAPI; }
 		DataStreamsAPI& getDataStreamsAPI() { return dataStreamsAPI; }
+		ObservationsAPI getObservationsAPI() { return observationsAPI; }
 	private:
 		std::string base64_encode(const std::string& in) {
 			static const std::string base64_chars =

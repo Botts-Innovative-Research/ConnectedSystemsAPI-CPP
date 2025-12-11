@@ -3,8 +3,10 @@
 #include <string>
 #include <ostream>
 #include <nlohmann/json.hpp>
+
 #include "DataComponent.h"
 #include "DataComponentRegistry.h"
+#include "DataModels/Data/DataBlockMixed.h"
 
 namespace ConnectedSystemsAPI {
 	namespace DataModels {
@@ -56,6 +58,29 @@ namespace ConnectedSystemsAPI {
 				void setFields(std::vector<std::unique_ptr<DataComponent>> f) noexcept { fields = std::move(f); }
 				void clearFields() noexcept { fields.clear(); }
 				void addField(std::unique_ptr<DataComponent> field) { if (field) fields.push_back(std::move(field)); }
+
+				DataModels::Data::DataBlockMixed createDataBlock() const {
+					DataModels::Data::DataBlockMixed dataBlock;
+					for (const auto& field : fields) {
+						auto fieldName = field->getName().value_or("");
+						auto fieldValue = DataModels::Data::DataValue();
+						if (field->getType() == "Boolean") {
+							fieldValue = DataModels::Data::DataValue(false);
+						}
+						else if (field->getType() == "Count") {
+							fieldValue = DataModels::Data::DataValue(int64_t(0));
+						}
+						else if (field->getType() == "Quantity") {
+							fieldValue = DataModels::Data::DataValue(0.0);
+						}
+						else if (field->getType() == "Text") {
+							fieldValue = DataModels::Data::DataValue(std::string(""));
+						}
+						if (fieldName.empty()) continue;
+						dataBlock.setField(fieldName, fieldValue);
+					}
+					return dataBlock;
+				}
 			};
 
 			inline DataComponent::Registrar<DataRecord> registerDataRecord{ "DataRecord" };

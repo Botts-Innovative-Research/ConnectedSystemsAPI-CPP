@@ -3,10 +3,12 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "ConnectedSystemsAPI.h"
+#include "RegistryInit.h"
 #include "DataModels/DataStream.h"
 #include "DataModels/DataStreamBuilder.h"
 #include "DataModels/System.h"
 #include "DataModels/SystemBuilder.h"
+#include "DataModels/ObservationBuilder.h"
 #include "DataModels/ObservationSchema.h"
 #include "DataModels/ObservationSchemaBuilder.h"
 #include "DataModels/Properties.h"
@@ -93,7 +95,7 @@ namespace CSAPItest {
 		ConnectedSystemsAPI::DataModels::DataStream createDataStream() {
 			auto booleanField = ConnectedSystemsAPI::DataModels::Component::BooleanBuilder()
 				.withType("Boolean"s)
-				.withName("Test Boolean Field"s)
+				.withName("booleanField"s)
 				.withDescription("This is a test boolean field"s)
 				.build();
 
@@ -224,31 +226,22 @@ namespace CSAPItest {
 
 		TEST_METHOD(GetDataStreams) {
 			auto response = csapi.getDataStreamsAPI().getDataStreams();
-			std::cout << "Response: " << response.getResponseBody() << std::endl;
 			Assert::IsTrue(response.isSuccessful());
-			std::cout << "DataStream: " << response.getItems().at(0) << std::endl;
 		}
 
 		TEST_METHOD(GetDataStreamById) {
 			auto response = csapi.getDataStreamsAPI().getDataStreams();
 			std::string id = response.getItems().at(0).getId().value_or("");
-			std::cout << "DataStream ID: " << id << std::endl;
-
 			auto response2 = csapi.getDataStreamsAPI().getDataStreamById(id);
-			std::cout << "DataStream Response: " << response2.getResponseBody() << std::endl;
 			Assert::IsTrue(response2.isSuccessful());
-			std::cout << "DataStream: " << response2.getItems().at(0) << std::endl;
 		}
 
 		TEST_METHOD(GetObservationSchema) {
 			auto response = csapi.getDataStreamsAPI().getDataStreams();
 			std::string id = response.getItems().at(0).getId().value_or("");
-			std::cout << "DataStream ID: " << id << std::endl;
 
 			auto response2 = csapi.getDataStreamsAPI().getObservationSchema(id);
-			std::cout << "Schema Response: " << response2.getResponseBody() << std::endl;
 			Assert::IsTrue(response2.isSuccessful());
-			std::cout << "ObservationSchema: " << response2.getItems().at(0) << std::endl;
 		}
 
 		TEST_METHOD(CreateDataStream) {
@@ -265,6 +258,123 @@ namespace CSAPItest {
 			auto dataStream = createDataStream();
 			auto dsId = dataStream.getId().value_or("");
 			csapi.getDataStreamsAPI().deleteDataStream(dsId, true);
+		}
+
+		TEST_METHOD(GetObservations) {
+			auto response = csapi.getObservationsAPI().getObservations();
+			Assert::IsTrue(response.isSuccessful());
+
+			std::cout << "Observations Response: " << response.getResponseBody() << std::endl;
+
+			for (const auto& obs : response.getItems()) {
+				std::cout << "Observation ID: " << obs.toJson().dump(2) << std::endl;
+			}
+		}
+
+		TEST_METHOD(GetObservationsOfDataStream) {
+			auto dataStreamsResponse = csapi.getDataStreamsAPI().getDataStreams();
+			std::string dataStreamId = dataStreamsResponse.getItems().at(0).getId().value_or("");
+			auto response = csapi.getObservationsAPI().getObservationsOfDataStream(dataStreamId);
+			Assert::IsTrue(response.isSuccessful());
+		}
+
+		TEST_METHOD(CreateObservation) {
+			createTestSystem();
+			std::string systemId = getTestSystemId();
+			auto dataStream = createDataStream();
+			auto dataStreamCreateResponse = csapi.getDataStreamsAPI().createDataStream(systemId, dataStream);
+			auto dataStreamGetResponse = csapi.getDataStreamsAPI().getDataStreams();
+
+			// First create a datastreams
+			std::string dataStreamId;
+			for (const auto& ds : dataStreamGetResponse.getItems()) {
+				if (ds.getName().value_or("") == dataStream.getName().value_or("")) {
+					dataStreamId = ds.getId().value_or("");
+					break;
+				}
+			}
+			assert(!dataStreamId.empty());
+
+			//Get the schema to know what kind of observation to create
+			auto schemaResponse = csapi.getDataStreamsAPI().getObservationSchema(dataStreamId);
+			Assert::IsTrue(schemaResponse.isSuccessful());
+			auto schema = schemaResponse.getItems().at(0).getResultSchema();
+			auto schemaDataRecord = dynamic_cast<const ConnectedSystemsAPI::DataModels::Component::DataRecord*>(schema);
+			Assert::IsNotNull(schemaDataRecord);
+			// Create a data block according to the schema
+			auto dataBlock = schemaDataRecord->createDataBlock();
+			dataBlock.setField("booleanField", ConnectedSystemsAPI::DataModels::Data::DataValue(true));
+
+			auto now = ConnectedSystemsAPI::DataModels::TimeInstant(std::chrono::system_clock::now());
+
+			// Then create an observation for that datastream
+			auto observation = ConnectedSystemsAPI::DataModels::ObservationBuilder()
+				.withResultTime(now)
+				.withResult(dataBlock)
+				.build();
+			// Print out the observation JSON
+			std::cout << "Observation to Create: " << observation.toJson().dump(2) << std::endl;
+
+			auto observationCreateResponse = csapi.getObservationsAPI().createObservation(dataStreamId, observation);
+			std::cout << "Create Observation Response Code: " << observationCreateResponse.getResponseCode() << std::endl;
+			Assert::IsTrue(observationCreateResponse.isSuccessful());
+
+			// Get the observations to verify
+			auto observationsResponse = csapi.getObservationsAPI().getObservationsOfDataStream(dataStreamId);
+			Assert::IsTrue(observationsResponse.isSuccessful());
+			Assert::IsTrue(observationsResponse.getItems().size() > 0);
+			//Verify the data stream id matches
+			Assert::AreEqual(dataStreamId, observationsResponse.getItems().at(0).getDataStreamId().value_or(""));
+			//Verify the result matches
+			const auto* resultValue = observationsResponse.getItems().at(0).getResult().getField("booleanField");
+			Assert::IsNotNull(resultValue);
+			Assert::IsTrue(std::holds_alternative<bool>(resultValue->value));
+		}
+
+		TEST_METHOD(CreateObservation2) {
+			// Same as above, but instead of creating a new datastream, use an existing one
+			auto dataStreamsResponse = csapi.getDataStreamsAPI().getDataStreams();
+			std::string dataStreamId = dataStreamsResponse.getItems().at(0).getId().value_or("");
+			assert(!dataStreamId.empty());
+
+			//Get the schema to know what kind of observation to create
+			auto schemaResponse = csapi.getDataStreamsAPI().getObservationSchema(dataStreamId);
+			Assert::IsTrue(schemaResponse.isSuccessful());
+			auto schema = schemaResponse.getItems().at(0).getResultSchema();
+			auto schemaDataRecord = dynamic_cast<const ConnectedSystemsAPI::DataModels::Component::DataRecord*>(schema);
+			Assert::IsNotNull(schemaDataRecord);
+
+			// Create a data block according to the schema
+			auto dataBlock = schemaDataRecord->createDataBlock();
+			if (dataBlock.hasField("data")) {
+				// This field exists in the default datastream created by the OSH node example project
+				dataBlock.setField("data", ConnectedSystemsAPI::DataModels::Data::DataValue("Test string data"));
+			}
+			else {
+				Assert::Fail(L"Schema does not have 'data' field");
+			}
+
+			auto now = ConnectedSystemsAPI::DataModels::TimeInstant(std::chrono::system_clock::now());
+			// Then create an observation for that datastream
+			auto observation = ConnectedSystemsAPI::DataModels::ObservationBuilder()
+				.withResultTime(now)
+				.withResult(dataBlock)
+				.build();
+			auto observationCreateResponse = csapi.getObservationsAPI().createObservation(dataStreamId, observation);
+			Assert::IsTrue(observationCreateResponse.isSuccessful());
+
+			// Get the observations to verify
+			auto observationsResponse = csapi.getObservationsAPI().getObservationsOfDataStream(dataStreamId);
+			Assert::IsTrue(observationsResponse.isSuccessful());
+			Assert::IsTrue(observationsResponse.getItems().size() > 0);
+			Assert::AreEqual(dataStreamId, observationsResponse.getItems().at(0).getDataStreamId().value_or(""));
+
+			//Verify the result matches
+			const auto* resultValue = observationsResponse.getItems().at(0).getResult().getField("data");
+			Assert::IsNotNull(resultValue);
+			std::cout << "Result value type index: " << resultValue->value.index() << std::endl;
+			Assert::IsTrue(std::holds_alternative<std::string>(resultValue->value));
+			std::cout << "Result value: " << std::get<std::string>(resultValue->value) << std::endl;
 		}
 	};
 }

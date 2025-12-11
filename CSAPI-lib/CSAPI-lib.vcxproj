@@ -160,7 +160,13 @@
     <ClInclude Include="DataModels\Component\Vector.h" />
     <ClInclude Include="DataModels\DataStream.h" />
     <ClInclude Include="DataModels\DataStreamBuilder.h" />
+    <ClInclude Include="DataModels\Data\DataBlock.h" />
+    <ClInclude Include="DataModels\Data\DataBlockMixed.h" />
+    <ClInclude Include="DataModels\Data\DataType.h" />
+    <ClInclude Include="DataModels\Data\DataValue.h" />
     <ClInclude Include="DataModels\Link.h" />
+    <ClInclude Include="DataModels\Observation.h" />
+    <ClInclude Include="DataModels\ObservationBuilder.h" />
     <ClInclude Include="DataModels\ObservationSchema.h" />
     <ClInclude Include="DataModels\ObservationSchemaBuilder.h" />
     <ClInclude Include="DataModels\ObservedProperty.h" />
@@ -169,8 +175,10 @@
     <ClInclude Include="DataModels\System.h" />
     <ClInclude Include="DataModels\SystemBuilder.h" />
     <ClInclude Include="DataModels\TimeExtent.h" />
+    <ClInclude Include="DataModels\TimeInstant.h" />
     <ClInclude Include="DataStreamsAPI.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="ObservationsAPI.h" />
     <ClInclude Include="Query\DataStreamsOfSystemQuery.h" />
     <ClInclude Include="Query\DataStreamsQuery.h" />
     <ClInclude Include="Query\QueryParameters.h" />

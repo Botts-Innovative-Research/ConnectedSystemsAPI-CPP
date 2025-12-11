@@ -5,7 +5,7 @@
 #include <optional>
 #include <nlohmann/json.hpp>
 
-#include "../TimeUtils.h"
+#include "TimeUtils.h"
 
 namespace ConnectedSystemsAPI {
 	namespace DataModels {
@@ -91,12 +91,36 @@ namespace ConnectedSystemsAPI {
 		};
 
 		inline void from_json(const nlohmann::json& j, TimeExtent& t) {
-			if (!j.is_array() || j.size() != 2) {
-				throw std::invalid_argument("TimeExtent JSON must be an array of two elements.");
+			std::string startStr;
+			std::string endStr;
+
+			if (j.is_array()) {
+				if (j.size() != 2) {
+					throw std::invalid_argument("TimeExtent JSON must be an array of two elements.");
+				}
+
+				startStr = j.at(0).get<std::string>();
+				endStr = j.at(1).get<std::string>();
+			}
+			else if (j.is_string()) {
+				std::string timeStr = j.get<std::string>();
+				size_t delimPos = timeStr.find('/');
+				if (delimPos == std::string::npos) {
+					// Single instant
+					startStr = timeStr;
+					endStr = timeStr;
+				}
+				else {
+					// Time range
+					startStr = timeStr.substr(0, delimPos);
+					endStr = timeStr.substr(delimPos + 1);
+				}
+			}
+			else {
+				throw std::invalid_argument("TimeExtent JSON must be either an array of two elements or a string.");
 			}
 
 			std::optional<std::chrono::system_clock::time_point> start;
-			std::string startStr = j.at(0).get<std::string>();
 			if (startStr == TimeExtent::SPECIAL_VALUE_NOW) {
 				start = std::nullopt; // 'now' is represented as nullopt
 			}
@@ -105,7 +129,6 @@ namespace ConnectedSystemsAPI {
 			}
 
 			std::optional<std::chrono::system_clock::time_point> end;
-			std::string endStr = j.at(1).get<std::string>();
 			if (endStr == TimeExtent::SPECIAL_VALUE_NOW) {
 				end = std::nullopt; // 'now' is represented as nullopt
 			}
