@@ -128,5 +128,12 @@ namespace ConnectedSystemsAPI {
 
 			j["result"] = o.result;
 		}
+
+		inline std::ostream& operator<<(std::ostream& os, const Observation& o) {
+			nlohmann::ordered_json j;
+			to_json(j, o);
+			os << j.dump(2);
+			return os;
+		}
 	}
 }

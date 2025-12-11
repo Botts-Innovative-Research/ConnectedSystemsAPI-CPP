@@ -22,7 +22,7 @@ namespace CSAPItest {
 		static constexpr const char* TEST_SYSTEM_UID = "test-system-001";
 		ConnectedSystemsAPI::ConSysAPI csapi{ "localhost:8282/sensorhub/api", "admin", "admin" };
 
-		ConnectedSystemsAPI::APIResponse<void> createTestSystem() {
+		std::string createTestSystem() {
 			auto system = ConnectedSystemsAPI::DataModels::SystemBuilder()
 				.setProperties(ConnectedSystemsAPI::DataModels::PropertiesBuilder()
 					.setFeatureType("osa:Sensor")
@@ -32,10 +32,11 @@ namespace CSAPItest {
 					.setAssetType("Equipment")
 					.build())
 				.build();
-			return csapi.getSystemsAPI().createSystem(system);
+			csapi.getSystemsAPI().createSystem(system);
+			return getTestSystemId();
 		}
 
-		ConnectedSystemsAPI::APIResponse<void> createTestSubsystem() {
+		std::string createTestSubsystem() {
 			auto parentSystemId = getTestSystemId();
 			auto subsystem = ConnectedSystemsAPI::DataModels::SystemBuilder()
 				.setProperties(ConnectedSystemsAPI::DataModels::PropertiesBuilder()
@@ -45,7 +46,8 @@ namespace CSAPItest {
 					.setDescription("This is a test subsystem created by CSAPI-test")
 					.build())
 				.build();
-			return csapi.getSystemsAPI().createSubsystem(parentSystemId, subsystem);
+			csapi.getSystemsAPI().createSubsystem(parentSystemId, subsystem);
+			return getTestSubsystemId();
 		}
 
 		std::string getTestSystemId() {
@@ -59,7 +61,10 @@ namespace CSAPItest {
 		}
 
 		std::string getTestSubsystemId() {
-			auto response = csapi.getSystemsAPI().getSubsystems(getTestSystemId());
+			std::string systemId = getTestSystemId();
+			if (systemId.empty()) return "";
+
+			auto response = csapi.getSystemsAPI().getSubsystems(systemId);
 			for (const auto& item : response.getItems()) {
 				if (item.getProperties().getUid() == "test-subsystem-001") {
 					return item.getId();
@@ -69,14 +74,11 @@ namespace CSAPItest {
 		}
 
 		void cleanupTestSystem() {
-			// First delete the subsystem
-			std::string subsystemId = getTestSubsystemId();
-			if (!subsystemId.empty()) {
-				csapi.getSystemsAPI().deleteSystem(subsystemId, true);
-			}
-
 			std::string systemId = getTestSystemId();
+			std::string subsystemId = getTestSubsystemId();
 			if (!systemId.empty()) {
+				if (!subsystemId.empty())
+					csapi.getSystemsAPI().deleteSystem(subsystemId, true);
 				csapi.getSystemsAPI().deleteSystem(systemId, true);
 			}
 
@@ -87,7 +89,13 @@ namespace CSAPItest {
 			}
 		}
 
-		ConnectedSystemsAPI::DataModels::DataStream createDataStream() {
+		std::string createTestDataStream(const std::string& systemId) {
+			auto dataStream = createTestDataStreamObject();
+			auto dataStreamCreateResponse = csapi.getDataStreamsAPI().createDataStream(systemId, dataStream);
+			return getTestDataStreamIdByName(dataStream.getName().value_or(""));
+		}
+
+		ConnectedSystemsAPI::DataModels::DataStream createTestDataStreamObject() {
 			auto booleanField = ConnectedSystemsAPI::DataModels::Component::BooleanBuilder()
 				.withType("Boolean")
 				.withName("booleanField")
@@ -118,33 +126,14 @@ namespace CSAPItest {
 			return dataStream;
 		}
 
-		//Debug stuff
-		template<typename T>
-		void printResponse(const ConnectedSystemsAPI::APIResponse<T>& response) {
-			std::cout << "Response Code: " << response.getResponseCode() << std::endl;
-			std::cout << "Response Message: " << response.getResponseMessage() << std::endl;
-			std::cout << "Headers: " << std::endl;
-			for (const auto& header : response.getHeaders()) {
-				std::cout << "  " << header.first << ": ";
-				for (const auto& value : header.second) {
-					std::cout << value << " ";
-				}
-				std::cout << std::endl;
-			}
-			std::cout << "Response Body: " << response.getResponseBody() << std::endl;
-		}
-
-		void printSystems() {
-			auto response = csapi.getSystemsAPI().getSystems();
-			auto items = response.getItems();
-			for (const auto& item : items) {
-				std::cout << "ystem: " << item.getProperties().getName() << std::endl;
-				auto subsystemsResponse = csapi.getSystemsAPI().getSubsystems(item.getId());
-				auto subsystems = subsystemsResponse.getItems();
-				for (const auto& subsystem : subsystems) {
-					std::cout << "  Subsystem: " << subsystem.getProperties().getName() << std::endl;
+		std::string getTestDataStreamIdByName(const std::string& name) {
+			auto response = csapi.getDataStreamsAPI().getDataStreams();
+			for (const auto& item : response.getItems()) {
+				if (item.getName().value_or("") == name) {
+					return item.getId().value_or("");
 				}
 			}
+			return "";
 		}
 	};
 }

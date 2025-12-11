@@ -49,15 +49,14 @@ namespace CSAPItest {
 		}
 
 		TEST_METHOD(CreateSystem) {
-			auto response = testHelper.createTestSystem();
-			Assert::IsTrue(response.isSuccessful());
+			auto systemId = testHelper.createTestSystem();
+			Assert::IsFalse(systemId.empty());
 		}
 
 		TEST_METHOD(CreateSubsystem) {
 			testHelper.createTestSystem();
-			auto response = testHelper.createTestSubsystem();
-			testHelper.printSystems();
-			Assert::IsTrue(response.isSuccessful());
+			auto subsystemId = testHelper.createTestSubsystem();
+			Assert::IsFalse(subsystemId.empty());
 		}
 
 		TEST_METHOD(UpdateSystem) {

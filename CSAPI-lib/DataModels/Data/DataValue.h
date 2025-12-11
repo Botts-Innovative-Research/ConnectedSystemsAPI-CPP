@@ -31,9 +31,18 @@ namespace ConnectedSystemsAPI {
 				DataValue(std::string&& v) : value(std::move(v)) {}
 				DataValue(const char* s) : value(std::string(s)) {}
 
+				// Assignment operators for underlying types
+				DataValue& operator=(bool v) { value = v; return *this; }
+				DataValue& operator=(int64_t v) { value = v; return *this; }
+				DataValue& operator=(uint64_t v) { value = v; return *this; }
+				DataValue& operator=(double v) { value = v; return *this; }
+				DataValue& operator=(const std::string& v) { value = v; return *this; }
+				DataValue& operator=(std::string&& v) { value = std::move(v); return *this; }
+				DataValue& operator=(const char* s) { value = std::string(s); return *this; }
+
 				std::string toString() const {
 					if (std::holds_alternative<bool>(value)) {
-						return std::holds_alternative<bool>(value) && std::get<bool>(value) ? "true" : "false";
+						return std::get<bool>(value) ? "true" : "false";
 					}
 					else if (std::holds_alternative<int64_t>(value)) {
 						return std::to_string(std::get<int64_t>(value));

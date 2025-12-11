@@ -40,6 +40,17 @@ namespace ConnectedSystemsAPI {
 			return response;
 		}
 
+		APIResponse<DataModels::Observation> getObservationById(const std::string& observationId) {
+			auto response = APIRequest::Builder()
+				.setApiRoot(apiRoot)
+				.setMethod("GET")
+				.setAuthHeader(authHeader)
+				.setResourcePath("/observations/" + observationId)
+				.build()
+				.execute<DataModels::Observation>();
+			return response;
+		}
+
 		APIResponse<void> createObservation(const std::string& dataStreamId, const DataModels::Observation& observation) {
 			nlohmann::ordered_json j;
 			ConnectedSystemsAPI::DataModels::to_json(j, observation);
@@ -50,6 +61,32 @@ namespace ConnectedSystemsAPI {
 				.addHeader("Content-Type", "application/json")
 				.setResourcePath("/datastreams/" + dataStreamId + "/observations")
 				.setBody(j.dump())
+				.build()
+				.execute<void>();
+			return response;
+		}
+
+		APIResponse<void> updateObservation(const std::string& observationId, const DataModels::Observation& observation) {
+			nlohmann::ordered_json j;
+			ConnectedSystemsAPI::DataModels::to_json(j, observation);
+			auto response = APIRequest::Builder()
+				.setApiRoot(apiRoot)
+				.setMethod("PUT")
+				.setAuthHeader(authHeader)
+				.addHeader("Content-Type", "application/json")
+				.setResourcePath("/observations/" + observationId)
+				.setBody(j.dump())
+				.build()
+				.execute<void>();
+			return response;
+		}
+
+		APIResponse<void> deleteObservation(const std::string& observationId) {
+			auto response = APIRequest::Builder()
+				.setApiRoot(apiRoot)
+				.setMethod("DELETE")
+				.setAuthHeader(authHeader)
+				.setResourcePath("/observations/" + observationId)
 				.build()
 				.execute<void>();
 			return response;

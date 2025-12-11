@@ -71,6 +71,13 @@ namespace ConnectedSystemsAPI {
 					j[pair.first] = pair.second;
 				}
 			}
+
+			inline std::ostream& operator<<(std::ostream& os, const DataBlockMixed& v) {
+				nlohmann::ordered_json j;
+				to_json(j, v);
+				os << j.dump(2);
+				return os;
+			}
 		}
 	}
 }

@@ -26,6 +26,20 @@ namespace ConnectedSystemsAPI {
 
 		public:
 			ObservationBuilder() = default;
+
+			ObservationBuilder& from(const Observation& o) {
+				id = o.getId();
+				dataStreamId = o.getDataStreamId();
+				samplingFeatureId = o.getSamplingFeatureId();
+				procedureLink = o.getProcedureLink();
+				phenomenonTime = o.getPhenomenonTime();
+				resultTime = o.getResultTime();
+				result = o.getResult();
+				resultLink = o.getResultLink();
+				links = o.getLinks();
+				return *this;
+			}
+
 			ObservationBuilder& withId(const std::string& v) { id = v; return *this; }
 			ObservationBuilder& withDataStreamId(const std::string& v) { dataStreamId = v; return *this; }
 			ObservationBuilder& withSamplingFeatureId(const std::string& v) { samplingFeatureId = v; return *this; }

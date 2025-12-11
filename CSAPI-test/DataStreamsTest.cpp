@@ -44,19 +44,16 @@ namespace CSAPItest {
 		}
 
 		TEST_METHOD(CreateDataStream) {
-			testHelper.createTestSystem();
-			std::string systemId = testHelper.getTestSystemId();
-			auto dataStream = testHelper.createDataStream();
+			auto systemId = testHelper.createTestSystem();
+			auto dataStream = testHelper.createTestDataStreamObject();
 			auto response = testHelper.csapi.getDataStreamsAPI().createDataStream(systemId, dataStream);
 			Assert::IsTrue(response.isSuccessful());
 		}
 
 		TEST_METHOD(DeleteDataStream) {
-			testHelper.createTestSystem();
-			std::string systemId = testHelper.getTestSystemId();
-			auto dataStream = testHelper.createDataStream();
-			auto dsId = dataStream.getId().value_or("");
-			testHelper.csapi.getDataStreamsAPI().deleteDataStream(dsId, true);
+			auto systemId = testHelper.createTestSystem();
+			auto dataStreamId = testHelper.createTestDataStream(systemId);
+			testHelper.csapi.getDataStreamsAPI().deleteDataStream(dataStreamId, true);
 		}
 	};
 }

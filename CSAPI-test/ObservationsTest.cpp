@@ -17,6 +17,34 @@ namespace CSAPItest {
 	{
 	private:
 		TestHelper testHelper;
+
+		ConnectedSystemsAPI::DataModels::Data::DataBlockMixed createTestDataBlock(const std::string& dataStreamId) {
+			//Get the schema to know what kind of observation to create
+			auto schemaResponse = testHelper.csapi.getDataStreamsAPI().getObservationSchema(dataStreamId);
+			auto schema = schemaResponse.getItems().at(0).getResultSchema();
+			auto schemaDataRecord = dynamic_cast<const ConnectedSystemsAPI::DataModels::Component::DataRecord*>(schema);
+			// Create a data block according to the schema
+			ConnectedSystemsAPI::DataModels::Data::DataBlockMixed dataBlock = schemaDataRecord->createDataBlock();
+			return dataBlock;
+		}
+
+		ConnectedSystemsAPI::DataModels::Observation pushTestObservation(const std::string& dataStreamId, const ConnectedSystemsAPI::DataModels::Data::DataBlockMixed& dataBlock) {
+			auto now = ConnectedSystemsAPI::DataModels::TimeInstant(std::chrono::system_clock::now());
+			auto observation = ConnectedSystemsAPI::DataModels::ObservationBuilder()
+				.withResultTime(now)
+				.withResult(dataBlock)
+				.build();
+			testHelper.csapi.getObservationsAPI().createObservation(dataStreamId, observation);
+			return getTestObservation(dataStreamId);
+		}
+
+		ConnectedSystemsAPI::DataModels::Observation getTestObservation(const std::string& dataStreamId) {
+			auto observationsResponse = testHelper.csapi.getObservationsAPI().getObservationsOfDataStream(dataStreamId);
+			Assert::IsTrue(observationsResponse.isSuccessful());
+			Assert::IsTrue(observationsResponse.getItems().size() > 0);
+			return observationsResponse.getItems().at(0);
+		}
+
 	public:
 		TEST_METHOD_INITIALIZE(ClassInitialize) {
 			testHelper = TestHelper();
@@ -45,54 +73,17 @@ namespace CSAPItest {
 		}
 
 		TEST_METHOD(CreateObservation) {
-			testHelper.createTestSystem();
-			std::string systemId = testHelper.getTestSystemId();
-			auto dataStream = testHelper.createDataStream();
-			auto dataStreamCreateResponse = testHelper.csapi.getDataStreamsAPI().createDataStream(systemId, dataStream);
-			auto dataStreamGetResponse = testHelper.csapi.getDataStreamsAPI().getDataStreams();
+			auto systemId = testHelper.createTestSystem();
+			auto dataStreamId = testHelper.createTestDataStream(systemId);
+			auto dataBlock = createTestDataBlock(dataStreamId);
 
-			// First create a datastream
-			std::string dataStreamId;
-			for (const auto& ds : dataStreamGetResponse.getItems()) {
-				if (ds.getName().value_or("") == dataStream.getName().value_or("")) {
-					dataStreamId = ds.getId().value_or("");
-					break;
-				}
-			}
-			assert(!dataStreamId.empty());
-
-			//Get the schema to know what kind of observation to create
-			auto schemaResponse = testHelper.csapi.getDataStreamsAPI().getObservationSchema(dataStreamId);
-			Assert::IsTrue(schemaResponse.isSuccessful());
-			auto schema = schemaResponse.getItems().at(0).getResultSchema();
-			auto schemaDataRecord = dynamic_cast<const ConnectedSystemsAPI::DataModels::Component::DataRecord*>(schema);
-			Assert::IsNotNull(schemaDataRecord);
-			// Create a data block according to the schema
-			auto dataBlock = schemaDataRecord->createDataBlock();
 			dataBlock.setField("booleanField", ConnectedSystemsAPI::DataModels::Data::DataValue(true));
+			auto observation = pushTestObservation(dataStreamId, dataBlock);
 
-			auto now = ConnectedSystemsAPI::DataModels::TimeInstant(std::chrono::system_clock::now());
-
-			// Then create an observation for that datastream
-			auto observation = ConnectedSystemsAPI::DataModels::ObservationBuilder()
-				.withResultTime(now)
-				.withResult(dataBlock)
-				.build();
-			// Print out the observation JSON
-			std::cout << "Observation to Create: " << observation.toJson().dump(2) << std::endl;
-
-			auto observationCreateResponse = testHelper.csapi.getObservationsAPI().createObservation(dataStreamId, observation);
-			std::cout << "Create Observation Response Code: " << observationCreateResponse.getResponseCode() << std::endl;
-			Assert::IsTrue(observationCreateResponse.isSuccessful());
-
-			// Get the observations to verify
-			auto observationsResponse = testHelper.csapi.getObservationsAPI().getObservationsOfDataStream(dataStreamId);
-			Assert::IsTrue(observationsResponse.isSuccessful());
-			Assert::IsTrue(observationsResponse.getItems().size() > 0);
 			//Verify the data stream id matches
-			Assert::AreEqual(dataStreamId, observationsResponse.getItems().at(0).getDataStreamId().value_or(""));
+			Assert::AreEqual(dataStreamId, observation.getDataStreamId().value_or(""));
 			//Verify the result matches
-			const auto* resultValue = observationsResponse.getItems().at(0).getResult().getField("booleanField");
+			const auto* resultValue = observation.getResult().getField("booleanField");
 			Assert::IsNotNull(resultValue);
 			Assert::IsTrue(std::holds_alternative<bool>(resultValue->value));
 		}
@@ -138,9 +129,33 @@ namespace CSAPItest {
 			//Verify the result matches
 			const auto* resultValue = observationsResponse.getItems().at(0).getResult().getField("data");
 			Assert::IsNotNull(resultValue);
-			std::cout << "Result value type index: " << resultValue->value.index() << std::endl;
 			Assert::IsTrue(std::holds_alternative<std::string>(resultValue->value));
-			std::cout << "Result value: " << std::get<std::string>(resultValue->value) << std::endl;
+		}
+
+		TEST_METHOD(GetObservationById) {
+			auto systemId = testHelper.createTestSystem();
+			auto dataStreamId = testHelper.createTestDataStream(systemId);
+			auto dataBlock = createTestDataBlock(dataStreamId);
+			auto observation = pushTestObservation(dataStreamId, dataBlock);
+			auto observationId = observation.getId().value_or("");
+
+			auto getResponse = testHelper.csapi.getObservationsAPI().getObservationById(observationId);
+			Assert::IsTrue(getResponse.isSuccessful());
+			Assert::AreEqual(observationId, getResponse.getItems().at(0).getId().value_or(""));
+		}
+
+		TEST_METHOD(DeleteObservation) {
+			auto systemId = testHelper.createTestSystem();
+			auto dataStreamId = testHelper.createTestDataStream(systemId);
+			auto dataBlock = createTestDataBlock(dataStreamId);
+			auto observation = pushTestObservation(dataStreamId, dataBlock);
+			auto observationId = observation.getId().value_or("");
+
+			auto deleteResponse = testHelper.csapi.getObservationsAPI().deleteObservation(observationId);
+			Assert::IsTrue(deleteResponse.isSuccessful());
+
+			auto getResponse = testHelper.csapi.getObservationsAPI().getObservationById(observationId);
+			Assert::IsFalse(getResponse.isSuccessful());
 		}
 	};
 }
