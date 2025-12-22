@@ -73,51 +73,92 @@ namespace ConnectedSystemsAPI {
 			{
 			}
 
-			/// <returns>Local resource ID. If set on creation, the server may ignore it.</returns>
+			/// <summary>
+			/// Local resource ID. If set on creation, the server may ignore it.
+			/// </summary>
 			const std::optional<std::string>& getId() const { return id; }
-			/// <returns>Human-readable name of the resource.</returns>
+			/// <summary>
+			/// Human-readable name of the resource.
+			/// </summary>
 			const std::optional<std::string>& getName() const { return name; }
-			/// <returns>Human-readable description of the resource.</returns>
+			/// <summary>
+			/// Human-readable description of the resource.
+			/// </summary>
 			const std::optional<std::string>& getDescription() const { return description; }
-			/// <returns>The validity period of the data stream’s description.</returns>
+			/// <summary>
+			/// The validity period of the data stream’s description.
+			/// </summary>
 			const std::optional<TimeExtent>& getValidTime() const { return validTime; }
-			/// <returns>The list of formats that the observations in the datastream can be encoded to.</returns>
+			/// <summary>
+			/// The list of formats that the observations in the datastream can be encoded to.
+			/// </summary>
 			const std::optional<std::vector<std::string>>& getFormats() const { return formats; }
-			/// <returns>Link to the system producing the observations.</returns>
+			/// <summary>
+			/// Link to the system producing the observations.
+			/// </summary>
 			const std::optional<Link>& getSystemLink() const { return systemLink; }
-			/// <returns>Name of the system output feeding this datastream.</returns>
+			/// <summary>
+			/// Name of the system output feeding this datastream.
+			/// </summary>
 			const std::optional<std::string>& getOutputName() const { return outputName; }
-			/// <returns>Link to the procedure used to acquire observations
-			/// (only provided if all observations in the datastream share the same procedure).</returns>
+			/// <summary>Link to the procedure used to acquire observations
+			/// (only provided if all observations in the datastream share the same procedure).
+			/// </summary>
 			const std::optional<Link>& getProcedureLink() const { return procedureLink; }
-			/// <returns>Link to the deployment during which the observations are/were collected
-			/// (only provided if all observations in the datastream share the same deployment).</returns>
+			/// <summary>
+			/// Link to the deployment during which the observations are/were collected
+			/// (only provided if all observations in the datastream share the same deployment).
+			/// </summary>
 			const std::optional<Link>& getDeploymentLink() const { return deploymentLink; }
-			/// <returns>Link to the ultimate feature of interest
-			/// (only provided if all observations in the datastream share the same feature of interest).</returns>
+			/// <summary>
+			/// Link to the ultimate feature of interest
+			/// (only provided if all observations in the datastream share the same feature of interest).
+			/// </summary>
 			const std::optional<Link>& getFeatureOfInterestLink() const { return featureOfInterestLink; }
-			/// <returns>Link to the sampling feature
-			/// (only provided if all observations in the datastream share the same sampling feature).</returns>
+			/// <summary>
+			/// Link to the sampling feature
+			/// (only provided if all observations in the datastream share the same sampling feature).
+			/// </summary>
 			const std::optional<Link>& getSamplingFeatureLink() const { return samplingFeatureLink; }
-			/// <returns>Properties for which the observations in the datastream provide measurements.</returns>
+			/// <summary>
+			/// Properties for which the observations in the datastream provide measurements.
+			/// </summary>
 			const std::optional<std::vector<ObservedProperty>>& getObservedProperties() const { return observedProperties; }
-			/// <returns>The time period spanned by the phenomenon times of all observations in the datastream.</returns>
+			/// <summary>
+			/// The time period spanned by the phenomenon times of all observations in the datastream.
+			/// </summary>
 			const std::optional<TimeExtent>& getPhenomenonTime() const { return phenomenonTime; }
-			/// <returns>An indication of how often feature of interest properties are observed.</returns>
+			/// <summary>
+			/// An indication of how often feature of interest properties are observed.
+			/// </summary>
 			const std::optional<std::string>& getPhenomenonTimeInterval() const { return phenomenonTimeInterval; }
-			/// <returns>The time period spanned by the result times of all observations in the datastream.</returns>
+			/// <summary>
+			/// The time period spanned by the result times of all observations in the datastream.
+			/// </summary>
 			const std::optional<TimeExtent>& getResultTime() const { return resultTime; }
-			/// <returns>An indication of how often observation results are produced.</returns>
+			/// <summary>
+			/// An indication of how often observation results are produced.
+			/// </summary>
 			const std::optional<std::string>& getResultTimeInterval() const { return resultTimeInterval; }
-			/// <returns>Type of the data stream.</returns>
+			/// <summary>
+			/// Type of the data stream.
+			/// </summary>
 			const std::optional<std::string>& getDataStreamType() const { return dataStreamType; }
-			/// <returns>The type of result for observations in the datastream.</returns>
+			/// <summary>
+			/// The type of result for observations in the datastream.
+			/// </summary>
 			const std::optional<std::string>& getResultType() const { return resultType; }
-			/// <returns>Indicates whether live data is available from the datastream.</returns>
+			/// <summary>
+			/// Indicates whether live data is available from the datastream.
+			/// </summary>
 			const std::optional<bool>& isLive() const { return live; }
-			/// <returns>List of links associated with the data stream.</returns>
+			/// <summary>
+			/// List of links associated with the data stream.
+			/// </summary>
 			const std::optional<std::vector<Link>>& getLinks() const { return links; }
-			/// <returns>The observation schema for the data stream, if available.</returns>
+			/// <summary>
+			/// The observation schema for the data stream, if available.
+			/// </summary>
 			const ObservationSchema* getSchema() const { return schema.get(); }
 		};
 

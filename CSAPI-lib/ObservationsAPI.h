@@ -39,7 +39,8 @@ namespace ConnectedSystemsAPI {
 				.setApiRoot(apiRoot)
 				.setMethod("GET")
 				.setAuthHeader(authHeader)
-				.setResourcePath("/observations" + queryString)
+				.setResourcePath("observations")
+				.setQueryString(queryString)
 				.build()
 				.execute<DataModels::Observation>();
 			return response;
@@ -64,7 +65,10 @@ namespace ConnectedSystemsAPI {
 				.setApiRoot(apiRoot)
 				.setMethod("GET")
 				.setAuthHeader(authHeader)
-				.setResourcePath("/datastreams/" + dataStreamId + "/observations" + queryString)
+				.setResourcePath("datastreams")
+				.setResourceId(dataStreamId)
+				.setSubResourcePath("observations")
+				.setQueryString(queryString)
 				.build()
 				.execute<DataModels::Observation>();
 			return response;
@@ -80,7 +84,8 @@ namespace ConnectedSystemsAPI {
 				.setApiRoot(apiRoot)
 				.setMethod("GET")
 				.setAuthHeader(authHeader)
-				.setResourcePath("/observations/" + observationId)
+				.setResourcePath("observations")
+				.setResourceId(observationId)
 				.build()
 				.execute<DataModels::Observation>();
 			return response;
@@ -100,7 +105,9 @@ namespace ConnectedSystemsAPI {
 				.setMethod("POST")
 				.setAuthHeader(authHeader)
 				.addHeader("Content-Type", "application/json")
-				.setResourcePath("/datastreams/" + dataStreamId + "/observations")
+				.setResourcePath("datastreams")
+				.setResourceId(dataStreamId)
+				.setSubResourcePath("observations")
 				.setBody(j.dump())
 				.build()
 				.execute<void>();
@@ -121,7 +128,8 @@ namespace ConnectedSystemsAPI {
 				.setMethod("PUT")
 				.setAuthHeader(authHeader)
 				.addHeader("Content-Type", "application/json")
-				.setResourcePath("/observations/" + observationId)
+				.setResourcePath("observations")
+				.setResourceId(observationId)
 				.setBody(j.dump())
 				.build()
 				.execute<void>();
@@ -138,7 +146,8 @@ namespace ConnectedSystemsAPI {
 				.setApiRoot(apiRoot)
 				.setMethod("DELETE")
 				.setAuthHeader(authHeader)
-				.setResourcePath("/observations/" + observationId)
+				.setResourcePath("observations")
+				.setResourceId(observationId)
 				.build()
 				.execute<void>();
 			return response;

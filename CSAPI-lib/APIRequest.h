@@ -131,6 +131,7 @@ namespace ConnectedSystemsAPI {
 			std::string resourceId;
 			std::string subResourcePath;
 			std::string subResourceId;
+			std::string queryString;
 
 		public:
 			Builder& setApiRoot(const std::string& root) {
@@ -178,6 +179,11 @@ namespace ConnectedSystemsAPI {
 				return *this;
 			}
 
+			Builder& setQueryString(const std::string& queryString) {
+				this->queryString = queryString;
+				return *this;
+			}
+
 			APIRequest build() {
 				if (apiRoot.empty()) {
 					throw std::invalid_argument("API root must be set");
@@ -191,6 +197,7 @@ namespace ConnectedSystemsAPI {
 				endpoint = appendPath(endpoint, resourceId);
 				endpoint = appendPath(endpoint, subResourcePath);
 				endpoint = appendPath(endpoint, subResourceId);
+				endpoint += queryString;
 
 				return APIRequest(apiRoot, endpoint, requestMethod, headers, body);
 			}

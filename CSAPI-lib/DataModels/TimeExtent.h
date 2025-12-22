@@ -88,6 +88,11 @@ namespace ConnectedSystemsAPI {
 
 				return startStr + "/" + endStr;
 			}
+
+			friend void from_json(const nlohmann::json& j, TimeExtent& t);
+			friend void to_json(nlohmann::ordered_json& j, const TimeExtent& t);
+			friend bool operator==(const TimeExtent& a, const TimeExtent& b);
+			friend bool operator!=(const TimeExtent& a, const TimeExtent& b);
 		};
 
 		inline void from_json(const nlohmann::json& j, TimeExtent& t) {
@@ -149,6 +154,14 @@ namespace ConnectedSystemsAPI {
 			nlohmann::ordered_json j;
 			ConnectedSystemsAPI::DataModels::to_json(j, t);
 			return os << j.dump(2);
+		}
+
+		inline bool operator== (const TimeExtent& a, const TimeExtent& b) {
+			return a.getStart() == b.getStart() && a.getEnd() == b.getEnd();
+		}
+
+		inline bool operator!= (const TimeExtent& a, const TimeExtent& b) {
+			return !(a == b);
 		}
 	}
 }

@@ -12,9 +12,8 @@ using namespace std::string_literals;
 namespace CSAPItest {
 	TEST_CLASS(DataStreamsTest)
 	{
-	private:
 		TestHelper testHelper;
-	public:
+
 		TEST_METHOD_INITIALIZE(ClassInitialize) {
 			testHelper = TestHelper();
 		}

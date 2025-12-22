@@ -15,10 +15,8 @@ using namespace std::string_literals;
 namespace CSAPItest {
 	TEST_CLASS(SystemsTest)
 	{
-	private:
 		TestHelper testHelper;
 
-	public:
 		TEST_METHOD_INITIALIZE(ClassInitialize) {
 			testHelper = TestHelper();
 		}
@@ -30,8 +28,8 @@ namespace CSAPItest {
 		TEST_METHOD(GetSystems) {
 			testHelper.createTestSystem();
 			auto response = testHelper.csapi.getSystemsAPI().getSystems();
-			auto items = response.getItems();
-			Assert::IsTrue(items.size() > 0);
+			auto const& items = response.getItems();
+			Assert::IsFalse(items.empty());
 		}
 
 		TEST_METHOD(GetSubsystems) {
@@ -39,7 +37,7 @@ namespace CSAPItest {
 			testHelper.createTestSubsystem();
 			auto response = testHelper.csapi.getSystemsAPI().getSubsystems(testHelper.getTestSystemId());
 			Assert::IsTrue(response.isSuccessful());
-			Assert::IsTrue(response.getItems().size() > 0);
+			Assert::IsFalse(response.getItems().empty());
 		}
 
 		TEST_METHOD(GetSystemById) {

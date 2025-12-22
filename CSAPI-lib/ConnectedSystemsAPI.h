@@ -5,6 +5,7 @@
 #include "DataStreamsAPI.h"
 #include "ObservationsAPI.h"
 #include "SystemsAPI.h"
+#include "ControlStreamsAPI.h"
 
 namespace ConnectedSystemsAPI {
 	class ConSysAPI {
@@ -14,6 +15,7 @@ namespace ConnectedSystemsAPI {
 		SystemsAPI systemsAPI;
 		DataStreamsAPI dataStreamsAPI;
 		ObservationsAPI observationsAPI;
+		ControlStreamsAPI controlStreamsAPI;
 
 	public:
 		/// <param name="apiRoot">e.g. "localhost:8181/sensorhub/api"</param>
@@ -30,6 +32,7 @@ namespace ConnectedSystemsAPI {
 			systemsAPI = SystemsAPI(apiRoot, authHeader);
 			dataStreamsAPI = DataStreamsAPI(apiRoot, authHeader);
 			observationsAPI = ObservationsAPI(apiRoot, authHeader);
+			controlStreamsAPI = ControlStreamsAPI(apiRoot, authHeader);
 		}
 
 		// Overload to accept C-style string literals to avoid list-initialization narrowing issues
@@ -48,7 +51,8 @@ namespace ConnectedSystemsAPI {
 		const std::string& getAuthHeader() const { return authHeader; }
 		SystemsAPI& getSystemsAPI() { return systemsAPI; }
 		DataStreamsAPI& getDataStreamsAPI() { return dataStreamsAPI; }
-		ObservationsAPI getObservationsAPI() { return observationsAPI; }
+		ObservationsAPI& getObservationsAPI() { return observationsAPI; }
+		ControlStreamsAPI& getControlStreamsAPI() { return controlStreamsAPI; }
 	private:
 		std::string base64_encode(const std::string& in) {
 			static const std::string base64_chars =

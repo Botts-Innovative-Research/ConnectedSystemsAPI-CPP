@@ -15,7 +15,6 @@ using namespace std::string_literals;
 namespace CSAPItest {
 	TEST_CLASS(ObservationsTest)
 	{
-	private:
 		TestHelper testHelper;
 
 		ConnectedSystemsAPI::DataModels::Data::DataBlockMixed createTestDataBlock(const std::string& dataStreamId) {
@@ -41,11 +40,10 @@ namespace CSAPItest {
 		ConnectedSystemsAPI::DataModels::Observation getTestObservation(const std::string& dataStreamId) {
 			auto observationsResponse = testHelper.csapi.getObservationsAPI().getObservationsOfDataStream(dataStreamId);
 			Assert::IsTrue(observationsResponse.isSuccessful());
-			Assert::IsTrue(observationsResponse.getItems().size() > 0);
+			Assert::IsFalse(observationsResponse.getItems().empty());
 			return observationsResponse.getItems().at(0);
 		}
 
-	public:
 		TEST_METHOD_INITIALIZE(ClassInitialize) {
 			testHelper = TestHelper();
 		}
@@ -57,12 +55,6 @@ namespace CSAPItest {
 		TEST_METHOD(GetObservations) {
 			auto response = testHelper.csapi.getObservationsAPI().getObservations();
 			Assert::IsTrue(response.isSuccessful());
-
-			std::cout << "Observations Response: " << response.getResponseBody() << std::endl;
-
-			for (const auto& obs : response.getItems()) {
-				std::cout << "Observation ID: " << obs.toJson().dump(2) << std::endl;
-			}
 		}
 
 		TEST_METHOD(GetObservationsOfDataStream) {
@@ -123,7 +115,7 @@ namespace CSAPItest {
 			// Get the observations to verify
 			auto observationsResponse = testHelper.csapi.getObservationsAPI().getObservationsOfDataStream(dataStreamId);
 			Assert::IsTrue(observationsResponse.isSuccessful());
-			Assert::IsTrue(observationsResponse.getItems().size() > 0);
+			Assert::IsFalse(observationsResponse.getItems().empty());
 			Assert::AreEqual(dataStreamId, observationsResponse.getItems().at(0).getDataStreamId().value_or(""));
 
 			//Verify the result matches

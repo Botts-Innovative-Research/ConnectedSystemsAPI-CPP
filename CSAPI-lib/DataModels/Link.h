@@ -46,6 +46,9 @@ namespace ConnectedSystemsAPI {
 			const std::string& getResourceType() const { return resourceType; }
 			/// <returns>Interface used to access the target resource (RFC 6690).</returns>
 			const std::string& getInterfaceUri() const { return interfaceUri; }
+
+			friend bool operator==(const Link& a, const Link& b);
+			friend bool operator!=(const Link& a, const Link& b);
 		};
 
 		inline void from_json(const nlohmann::json& j, Link& l) {
@@ -92,6 +95,21 @@ namespace ConnectedSystemsAPI {
 			nlohmann::ordered_json j;
 			ConnectedSystemsAPI::DataModels::to_json(j, l);
 			return os << j.dump(2);
+		}
+
+		inline bool operator==(const Link& a, const Link& b) {
+			return a.getHref() == b.getHref() &&
+				a.getRelationType() == b.getRelationType() &&
+				a.getMediaType() == b.getMediaType() &&
+				a.getHrefLanguage() == b.getHrefLanguage() &&
+				a.getTitle() == b.getTitle() &&
+				a.getUid() == b.getUid() &&
+				a.getResourceType() == b.getResourceType() &&
+				a.getInterfaceUri() == b.getInterfaceUri();
+		}
+
+		inline bool operator!=(const Link& a, const Link& b) {
+			return !(a == b);
 		}
 	}
 }

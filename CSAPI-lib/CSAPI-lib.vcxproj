@@ -135,6 +135,8 @@
     <ClInclude Include="APIRequest.h" />
     <ClInclude Include="APIResponse.h" />
     <ClInclude Include="ConnectedSystemsAPI.h" />
+    <ClInclude Include="ControlStreamsAPI.h" />
+    <ClInclude Include="DataModels\CommandSchema.h" />
     <ClInclude Include="DataModels\Component\Boolean.h" />
     <ClInclude Include="DataModels\Component\BooleanBuilder.h" />
     <ClInclude Include="DataModels\Component\Category.h" />
@@ -158,6 +160,8 @@
     <ClInclude Include="DataModels\Component\TimeRange.h" />
     <ClInclude Include="DataModels\Component\UnitOfMeasure.h" />
     <ClInclude Include="DataModels\Component\Vector.h" />
+    <ClInclude Include="DataModels\ControlledProperty.h" />
+    <ClInclude Include="DataModels\ControlStream.h" />
     <ClInclude Include="DataModels\DataStream.h" />
     <ClInclude Include="DataModels\DataStreamBuilder.h" />
     <ClInclude Include="DataModels\Data\DataBlock.h" />

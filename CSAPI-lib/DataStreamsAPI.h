@@ -39,7 +39,8 @@ namespace ConnectedSystemsAPI {
 				.setApiRoot(apiRoot)
 				.setMethod("GET")
 				.setAuthHeader(authHeader)
-				.setResourcePath("/datastreams" + queryString)
+				.setResourcePath("datastreams")
+				.setQueryString(queryString)
 				.build()
 				.execute<DataModels::DataStream>();
 			return response;
@@ -66,7 +67,10 @@ namespace ConnectedSystemsAPI {
 				.setApiRoot(apiRoot)
 				.setMethod("GET")
 				.setAuthHeader(authHeader)
-				.setResourcePath("/systems/" + systemId + "/datastreams" + queryString)
+				.setResourcePath("systems")
+				.setResourceId(systemId)
+				.setSubResourcePath("datastreams")
+				.setQueryString(queryString)
 				.build()
 				.execute<DataModels::DataStream>();
 			return response;
@@ -83,7 +87,9 @@ namespace ConnectedSystemsAPI {
 				.setApiRoot(apiRoot)
 				.setMethod("GET")
 				.setAuthHeader(authHeader)
-				.setResourcePath("/datastreams/" + dataStreamId + queryString)
+				.setResourcePath("datastreams")
+				.setResourceId(dataStreamId)
+				.setQueryString(queryString)
 				.build()
 				.execute<DataModels::DataStream>();
 			return response;
@@ -99,7 +105,9 @@ namespace ConnectedSystemsAPI {
 				.setApiRoot(apiRoot)
 				.setMethod("GET")
 				.setAuthHeader(authHeader)
-				.setResourcePath("/datastreams/" + dataStreamId + "/schema")
+				.setResourcePath("datastreams")
+				.setResourceId(dataStreamId)
+				.setSubResourcePath("schema")
 				.build()
 				.execute<DataModels::ObservationSchema>();
 			return response;
@@ -120,7 +128,9 @@ namespace ConnectedSystemsAPI {
 				.setMethod("POST")
 				.setAuthHeader(authHeader)
 				.addHeader("Content-Type", "application/json")
-				.setResourcePath("/systems/" + systemId + "/datastreams")
+				.setResourcePath("systems")
+				.setResourceId(systemId)
+				.setSubResourcePath("datastreams")
 				.setBody(j.dump())
 				.build()
 				.execute<void>();
@@ -143,7 +153,8 @@ namespace ConnectedSystemsAPI {
 				.setMethod("PUT")
 				.setAuthHeader(authHeader)
 				.addHeader("Content-Type", "application/json")
-				.setResourcePath("/datastreams/" + dataStreamId)
+				.setResourcePath("datastreams")
+				.setResourceId(dataStreamId)
 				.setBody(j.dump())
 				.build()
 				.execute<void>();
@@ -160,7 +171,8 @@ namespace ConnectedSystemsAPI {
 				.setApiRoot(apiRoot)
 				.setMethod("DELETE")
 				.setAuthHeader(authHeader)
-				.setResourcePath("/datastreams/" + dataStreamId)
+				.setResourcePath("datastreams")
+				.setResourceId(dataStreamId)
 				.build()
 				.execute<void>();
 			return response;
@@ -178,7 +190,9 @@ namespace ConnectedSystemsAPI {
 				.setApiRoot(apiRoot)
 				.setMethod("DELETE")
 				.setAuthHeader(authHeader)
-				.setResourcePath("/datastreams/" + dataStreamId + queryString)
+				.setResourcePath("datastreams")
+				.setResourceId(dataStreamId)
+				.setQueryString(queryString)
 				.build()
 				.execute<void>();
 			return response;

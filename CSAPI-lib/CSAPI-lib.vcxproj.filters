@@ -201,5 +201,17 @@
     <ClInclude Include="Query\ObservationsOfDataStreamQuery.h">
       <Filter>Header Files\Query</Filter>
     </ClInclude>
+    <ClInclude Include="ControlStreamsAPI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\ControlStream.h">
+      <Filter>Header Files\DataModels</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\ControlledProperty.h">
+      <Filter>Header Files\DataModels</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\CommandSchema.h">
+      <Filter>Header Files\DataModels</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

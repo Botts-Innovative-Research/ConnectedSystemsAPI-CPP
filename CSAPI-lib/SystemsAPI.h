@@ -39,7 +39,8 @@ namespace ConnectedSystemsAPI {
 				.setApiRoot(apiRoot)
 				.setMethod("GET")
 				.setAuthHeader(authHeader)
-				.setResourcePath("/systems" + queryString)
+				.setResourcePath("systems")
+				.setQueryString(queryString)
 				.build()
 				.execute<DataModels::System>();
 			return response;
@@ -66,7 +67,10 @@ namespace ConnectedSystemsAPI {
 				.setApiRoot(apiRoot)
 				.setMethod("GET")
 				.setAuthHeader(authHeader)
-				.setResourcePath("/systems/" + systemId + "/subsystems" + queryString)
+				.setResourcePath("systems")
+				.setResourceId(systemId)
+				.setSubResourcePath("subsystems")
+				.setQueryString(queryString)
 				.build()
 				.execute<DataModels::System>();
 			return response;
@@ -93,7 +97,9 @@ namespace ConnectedSystemsAPI {
 				.setApiRoot(apiRoot)
 				.setMethod("GET")
 				.setAuthHeader(authHeader)
-				.setResourcePath("/systems/" + systemId + queryString)
+				.setResourcePath("systems")
+				.setResourceId(systemId)
+				.setQueryString(queryString)
 				.build()
 				.execute<DataModels::System>();
 			return response;
@@ -112,7 +118,7 @@ namespace ConnectedSystemsAPI {
 				.setMethod("POST")
 				.setAuthHeader(authHeader)
 				.addHeader("Content-Type", "application/json")
-				.setResourcePath("/systems")
+				.setResourcePath("systems")
 				.setBody(j.dump())
 				.build()
 				.execute<void>();
@@ -133,7 +139,9 @@ namespace ConnectedSystemsAPI {
 				.setMethod("POST")
 				.setAuthHeader(authHeader)
 				.addHeader("Content-Type", "application/json")
-				.setResourcePath("/systems/" + systemId + "/subsystems")
+				.setResourcePath("systems")
+				.setResourceId(systemId)
+				.setSubResourcePath("subsystems")
 				.setBody(j.dump())
 				.build()
 				.execute<void>();
@@ -157,7 +165,8 @@ namespace ConnectedSystemsAPI {
 				.setMethod("PUT")
 				.setAuthHeader(authHeader)
 				.addHeader("Content-Type", "application/json")
-				.setResourcePath("/systems/" + systemId)
+				.setResourcePath("systems")
+				.setResourceId(systemId)
 				.setBody(j.dump())
 				.build()
 				.execute<void>();
@@ -178,7 +187,9 @@ namespace ConnectedSystemsAPI {
 				.setApiRoot(apiRoot)
 				.setMethod("DELETE")
 				.setAuthHeader(authHeader)
-				.setResourcePath("/systems/" + systemId + queryString)
+				.setResourcePath("systems")
+				.setResourceId(systemId)
+				.setQueryString(queryString)
 				.build()
 				.execute<void>();
 			return response;
