@@ -9,13 +9,16 @@
 #include "Query/DataStreamsQuery.h"
 
 namespace ConnectedSystemsAPI {
+	/// <summary>
+	/// API for interacting with data streams in the Connected Systems API.
+	/// </summary>
 	class DataStreamsAPI {
 	private:
 		std::string apiRoot;
 		std::string authHeader;
 
 	public:
-		DataStreamsAPI() {}
+		DataStreamsAPI() = default;
 		DataStreamsAPI(const std::string& apiRoot, const std::string& authHeader)
 			: apiRoot(apiRoot), authHeader(authHeader) {
 		}
@@ -25,7 +28,7 @@ namespace ConnectedSystemsAPI {
 		/// </summary>
 		/// <param name="query">The query string parameters.</param>
 		/// <returns>A response object containing a list of data streams.</returns>
-		APIResponse<DataModels::DataStream> getDataStreams(const Query::DataStreamsQuery& query) {
+		APIResponse<DataModels::DataStream> getDataStreams(const Query::DataStreamsQuery& query) const {
 			return getDataStreams(query.toString());
 		}
 
@@ -34,7 +37,7 @@ namespace ConnectedSystemsAPI {
 		/// </summary>
 		/// <param name="queryString">The query string.</param>
 		/// <returns>A response object containing a list of data streams.</returns>
-		APIResponse<DataModels::DataStream> getDataStreams(std::string queryString = "") {
+		APIResponse<DataModels::DataStream> getDataStreams(const std::string& queryString = "") const {
 			auto response = APIRequest::Builder()
 				.setApiRoot(apiRoot)
 				.setMethod("GET")
@@ -52,7 +55,7 @@ namespace ConnectedSystemsAPI {
 		/// <param name="systemId">The local identifier of a system.</param>
 		/// <param name="query">The query string parameters.</param>
 		/// <returns>A response object containing a list of data streams.</returns>
-		APIResponse<DataModels::DataStream> getDataStreamsOfSystem(const std::string& systemId, const Query::DataStreamsOfSystemQuery& query) {
+		APIResponse<DataModels::DataStream> getDataStreamsOfSystem(const std::string& systemId, const Query::DataStreamsOfSystemQuery& query) const {
 			return getDataStreamsOfSystem(systemId, query.toString());
 		}
 
@@ -62,7 +65,10 @@ namespace ConnectedSystemsAPI {
 		/// <param name="systemId">The local identifier of a system.</param>
 		/// <param name="query">The query string.</param>
 		/// <returns>A response object containing a list of data streams.</returns>
-		APIResponse<DataModels::DataStream> getDataStreamsOfSystem(const std::string& systemId, std::string queryString = "") {
+		APIResponse<DataModels::DataStream> getDataStreamsOfSystem(const std::string& systemId, const std::string& queryString = "") const {
+			if (systemId.empty())
+				return APIResponse<DataModels::DataStream>(400, "Invalid systemId", "", {});
+
 			auto response = APIRequest::Builder()
 				.setApiRoot(apiRoot)
 				.setMethod("GET")
@@ -82,7 +88,10 @@ namespace ConnectedSystemsAPI {
 		/// <param name="dataStreamId">The local identifier of a data stream.</param>
 		/// <param name="queryString">The query string.</param>
 		/// <returns>A response object containing a list of data streams.</returns>
-		APIResponse<DataModels::DataStream> getDataStreamById(const std::string& dataStreamId, std::string queryString = "") {
+		APIResponse<DataModels::DataStream> getDataStreamById(const std::string& dataStreamId, const std::string& queryString = "") const {
+			if (dataStreamId.empty())
+				return APIResponse<DataModels::DataStream>(400, "Invalid dataStreamId", "", {});
+
 			auto response = APIRequest::Builder()
 				.setApiRoot(apiRoot)
 				.setMethod("GET")
@@ -100,7 +109,10 @@ namespace ConnectedSystemsAPI {
 		/// </summary>
 		/// <param name="dataStreamId">The local identifier of a data stream.</param>
 		/// <returns>A response object containing the observation schema.</returns>	
-		APIResponse<DataModels::ObservationSchema> getObservationSchema(const std::string& dataStreamId) {
+		APIResponse<DataModels::ObservationSchema> getObservationSchema(const std::string& dataStreamId) const {
+			if (dataStreamId.empty())
+				return APIResponse<DataModels::ObservationSchema>(400, "Invalid dataStreamId", "", {});
+
 			auto response = APIRequest::Builder()
 				.setApiRoot(apiRoot)
 				.setMethod("GET")
@@ -119,7 +131,10 @@ namespace ConnectedSystemsAPI {
 		/// <param name="systemId">The local identifier of the parent system.</param>
 		/// <param name="dataStream">The data stream to create.</param>
 		/// <returns>A response object indicating success or failure.</returns>
-		APIResponse<void> createDataStream(const std::string& systemId, const DataModels::DataStream& dataStream) {
+		APIResponse<void> createDataStream(const std::string& systemId, const DataModels::DataStream& dataStream) const {
+			if (systemId.empty())
+				return APIResponse<void>(400, "Invalid systemId", "", {});
+
 			nlohmann::ordered_json j;
 			ConnectedSystemsAPI::DataModels::to_json(j, dataStream);
 
@@ -144,7 +159,10 @@ namespace ConnectedSystemsAPI {
 		/// <param name="dataStreamId">The local identifier of the data stream to update.</param>
 		/// <param name="dataStream">The updated data stream.</param>
 		/// <returns>A response object indicating success or failure.</returns>
-		APIResponse<void> updateDataStream(const std::string& dataStreamId, const DataModels::DataStream& dataStream) {
+		APIResponse<void> updateDataStream(const std::string& dataStreamId, const DataModels::DataStream& dataStream) const {
+			if (dataStreamId.empty())
+				return APIResponse<void>(400, "Invalid dataStreamId", "", {});
+
 			nlohmann::ordered_json j;
 			ConnectedSystemsAPI::DataModels::to_json(j, dataStream);
 
@@ -162,30 +180,21 @@ namespace ConnectedSystemsAPI {
 		}
 
 		/// <summary>
-		/// Delete a data stream by its ID.
-		/// </summary>
-		/// <param name="dataStreamId">The local identifier of the data stream to delete.</param>
-		/// <returns>A response object indicating success or failure.</returns>
-		APIResponse<void> deleteDataStream(const std::string& dataStreamId) {
-			auto response = APIRequest::Builder()
-				.setApiRoot(apiRoot)
-				.setMethod("DELETE")
-				.setAuthHeader(authHeader)
-				.setResourcePath("datastreams")
-				.setResourceId(dataStreamId)
-				.build()
-				.execute<void>();
-			return response;
-		}
-
-		/// <summary>
 		/// Delete a data stream by its ID, with an option to delete all associated observations.
 		/// </summary>
 		/// <param name="dataStreamId">The local identifier of the data stream to delete.</param>
-		/// <param name="cascade">If true, all associated observations will also be deleted.</param>
+		/// <param name="cascade">If true, all associated observations will also be deleted.
+		///                       If false, associated observations will be preserved.
+		///                       If undefined, the server's default behavior will be applied (false unless otherwise specified).</param>
 		/// <returns>A response object indicating success or failure.</returns>
-		APIResponse<void> deleteDataStream(const std::string& dataStreamId, bool cascade) {
-			std::string queryString = cascade ? "?cascade=true" : "";
+		APIResponse<void> deleteDataStream(const std::string& dataStreamId, std::optional<bool> cascade = std::nullopt) const {
+			if (dataStreamId.empty())
+				return APIResponse<void>(400, "Invalid dataStreamId", "", {});
+
+			std::string queryString;
+			if (cascade.has_value())
+				queryString = cascade.value() ? "?cascade=true" : "?cascade=false";
+
 			auto response = APIRequest::Builder()
 				.setApiRoot(apiRoot)
 				.setMethod("DELETE")

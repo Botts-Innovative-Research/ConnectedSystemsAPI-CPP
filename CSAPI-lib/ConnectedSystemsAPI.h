@@ -8,6 +8,9 @@
 #include "ControlStreamsAPI.h"
 
 namespace ConnectedSystemsAPI {
+	/// <summary>
+	/// Main API class for interacting with the Connected Systems API on a server.
+	/// </summary>
 	class ConSysAPI {
 	private:
 		std::string apiRoot;
@@ -18,33 +21,40 @@ namespace ConnectedSystemsAPI {
 		ControlStreamsAPI controlStreamsAPI;
 
 	public:
-		/// <param name="apiRoot">e.g. "localhost:8181/sensorhub/api"</param>
+		/// <summary>
+		/// Constructs a ConnectedSystemsAPI instance, used to access an API endpoint on a server.
+		/// </summary>
+		/// <param name="apiRoot">e.g. "localhost:8181/sensorhub/api". If no protocol is specified, defaults to https://</param>
 		/// <param name="authenticationToken">If isBasicAuth is true, this should be a base64-encoded "username:password" string. If isBasicAuth is false, this should be a bearer token.</param>
 		/// <param name="isBasicAuth">If true, use Basic authentication with the provided base64-encoded "username:password" string. If false, use Bearer token authentication.</param>
 		ConSysAPI(const std::string& apiRoot, const std::string& authenticationToken, bool isBasicAuth)
-			: apiRoot(apiRoot) {
-			if (isBasicAuth) {
-				authHeader = "Authorization: Basic " + authenticationToken;
-			}
-			else {
-				authHeader = "Authorization: Bearer " + authenticationToken;
-			}
-			systemsAPI = SystemsAPI(apiRoot, authHeader);
-			dataStreamsAPI = DataStreamsAPI(apiRoot, authHeader);
-			observationsAPI = ObservationsAPI(apiRoot, authHeader);
-			controlStreamsAPI = ControlStreamsAPI(apiRoot, authHeader);
+			: apiRoot(apiRoot),
+			authHeader(isBasicAuth ? std::string("Authorization: Basic ") + authenticationToken : std::string("Authorization: Bearer ") + authenticationToken),
+			systemsAPI(this->apiRoot, authHeader),
+			dataStreamsAPI(this->apiRoot, authHeader),
+			observationsAPI(this->apiRoot, authHeader),
+			controlStreamsAPI(this->apiRoot, authHeader) {
 		}
 
-		// Overload to accept C-style string literals to avoid list-initialization narrowing issues
-		ConSysAPI(const char* apiRootC, const char* usernameC, const char* passwordC)
-			: ConSysAPI(std::string(apiRootC), std::string(usernameC), std::string(passwordC)) {
-		}
-
-		/// <param name="apiRoot">e.g. "localhost:8181/sensorhub/api"</param>
+		/// <summary>
+		/// Constructs a ConnectedSystemsAPI instance, used to access an API endpoint on a server.
+		/// </summary>
+		/// <param name="apiRoot">e.g. "localhost:8181/sensorhub/api". If no protocol is specified, defaults to https://</param>
 		/// <param name="username">Username for Basic authentication</param>
 		/// <param name="password">Password for Basic authentication</param>
 		ConSysAPI(const std::string& apiRoot, const std::string& username, const std::string& password)
 			: ConSysAPI(apiRoot, base64_encode(username + ":" + password), true) {
+		}
+
+		// Overload to accept C-style string literals to avoid list-initialization narrowing issues
+		/// <summary>
+		/// Constructs a ConnectedSystemsAPI instance, used to access an API endpoint on a server.
+		/// </summary>
+		/// <param name="apiRoot">e.g. "localhost:8181/sensorhub/api". If no protocol is specified, defaults to https://</param>
+		/// <param name="username">Username for Basic authentication</param>
+		/// <param name="password">Password for Basic authentication</param>
+		ConSysAPI(const char* apiRootC, const char* usernameC, const char* passwordC)
+			: ConSysAPI(std::string(apiRootC), std::string(usernameC), std::string(passwordC)) {
 		}
 
 		const std::string& getApiRoot() const { return apiRoot; }
@@ -54,14 +64,18 @@ namespace ConnectedSystemsAPI {
 		ObservationsAPI& getObservationsAPI() { return observationsAPI; }
 		ControlStreamsAPI& getControlStreamsAPI() { return controlStreamsAPI; }
 	private:
-		std::string base64_encode(const std::string& in) {
-			static const std::string base64_chars =
+		static std::string base64_encode(const std::string& in) {
+			static const char base64_chars[] =
 				"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 				"abcdefghijklmnopqrstuvwxyz"
 				"0123456789+/";
 
 			std::string out;
-			int val = 0, valb = -6;
+			out.reserve(((in.size() + 2) / 3) * 4);
+
+			unsigned int val = 0;
+			int valb = -6;
+
 			for (unsigned char c : in) {
 				val = (val << 8) + c;
 				valb += 8;
@@ -70,8 +84,13 @@ namespace ConnectedSystemsAPI {
 					valb -= 6;
 				}
 			}
-			if (valb > -6) out.push_back(base64_chars[((val << 8) >> (valb + 8)) & 0x3F]);
-			while (out.size() % 4) out.push_back('=');
+
+			if (valb > -6)
+				out.push_back(base64_chars[((val << 8) >> (valb + 8)) & 0x3F]);
+
+			while (out.size() % 4)
+				out.push_back('=');
+
 			return out;
 		}
 	};

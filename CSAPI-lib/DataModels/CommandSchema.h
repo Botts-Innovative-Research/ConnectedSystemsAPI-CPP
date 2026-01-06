@@ -5,7 +5,6 @@
 
 #include "Component/DataComponent.h"
 #include "Component/DataComponentRegistry.h"
-#include "Component/DataRecord.h"
 
 namespace ConnectedSystemsAPI {
 	namespace DataModels {
@@ -21,7 +20,7 @@ namespace ConnectedSystemsAPI {
 			CommandSchema(const std::string& commandFormat,
 				std::unique_ptr<Component::DataComponent> parametersSchema,
 				std::unique_ptr<Component::DataComponent> resultSchema)
-				: commandFormat(commandFormat), resultSchema(std::move(resultSchema)) {
+				: commandFormat(commandFormat), parametersSchema(std::move(parametersSchema)), resultSchema(std::move(resultSchema)) {
 			}
 
 			CommandSchema(const CommandSchema&) = delete;
