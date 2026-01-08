@@ -213,5 +213,11 @@
     <ClInclude Include="DataModels\CommandSchema.h">
       <Filter>Header Files\DataModels</Filter>
     </ClInclude>
+    <ClInclude Include="DataModels\ValidationException.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\ControlStreamBuilder.h">
+      <Filter>Header Files\DataModels</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

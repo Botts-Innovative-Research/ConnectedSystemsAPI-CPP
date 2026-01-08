@@ -40,6 +40,7 @@ namespace ConnectedSystemsAPI {
 
 		public:
 			DataStream() = default;
+
 			DataStream(const std::optional<std::string>& id,
 				const std::optional<std::string>& name,
 				const std::optional<std::string>& description,
@@ -72,6 +73,62 @@ namespace ConnectedSystemsAPI {
 				schema(std::move(schema))
 			{
 			}
+
+			DataStream(const DataStream& other)
+				: id(other.id), name(other.name), description(other.description),
+				validTime(other.validTime), formats(other.formats),
+				systemLink(other.systemLink), outputName(other.outputName),
+				procedureLink(other.procedureLink), deploymentLink(other.deploymentLink),
+				featureOfInterestLink(other.featureOfInterestLink),
+				samplingFeatureLink(other.samplingFeatureLink),
+				observedProperties(other.observedProperties),
+				phenomenonTime(other.phenomenonTime),
+				phenomenonTimeInterval(other.phenomenonTimeInterval),
+				resultTime(other.resultTime), resultTimeInterval(other.resultTimeInterval),
+				dataStreamType(other.dataStreamType), resultType(other.resultType),
+				live(other.live), links(other.links)
+			{
+				if (other.schema) {
+					schema = std::make_unique<ObservationSchema>(*other.schema);
+				}
+			}
+
+			DataStream(DataStream&&) noexcept = default;
+
+			DataStream& operator=(const DataStream& other) {
+				if (this != &other) {
+					id = other.id;
+					name = other.name;
+					description = other.description;
+					validTime = other.validTime;
+					formats = other.formats;
+					systemLink = other.systemLink;
+					outputName = other.outputName;
+					procedureLink = other.procedureLink;
+					deploymentLink = other.deploymentLink;
+					featureOfInterestLink = other.featureOfInterestLink;
+					samplingFeatureLink = other.samplingFeatureLink;
+					observedProperties = other.observedProperties;
+					phenomenonTime = other.phenomenonTime;
+					phenomenonTimeInterval = other.phenomenonTimeInterval;
+					resultTime = other.resultTime;
+					resultTimeInterval = other.resultTimeInterval;
+					dataStreamType = other.dataStreamType;
+					resultType = other.resultType;
+					live = other.live;
+					links = other.links;
+
+					if (other.schema) {
+						schema = std::make_unique<ObservationSchema>(*other.schema);
+					}
+					else {
+						schema.reset();
+					}
+				}
+				return *this;
+			}
+
+			DataStream& operator=(DataStream&&) noexcept = default;
 
 			/// <summary>
 			/// Local resource ID. If set on creation, the server may ignore it.

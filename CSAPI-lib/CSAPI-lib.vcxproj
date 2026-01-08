@@ -162,6 +162,7 @@
     <ClInclude Include="DataModels\Component\Vector.h" />
     <ClInclude Include="DataModels\ControlledProperty.h" />
     <ClInclude Include="DataModels\ControlStream.h" />
+    <ClInclude Include="DataModels\ControlStreamBuilder.h" />
     <ClInclude Include="DataModels\DataStream.h" />
     <ClInclude Include="DataModels\DataStreamBuilder.h" />
     <ClInclude Include="DataModels\Data\DataBlock.h" />
@@ -180,6 +181,7 @@
     <ClInclude Include="DataModels\SystemBuilder.h" />
     <ClInclude Include="DataModels\TimeExtent.h" />
     <ClInclude Include="DataModels\TimeInstant.h" />
+    <ClInclude Include="DataModels\ValidationException.h" />
     <ClInclude Include="DataStreamsAPI.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="ObservationsAPI.h" />

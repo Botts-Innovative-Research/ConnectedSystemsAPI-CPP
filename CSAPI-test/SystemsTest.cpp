@@ -61,12 +61,12 @@ namespace CSAPItest {
 			testHelper.createTestSystem();
 
 			auto system = ConnectedSystemsAPI::DataModels::SystemBuilder()
-				.setProperties(ConnectedSystemsAPI::DataModels::PropertiesBuilder()
-					.setFeatureType("sosa:Sensor"s)
-					.setUid("test-system-001"s)
-					.setName("Test System 001 - Updated"s)
-					.setDescription("This is a test system created by CSAPI-test - Updated"s)
-					.setAssetType("Equipment"s)
+				.withProperties(ConnectedSystemsAPI::DataModels::PropertiesBuilder()
+					.withFeatureType("sosa:Sensor"s)
+					.withUid("test-system-001"s)
+					.withName("Test System 001 - Updated"s)
+					.withDescription("This is a test system created by CSAPI-test - Updated"s)
+					.withAssetType("Equipment"s)
 					.build())
 				.build();
 

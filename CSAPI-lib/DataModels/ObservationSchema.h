@@ -23,11 +23,36 @@ namespace ConnectedSystemsAPI {
 				const std::optional<Component::DataRecord>& parametersSchema,
 				std::unique_ptr<Component::DataComponent> resultSchema,
 				const std::optional<Link>& resultLink)
-				: observationFormat(observationFormat), resultSchema(std::move(resultSchema)), resultLink(resultLink) {
+				: observationFormat(observationFormat), parametersSchema(parametersSchema),
+				  resultSchema(std::move(resultSchema)), resultLink(resultLink) {
 			}
 
-			ObservationSchema(const ObservationSchema&) = delete;
-			ObservationSchema& operator=(const ObservationSchema&) = delete;
+			ObservationSchema(const ObservationSchema& other)
+				: observationFormat(other.observationFormat),
+				  parametersSchema(other.parametersSchema),
+				  resultLink(other.resultLink) {
+				if (other.resultSchema) {
+					nlohmann::ordered_json j = other.resultSchema->toJson();
+					resultSchema = Component::DataComponentRegistry::createDataComponent(j);
+				}
+			}
+
+			ObservationSchema& operator=(const ObservationSchema& other) {
+				if (this != &other) {
+					observationFormat = other.observationFormat;
+					parametersSchema = other.parametersSchema;
+					resultLink = other.resultLink;
+
+					if (other.resultSchema) {
+						nlohmann::ordered_json j = other.resultSchema->toJson();
+						resultSchema = Component::DataComponentRegistry::createDataComponent(j);
+					} else {
+						resultSchema.reset();
+					}
+				}
+				return *this;
+			}
+
 			ObservationSchema(ObservationSchema&&) noexcept = default;
 			ObservationSchema& operator=(ObservationSchema&&) noexcept = default;
 

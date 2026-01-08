@@ -24,12 +24,12 @@ namespace CSAPItest {
 
 		std::string createTestSystem() {
 			auto system = ConnectedSystemsAPI::DataModels::SystemBuilder()
-				.setProperties(ConnectedSystemsAPI::DataModels::PropertiesBuilder()
-					.setFeatureType("osa:Sensor")
-					.setUid(TEST_SYSTEM_UID)
-					.setName("Test System 001")
-					.setDescription("This is a test system created by CSAPI-test")
-					.setAssetType("Equipment")
+				.withProperties(ConnectedSystemsAPI::DataModels::PropertiesBuilder()
+					.withFeatureType("osa:Sensor")
+					.withUid(TEST_SYSTEM_UID)
+					.withName("Test System 001")
+					.withDescription("This is a test system created by CSAPI-test")
+					.withAssetType("Equipment")
 					.build())
 				.build();
 			csapi.getSystemsAPI().createSystem(system);
@@ -39,11 +39,11 @@ namespace CSAPItest {
 		std::string createTestSubsystem() {
 			auto parentSystemId = getTestSystemId();
 			auto subsystem = ConnectedSystemsAPI::DataModels::SystemBuilder()
-				.setProperties(ConnectedSystemsAPI::DataModels::PropertiesBuilder()
-					.setFeatureType("osa:Sensor")
-					.setUid("test-subsystem-001")
-					.setName("Test Subsystem 001")
-					.setDescription("This is a test subsystem created by CSAPI-test")
+				.withProperties(ConnectedSystemsAPI::DataModels::PropertiesBuilder()
+					.withFeatureType("osa:Sensor")
+					.withUid("test-subsystem-001")
+					.withName("Test Subsystem 001")
+					.withDescription("This is a test subsystem created by CSAPI-test")
 					.build())
 				.build();
 			csapi.getSystemsAPI().createSubsystem(parentSystemId, subsystem);
