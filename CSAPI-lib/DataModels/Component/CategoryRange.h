@@ -8,87 +8,83 @@
 #include "SimpleComponent.h"
 #include "Util/JsonUtils.h"
 
-namespace ConnectedSystemsAPI {
-	namespace DataModels {
-		namespace Component {
-			class CategoryRange;
-			void to_json(nlohmann::ordered_json& j, const CategoryRange& q);
+namespace ConnectedSystemsAPI::DataModels::Component {
+	class CategoryRange;
+	void to_json(nlohmann::ordered_json& j, const CategoryRange& q);
 
-			class CategoryRange : public SimpleComponent {
-			private:
-				std::optional<std::vector<std::string>> value;
-				std::optional<std::string> codeSpace;
+	class CategoryRange : public SimpleComponent {
+	private:
+		std::optional<std::vector<std::string>> value;
+		std::optional<std::string> codeSpace;
 
-			public:
-				CategoryRange() = default;
-				CategoryRange(const CategoryRange&) = default;
-				CategoryRange(CategoryRange&&) noexcept = default;
-				CategoryRange& operator=(const CategoryRange&) = default;
-				CategoryRange& operator=(CategoryRange&&) noexcept = default;
-				~CategoryRange() override = default;
+	public:
+		CategoryRange() = default;
+		CategoryRange(const CategoryRange&) = default;
+		CategoryRange(CategoryRange&&) noexcept = default;
+		CategoryRange& operator=(const CategoryRange&) = default;
+		CategoryRange& operator=(CategoryRange&&) noexcept = default;
+		~CategoryRange() override = default;
 
-				void validate() const override {
-					SimpleComponent::validate();
-				}
-
-				nlohmann::ordered_json toJson() const override {
-					nlohmann::ordered_json j;
-					to_json(j, *this);
-					return j;
-				}
-
-				/// <summary>
-				/// Inline value(s) for the component.
-				/// This property is optional to enable structure to act as a schema for values provided separately (e.g., in a datastream)
-				/// </summary>
-				const std::optional<std::vector<std::string>>& getValue() const noexcept { return value; }
-				void setValue(std::optional<std::vector<std::string>> v) noexcept { value = std::move(v); }
-				void setValue(std::vector<std::string> v) noexcept { value = std::move(v); }
-				void setValue(std::initializer_list<std::string> il) { value = std::vector<std::string>(il); }
-				bool hasValue() const noexcept { return value.has_value(); }
-				void clearValue() noexcept { value = std::nullopt; }
-				void addValue(const std::string& v) {
-					if (!value) value = std::vector<std::string>{};
-					value->push_back(v);
-				}
-				void addValue(std::string&& v) {
-					if (!value) value = std::vector<std::string>{};
-					value->push_back(std::move(v));
-				}
-
-				/// <summary>
-				/// Name of the dictionary where the possible values for this component are listed and defined.
-				/// </summary>
-				const std::optional<std::string>& getCodeSpace() const noexcept { return codeSpace; }
-				void setCodeSpace(std::optional<std::string> cs) noexcept { codeSpace = std::move(cs); }
-				void setCodeSpace(std::string cs) { codeSpace = std::move(cs); }
-				bool hasCodeSpace() const noexcept { return codeSpace.has_value(); }
-				void clearCodeSpace() noexcept { codeSpace = std::nullopt; }
-			};
-
-			inline DataComponent::Registrar<CategoryRange> registerCategoryRange{ "CategoryRange" };
-			inline bool operator==(const CategoryRange& a, const CategoryRange& b) { return a.toJson() == b.toJson(); }
-			inline bool operator!=(const CategoryRange& a, const CategoryRange& b) { return !(a == b); }
-
-			inline void from_json(const nlohmann::json& j, CategoryRange& v) {
-				from_json(j, static_cast<SimpleComponent&>(v));
-
-				v.setValue(ConnectedSystemsAPI::JsonUtils::tryParseStringArray(j, "value"));
-				v.setCodeSpace(ConnectedSystemsAPI::JsonUtils::tryParseString(j, "codeSpace"));
-			}
-
-			inline void to_json(nlohmann::ordered_json& j, const CategoryRange& v) {
-				to_json(j, static_cast<const SimpleComponent&>(v));
-
-				if (v.getValue()) j["value"] = v.getValue().value();
-				if (v.getCodeSpace()) j["codeSpace"] = v.getCodeSpace().value();
-			}
-
-			inline std::ostream& operator<<(std::ostream& os, const CategoryRange& v) {
-				nlohmann::ordered_json j;
-				to_json(j, v);
-				return os << j.dump(2);
-			}
+		void validate() const override {
+			SimpleComponent::validate();
 		}
+
+		nlohmann::ordered_json toJson() const override {
+			nlohmann::ordered_json j;
+			to_json(j, *this);
+			return j;
+		}
+
+		/// <summary>
+		/// Inline value(s) for the component.
+		/// This property is optional to enable structure to act as a schema for values provided separately (e.g., in a datastream)
+		/// </summary>
+		const std::optional<std::vector<std::string>>& getValue() const noexcept { return value; }
+		void setValue(std::optional<std::vector<std::string>> v) noexcept { value = std::move(v); }
+		void setValue(std::vector<std::string> v) noexcept { value = std::move(v); }
+		void setValue(std::initializer_list<std::string> il) { value = std::vector<std::string>(il); }
+		bool hasValue() const noexcept { return value.has_value(); }
+		void clearValue() noexcept { value = std::nullopt; }
+		void addValue(const std::string& v) {
+			if (!value) value = std::vector<std::string>{};
+			value->push_back(v);
+		}
+		void addValue(std::string&& v) {
+			if (!value) value = std::vector<std::string>{};
+			value->push_back(std::move(v));
+		}
+
+		/// <summary>
+		/// Name of the dictionary where the possible values for this component are listed and defined.
+		/// </summary>
+		const std::optional<std::string>& getCodeSpace() const noexcept { return codeSpace; }
+		void setCodeSpace(std::optional<std::string> cs) noexcept { codeSpace = std::move(cs); }
+		void setCodeSpace(std::string cs) { codeSpace = std::move(cs); }
+		bool hasCodeSpace() const noexcept { return codeSpace.has_value(); }
+		void clearCodeSpace() noexcept { codeSpace = std::nullopt; }
+	};
+
+	inline DataComponent::Registrar<CategoryRange> registerCategoryRange{ "CategoryRange" };
+	inline bool operator==(const CategoryRange& a, const CategoryRange& b) { return a.toJson() == b.toJson(); }
+	inline bool operator!=(const CategoryRange& a, const CategoryRange& b) { return !(a == b); }
+
+	inline void from_json(const nlohmann::json& j, CategoryRange& v) {
+		from_json(j, static_cast<SimpleComponent&>(v));
+
+		v.setValue(ConnectedSystemsAPI::JsonUtils::tryParseStringArray(j, "value"));
+		v.setCodeSpace(ConnectedSystemsAPI::JsonUtils::tryParseString(j, "codeSpace"));
+	}
+
+	inline void to_json(nlohmann::ordered_json& j, const CategoryRange& v) {
+		to_json(j, static_cast<const SimpleComponent&>(v));
+
+		if (v.getValue()) j["value"] = v.getValue().value();
+		if (v.getCodeSpace()) j["codeSpace"] = v.getCodeSpace().value();
+	}
+
+	inline std::ostream& operator<<(std::ostream& os, const CategoryRange& v) {
+		nlohmann::ordered_json j;
+		to_json(j, v);
+		return os << j.dump(2);
 	}
 }

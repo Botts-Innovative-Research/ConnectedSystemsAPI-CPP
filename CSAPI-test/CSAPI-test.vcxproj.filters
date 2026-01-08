@@ -39,9 +39,6 @@
     <ClCompile Include="UnitTests\ConnectedSystemsAPITest.cpp">
       <Filter>UnitTests</Filter>
     </ClCompile>
-    <ClCompile Include="UnitTests\SystemsAPITest.cpp">
-      <Filter>UnitTests</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">

@@ -8,78 +8,74 @@
 #include "UnitOfMeasure.h"
 #include "Util/JsonUtils.h"
 
-namespace ConnectedSystemsAPI {
-	namespace DataModels {
-		namespace Component {
-			class Quantity;
-			void to_json(nlohmann::ordered_json& j, const Quantity& q);
+namespace ConnectedSystemsAPI::DataModels::Component {
+	class Quantity;
+	void to_json(nlohmann::ordered_json& j, const Quantity& q);
 
-			class Quantity : public ScalarComponent {
-			private:
-				std::optional<double> value;
-				UnitOfMeasure unitOfMeasure;
+	class Quantity : public ScalarComponent {
+	private:
+		std::optional<double> value;
+		UnitOfMeasure unitOfMeasure;
 
-			public:
-				Quantity() = default;
-				Quantity(const Quantity&) = default;
-				Quantity(Quantity&&) noexcept = default;
-				Quantity& operator=(const Quantity&) = default;
-				Quantity& operator=(Quantity&&) noexcept = default;
-				~Quantity() override = default;
+	public:
+		Quantity() = default;
+		Quantity(const Quantity&) = default;
+		Quantity(Quantity&&) noexcept = default;
+		Quantity& operator=(const Quantity&) = default;
+		Quantity& operator=(Quantity&&) noexcept = default;
+		~Quantity() override = default;
 
-				void validate() const override {
-					ScalarComponent::validate();
-					unitOfMeasure.validate();
-				}
-
-				nlohmann::ordered_json toJson() const override {
-					nlohmann::ordered_json j;
-					to_json(j, *this);
-					return j;
-				}
-
-				/// <summary>
-				/// Inline value(s) for the component.
-				/// This property is optional to enable structure to act as a schema for values provided separately (e.g., in a datastream)
-				/// </summary>
-				const std::optional<double>& getValue() const noexcept { return value; }
-				void setValue(const std::optional<double>& v) noexcept { value = v; }
-				void setValue(std::optional<double>&& v) noexcept { value = std::move(v); }
-				void setValue(double v) noexcept { value = v; }
-				bool hasValue() const noexcept { return value.has_value(); }
-				void clearValue() noexcept { value.reset(); }
-
-				/// <summary>
-				/// Unit of measure used to express the value of this data component.
-				/// </summary>
-				const UnitOfMeasure& getUnitOfMeasure() const noexcept { return unitOfMeasure; }
-				void setUnitOfMeasure(const UnitOfMeasure& uom) { unitOfMeasure = uom; }
-				void setUnitOfMeasure(UnitOfMeasure&& uom) noexcept { unitOfMeasure = std::move(uom); }
-			};
-
-			inline DataComponent::Registrar<Quantity> registerQuantity{ "Quantity" };
-			inline bool operator==(const Quantity& a, const Quantity& b) { return a.toJson() == b.toJson(); }
-			inline bool operator!=(const Quantity& a, const Quantity& b) { return !(a == b); }
-
-			inline void from_json(const nlohmann::json& j, Quantity& v) {
-				from_json(j, static_cast<ScalarComponent&>(v));
-
-				v.setValue(ConnectedSystemsAPI::JsonUtils::tryParseDouble(j, "value"));
-				v.setUnitOfMeasure(j.at("uom").get<UnitOfMeasure>());
-			}
-
-			inline void to_json(nlohmann::ordered_json& j, const Quantity& v) {
-				to_json(j, static_cast<const ScalarComponent&>(v));
-
-				if (v.getValue()) j["value"] = v.getValue().value();
-				j["uom"] = v.getUnitOfMeasure();
-			}
-
-			inline std::ostream& operator<<(std::ostream& os, const Quantity& v) {
-				nlohmann::ordered_json j;
-				to_json(j, v);
-				return os << j.dump(2);
-			}
+		void validate() const override {
+			ScalarComponent::validate();
+			unitOfMeasure.validate();
 		}
+
+		nlohmann::ordered_json toJson() const override {
+			nlohmann::ordered_json j;
+			to_json(j, *this);
+			return j;
+		}
+
+		/// <summary>
+		/// Inline value(s) for the component.
+		/// This property is optional to enable structure to act as a schema for values provided separately (e.g., in a datastream)
+		/// </summary>
+		const std::optional<double>& getValue() const noexcept { return value; }
+		void setValue(const std::optional<double>& v) noexcept { value = v; }
+		void setValue(std::optional<double>&& v) noexcept { value = std::move(v); }
+		void setValue(double v) noexcept { value = v; }
+		bool hasValue() const noexcept { return value.has_value(); }
+		void clearValue() noexcept { value.reset(); }
+
+		/// <summary>
+		/// Unit of measure used to express the value of this data component.
+		/// </summary>
+		const UnitOfMeasure& getUnitOfMeasure() const noexcept { return unitOfMeasure; }
+		void setUnitOfMeasure(const UnitOfMeasure& uom) { unitOfMeasure = uom; }
+		void setUnitOfMeasure(UnitOfMeasure&& uom) noexcept { unitOfMeasure = std::move(uom); }
+	};
+
+	inline DataComponent::Registrar<Quantity> registerQuantity{ "Quantity" };
+	inline bool operator==(const Quantity& a, const Quantity& b) { return a.toJson() == b.toJson(); }
+	inline bool operator!=(const Quantity& a, const Quantity& b) { return !(a == b); }
+
+	inline void from_json(const nlohmann::json& j, Quantity& v) {
+		from_json(j, static_cast<ScalarComponent&>(v));
+
+		v.setValue(ConnectedSystemsAPI::JsonUtils::tryParseDouble(j, "value"));
+		v.setUnitOfMeasure(j.at("uom").get<UnitOfMeasure>());
+	}
+
+	inline void to_json(nlohmann::ordered_json& j, const Quantity& v) {
+		to_json(j, static_cast<const ScalarComponent&>(v));
+
+		if (v.getValue()) j["value"] = v.getValue().value();
+		j["uom"] = v.getUnitOfMeasure();
+	}
+
+	inline std::ostream& operator<<(std::ostream& os, const Quantity& v) {
+		nlohmann::ordered_json j;
+		to_json(j, v);
+		return os << j.dump(2);
 	}
 }

@@ -8,79 +8,75 @@
 #include "NilValue.h"
 #include "Util/JsonUtils.h"
 
-namespace ConnectedSystemsAPI {
-	namespace DataModels {
-		namespace Component {
-			class SimpleComponent : public DataComponent {
-			private:
-				std::optional<std::string> referenceFrame;
-				std::optional<std::string> axisId;
-				std::optional<std::vector<NilValue>> nilValues;
-				// Todo: constraint
+namespace ConnectedSystemsAPI::DataModels::Component {
+	class SimpleComponent : public DataComponent {
+	private:
+		std::optional<std::string> referenceFrame;
+		std::optional<std::string> axisId;
+		std::optional<std::vector<NilValue>> nilValues;
+		// Todo: constraint
 
-			public:
-				SimpleComponent() = default;
+	public:
+		SimpleComponent() = default;
 
-				void validate() const override {
-					DataComponent::validate();
+		void validate() const override {
+			DataComponent::validate();
 
-					if (nilValues) {
-						for (const auto& nv : nilValues.value()) {
-							nv.validate();
-						}
-					}
+			if (nilValues) {
+				for (const auto& nv : nilValues.value()) {
+					nv.validate();
 				}
-
-				/// <summary>
-				/// Frame of reference (usually temporal or spatial) with respect to which the value of the component is expressed.
-				/// A reference frame anchors a value to a real world datum.
-				/// </summary>
-				const std::optional<std::string> getReferenceFrame() const noexcept { return referenceFrame; }
-				void setReferenceFrame(const std::optional<std::string> referenceFrame) { this->referenceFrame = referenceFrame; }
-				void clearReferenceFrame() noexcept { referenceFrame.reset(); }
-
-				/// <summary>
-				/// Specifies the reference axis (refer to CRS axisID).
-				/// The reference frame URI should also be specified unless it is inherited from parent Vector.
-				/// </summary>
-				const std::optional<std::string> getAxisId() const noexcept { return axisId; }
-				void setAxisId(const std::optional<std::string> axisId) { this->axisId = axisId; }
-				void clearAxisId() noexcept { axisId.reset(); }
-
-				/// <summary>
-				/// Defines reserved values with special meaning (e.g., missing, out-of-range, etc.)
-				/// </summary>		
-				const std::optional<std::vector<NilValue>>& getNilValues() const noexcept { return nilValues; }
-				void setNilValues(const std::optional<std::vector<NilValue>>& nilValues) { this->nilValues = nilValues; }
-				void setNilValues(std::optional<std::vector<NilValue>>&& nilValues) noexcept { this->nilValues = std::move(nilValues); }
-				void clearNilValues() noexcept { nilValues.reset(); }
-			};
-
-			inline void from_json(const nlohmann::json& j, SimpleComponent& v) {
-				from_json(j, static_cast<DataComponent&>(v));
-
-				v.setReferenceFrame(ConnectedSystemsAPI::JsonUtils::tryParseString(j, "refFrame"));
-				v.setAxisId(ConnectedSystemsAPI::JsonUtils::tryParseString(j, "axisID"));
-
-				if (j.contains("nilValues") && j["nilValues"].is_array())
-					v.setNilValues(j.at("nilValues").get<std::vector<NilValue>>());
-				else
-					v.setNilValues(std::nullopt);
-			}
-
-			inline void to_json(nlohmann::ordered_json& j, const SimpleComponent& s) {
-				to_json(j, static_cast<const DataComponent&>(s));
-
-				if (s.getReferenceFrame()) j["refFrame"] = s.getReferenceFrame();
-				if (s.getAxisId()) j["axisID"] = s.getAxisId();
-				if (s.getNilValues()) j["nilValues"] = s.getNilValues().value();
-			}
-
-			inline std::ostream& operator<<(std::ostream& os, const SimpleComponent& s) {
-				nlohmann::ordered_json j;
-				to_json(j, s);
-				return os << j.dump(2);
 			}
 		}
+
+		/// <summary>
+		/// Frame of reference (usually temporal or spatial) with respect to which the value of the component is expressed.
+		/// A reference frame anchors a value to a real world datum.
+		/// </summary>
+		const std::optional<std::string> getReferenceFrame() const noexcept { return referenceFrame; }
+		void setReferenceFrame(const std::optional<std::string> referenceFrame) { this->referenceFrame = referenceFrame; }
+		void clearReferenceFrame() noexcept { referenceFrame.reset(); }
+
+		/// <summary>
+		/// Specifies the reference axis (refer to CRS axisID).
+		/// The reference frame URI should also be specified unless it is inherited from parent Vector.
+		/// </summary>
+		const std::optional<std::string> getAxisId() const noexcept { return axisId; }
+		void setAxisId(const std::optional<std::string> axisId) { this->axisId = axisId; }
+		void clearAxisId() noexcept { axisId.reset(); }
+
+		/// <summary>
+		/// Defines reserved values with special meaning (e.g., missing, out-of-range, etc.)
+		/// </summary>		
+		const std::optional<std::vector<NilValue>>& getNilValues() const noexcept { return nilValues; }
+		void setNilValues(const std::optional<std::vector<NilValue>>& nilValues) { this->nilValues = nilValues; }
+		void setNilValues(std::optional<std::vector<NilValue>>&& nilValues) noexcept { this->nilValues = std::move(nilValues); }
+		void clearNilValues() noexcept { nilValues.reset(); }
+	};
+
+	inline void from_json(const nlohmann::json& j, SimpleComponent& v) {
+		from_json(j, static_cast<DataComponent&>(v));
+
+		v.setReferenceFrame(ConnectedSystemsAPI::JsonUtils::tryParseString(j, "refFrame"));
+		v.setAxisId(ConnectedSystemsAPI::JsonUtils::tryParseString(j, "axisID"));
+
+		if (j.contains("nilValues") && j["nilValues"].is_array())
+			v.setNilValues(j.at("nilValues").get<std::vector<NilValue>>());
+		else
+			v.setNilValues(std::nullopt);
+	}
+
+	inline void to_json(nlohmann::ordered_json& j, const SimpleComponent& s) {
+		to_json(j, static_cast<const DataComponent&>(s));
+
+		if (s.getReferenceFrame()) j["refFrame"] = s.getReferenceFrame();
+		if (s.getAxisId()) j["axisID"] = s.getAxisId();
+		if (s.getNilValues()) j["nilValues"] = s.getNilValues().value();
+	}
+
+	inline std::ostream& operator<<(std::ostream& os, const SimpleComponent& s) {
+		nlohmann::ordered_json j;
+		to_json(j, s);
+		return os << j.dump(2);
 	}
 }
