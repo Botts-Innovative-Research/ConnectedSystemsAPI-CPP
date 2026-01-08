@@ -14,7 +14,7 @@ namespace ConnectedSystemsAPI {
 		std::string authHeader;
 
 	public:
-		SystemsAPI() {}
+		SystemsAPI() = delete;
 		SystemsAPI(const std::string& apiRoot, const std::string& authHeader)
 			: apiRoot(apiRoot), authHeader(authHeader) {
 		}

@@ -137,6 +137,7 @@
     <ClInclude Include="ConnectedSystemsAPI.h" />
     <ClInclude Include="ControlStreamsAPI.h" />
     <ClInclude Include="DataModels\CommandSchema.h" />
+    <ClInclude Include="DataModels\CommandSchemaBuilder.h" />
     <ClInclude Include="DataModels\Component\Boolean.h" />
     <ClInclude Include="DataModels\Component\BooleanBuilder.h" />
     <ClInclude Include="DataModels\Component\Category.h" />

@@ -3,7 +3,7 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "ConnectedSystemsAPI.h"
-#include "TestHelper.h"
+#include "../TestHelper.h"
 #include "DataModels/System.h"
 #include "DataModels/SystemBuilder.h"
 #include "DataModels/Properties.h"

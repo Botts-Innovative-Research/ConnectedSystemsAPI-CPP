@@ -7,6 +7,10 @@
 #include "RegistryInit.h"
 #include "DataModels/DataStream.h"
 #include "DataModels/DataStreamBuilder.h"
+#include "DataModels/ControlStream.h"
+#include "DataModels/ControlStreamBuilder.h"
+#include "DataModels/CommandSchema.h"
+#include "DataModels/CommandSchemaBuilder.h"
 #include "DataModels/System.h"
 #include "DataModels/SystemBuilder.h"
 #include "DataModels/ObservationSchema.h"
@@ -128,6 +132,67 @@ namespace CSAPItest {
 
 		std::string getTestDataStreamIdByName(const std::string& name) {
 			auto response = csapi.getDataStreamsAPI().getDataStreams();
+			for (const auto& item : response.getItems()) {
+				if (item.getName().value_or("") == name) {
+					return item.getId().value_or("");
+				}
+			}
+			return "";
+		}
+
+		std::string createTestControlStream(const std::string& systemId) {
+			auto controlStream = createTestControlStreamObject();
+			auto controlStreamCreateResponse = csapi.getControlStreamsAPI().createControlStream(systemId, controlStream);
+			return getTestControlStreamIdByName(controlStream.getName().value_or(""));
+		}
+
+		ConnectedSystemsAPI::DataModels::ControlStream createTestControlStreamObject() {
+			auto booleanParamField = ConnectedSystemsAPI::DataModels::Component::BooleanBuilder()
+				.withType("Boolean")
+				.withName("booleanParam")
+				.withDescription("This is a test boolean parameter field")
+				.build();
+
+			auto parametersSchemaPtr = std::make_unique<ConnectedSystemsAPI::DataModels::Component::DataRecord>(
+				ConnectedSystemsAPI::DataModels::Component::DataRecordBuilder()
+				.withType("DataRecord")
+				.addField(std::make_unique<ConnectedSystemsAPI::DataModels::Component::Boolean>(booleanParamField))
+				.build()
+			);
+
+			auto booleanResultField = ConnectedSystemsAPI::DataModels::Component::BooleanBuilder()
+				.withType("Boolean")
+				.withName("booleanResult")
+				.withDescription("This is a test boolean result field")
+				.build();
+
+			auto resultSchemaPtr = std::make_unique<ConnectedSystemsAPI::DataModels::Component::DataRecord>(
+				ConnectedSystemsAPI::DataModels::Component::DataRecordBuilder()
+				.withType("DataRecord")
+				.addField(std::make_unique<ConnectedSystemsAPI::DataModels::Component::Boolean>(booleanResultField))
+				.build()
+			);
+
+			auto commandSchemaPtr = std::make_unique<ConnectedSystemsAPI::DataModels::CommandSchema>(
+				ConnectedSystemsAPI::DataModels::CommandSchemaBuilder()
+				.withCommandFormat("application/swe+json")
+				.withParametersSchema(std::move(parametersSchemaPtr))
+				.withResultSchema(std::move(resultSchemaPtr))
+				.build()
+			);
+
+			auto controlStream = ConnectedSystemsAPI::DataModels::ControlStreamBuilder()
+				.withName("Test ControlStream 001")
+				.withInputName("test_input_001")
+				.withDescription("This is a test control stream created by CSAPI-test")
+				.withSchema(std::move(commandSchemaPtr))
+				.build();
+
+			return controlStream;
+		}
+
+		std::string getTestControlStreamIdByName(const std::string& name) {
+			auto response = csapi.getControlStreamsAPI().getControlStreams();
 			for (const auto& item : response.getItems()) {
 				if (item.getName().value_or("") == name) {
 					return item.getId().value_or("");

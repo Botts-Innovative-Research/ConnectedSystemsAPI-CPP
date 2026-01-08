@@ -3,12 +3,14 @@
 #include <string>
 #include <optional>
 #include <vector>
+#include <memory>
 #include <ostream>
 #include <nlohmann/json.hpp>
 
 #include "Link.h"
 #include "TimeExtent.h"
 #include "ControlledProperty.h"
+#include "CommandSchema.h"
 
 namespace ConnectedSystemsAPI {
 	namespace DataModels {
@@ -31,6 +33,7 @@ namespace ConnectedSystemsAPI {
 			std::optional<bool> live;
 			std::optional<bool> async;
 			std::optional<std::vector<Link>> links;
+			std::unique_ptr<CommandSchema> schema;
 
 		public:
 			ControlStream() = default;
@@ -50,20 +53,76 @@ namespace ConnectedSystemsAPI {
 				const std::optional<TimeExtent>& executionTime,
 				const std::optional<bool>& live,
 				const std::optional<bool>& async,
-				const std::optional<std::vector<Link>>& links)
+				const std::optional<std::vector<Link>>& links,
+				std::unique_ptr<CommandSchema> schema)
 				: id(id), name(name), description(description), validTime(validTime), formats(formats),
 				systemLink(systemLink), inputName(inputName), procedureLink(procedureLink),
 				deploymentLink(deploymentLink), featureOfInterestLink(featureOfInterestLink),
 				samplingFeatureLink(samplingFeatureLink),
 				controlledProperties(controlledProperties),
 				issueTime(issueTime), executionTime(executionTime),
-				live(live), async(async), links(links)
+				live(live), async(async), links(links), schema(std::move(schema))
 			{
 			}
 
-			ControlStream(const ControlStream&) = default;
+			ControlStream(const ControlStream& other)
+				: id(other.id), name(other.name), description(other.description),
+				validTime(other.validTime), formats(other.formats),
+				systemLink(other.systemLink), inputName(other.inputName),
+				procedureLink(other.procedureLink), deploymentLink(other.deploymentLink),
+				featureOfInterestLink(other.featureOfInterestLink),
+				samplingFeatureLink(other.samplingFeatureLink),
+				controlledProperties(other.controlledProperties),
+				issueTime(other.issueTime), executionTime(other.executionTime),
+				live(other.live), async(other.async), links(other.links)
+			{
+				if (other.schema) {
+					schema = std::make_unique<CommandSchema>(
+						other.schema->getCommandFormat(),
+						cloneComponent(other.schema->getParametersSchema()),
+						cloneComponent(other.schema->getResultSchema()),
+						cloneComponent(other.schema->getFeasibilityResultSchema())
+					);
+				}
+			}
+
 			ControlStream(ControlStream&&) noexcept = default;
-			ControlStream& operator=(const ControlStream&) = default;
+
+			ControlStream& operator=(const ControlStream& other) {
+				if (this != &other) {
+					id = other.id;
+					name = other.name;
+					description = other.description;
+					validTime = other.validTime;
+					formats = other.formats;
+					systemLink = other.systemLink;
+					inputName = other.inputName;
+					procedureLink = other.procedureLink;
+					deploymentLink = other.deploymentLink;
+					featureOfInterestLink = other.featureOfInterestLink;
+					samplingFeatureLink = other.samplingFeatureLink;
+					controlledProperties = other.controlledProperties;
+					issueTime = other.issueTime;
+					executionTime = other.executionTime;
+					live = other.live;
+					async = other.async;
+					links = other.links;
+
+					if (other.schema) {
+						schema = std::make_unique<CommandSchema>(
+							other.schema->getCommandFormat(),
+							cloneComponent(other.schema->getParametersSchema()),
+							cloneComponent(other.schema->getResultSchema()),
+							cloneComponent(other.schema->getFeasibilityResultSchema())
+						);
+					}
+					else {
+						schema.reset();
+					}
+				}
+				return *this;
+			}
+
 			ControlStream& operator=(ControlStream&&) noexcept = default;
 
 			/// <summary>
@@ -79,7 +138,7 @@ namespace ConnectedSystemsAPI {
 			/// </summary>
 			const std::optional<std::string>& getDescription() const { return description; }
 			/// <summary>
-			/// The validity period of the control stream’s description.
+			/// The validity period of the control stream's description.
 			/// </summary>
 			const std::optional<TimeExtent>& getValidTime() const { return validTime; }
 			/// <summary>
@@ -137,14 +196,30 @@ namespace ConnectedSystemsAPI {
 			/// Links to related resources.
 			/// </summary>
 			const std::optional<std::vector<Link>>& getLinks() const { return links; }
+			/// <summary>
+			/// The command schema for the control stream, if available.
+			/// </summary>
+			const CommandSchema* getSchema() const { return schema.get(); }
 
 			friend void from_json(const nlohmann::json& j, ControlStream& o);
 			friend void to_json(nlohmann::ordered_json& j, const ControlStream& o);
 			friend bool operator==(const ControlStream& a, const ControlStream& b);
 			friend bool operator!=(const ControlStream& a, const ControlStream& b);
+
+		private:
+			static std::unique_ptr<Component::DataComponent> cloneComponent(const Component::DataComponent* source) {
+				if (!source) return nullptr;
+				nlohmann::ordered_json j = source->toJson();
+				return Component::DataComponentRegistry::createDataComponent(j);
+			}
 		};
 
 		inline void from_json(const nlohmann::json& j, ControlStream& v) {
+			std::unique_ptr<CommandSchema> schemaPtr;
+			if (j.contains("schema") && !j["schema"].is_null()) {
+				schemaPtr = std::make_unique<CommandSchema>(j["schema"].get<CommandSchema>());
+			}
+
 			v.id = j.value("id", std::optional<std::string>{});
 			v.name = j.value("name", std::optional<std::string>{});
 			v.description = j.value("description", std::optional<std::string>{});
@@ -162,6 +237,7 @@ namespace ConnectedSystemsAPI {
 			v.live = j.value("live", std::optional<bool>{});
 			v.async = j.value("async", std::optional<bool>{});
 			v.links = j.value("links", std::optional<std::vector<Link>>{});
+			v.schema = std::move(schemaPtr);
 		}
 
 		inline void to_json(nlohmann::ordered_json& j, const ControlStream& v) {
@@ -184,6 +260,7 @@ namespace ConnectedSystemsAPI {
 			if (v.live.has_value()) j["live"] = v.live.value();
 			if (v.async.has_value()) j["async"] = v.async.value();
 			if (v.links.has_value()) j["links"] = v.links.value();
+			if (v.schema) j["schema"] = *v.schema;
 		}
 
 		inline std::ostream& operator<<(std::ostream& os, const ControlStream& v) {
@@ -194,6 +271,7 @@ namespace ConnectedSystemsAPI {
 		}
 
 		inline bool operator==(const ControlStream& a, const ControlStream& b) {
+			// Note: Schema comparison not implemented as CommandSchema doesn't have operator==
 			return a.id == b.id
 				&& a.name == b.name
 				&& a.description == b.description

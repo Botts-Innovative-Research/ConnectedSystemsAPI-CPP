@@ -4,7 +4,7 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "ConnectedSystemsAPI.h"
-#include "TestHelper.h"
+#include "../TestHelper.h"
 #include "DataModels/DataStream.h"
 #include "DataModels/ObservationBuilder.h"
 #include "DataModels/ObservationSchema.h"

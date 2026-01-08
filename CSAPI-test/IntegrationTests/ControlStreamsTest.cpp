@@ -3,7 +3,7 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "ConnectedSystemsAPI.h"
-#include "TestHelper.h"
+#include "../TestHelper.h"
 #include "DataModels/ControlStream.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -25,12 +25,6 @@ namespace CSAPItest {
 		TEST_METHOD(GetControlStreams) {
 			auto response = testHelper.csapi.getControlStreamsAPI().getControlStreams();
 			Assert::IsTrue(response.isSuccessful());
-
-			// Print out the retrieved control streams for debugging
-			std::cout << "Retrieved Control Streams:" << std::endl;
-			for (const auto& controlStream : response.getItems()) {
-				std::cout << controlStream << std::endl;
-			}
 		}
 
 		TEST_METHOD(GetControlStreamsOfSystem) {
@@ -58,6 +52,21 @@ namespace CSAPItest {
 			auto controlStreamId = controlStreamsResponse.getItems().front().getId().value_or("");
 			auto response = testHelper.csapi.getControlStreamsAPI().getControlStreamSchema(controlStreamId);
 			Assert::IsTrue(response.isSuccessful());
+		}
+
+		TEST_METHOD(CreateControlStream) {
+			auto systemId = testHelper.createTestSystem();
+			auto controlStream = testHelper.createTestControlStreamObject();
+			std::cout << "Creating Control Stream: " << controlStream << std::endl;
+			auto response = testHelper.csapi.getControlStreamsAPI().createControlStream(systemId, controlStream);
+			std::cout << "Created Control Stream Response: " << response.getResponseMessage() << std::endl;
+			Assert::IsTrue(response.isSuccessful());
+		}
+
+		TEST_METHOD(DeleteControlStream) {
+			auto systemId = testHelper.createTestSystem();
+			auto controlStreamId = testHelper.createTestControlStream(systemId);
+			testHelper.csapi.getControlStreamsAPI().deleteControlStream(controlStreamId, true);
 		}
 	};
 }

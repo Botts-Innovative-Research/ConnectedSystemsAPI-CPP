@@ -6,69 +6,79 @@
 #include "Component/DataComponent.h"
 #include "Component/DataComponentRegistry.h"
 
-namespace ConnectedSystemsAPI {
-	namespace DataModels {
-		class CommandSchema {
-		private:
-			std::string commandFormat;
-			std::unique_ptr<Component::DataComponent> parametersSchema;
-			std::unique_ptr<Component::DataComponent> resultSchema;
-			//todo: feasibilityResultSchema
+namespace ConnectedSystemsAPI::DataModels {
+	class CommandSchema {
+	private:
+		std::string commandFormat;
+		std::unique_ptr<Component::DataComponent> parametersSchema;
+		std::unique_ptr<Component::DataComponent> resultSchema;
+		std::unique_ptr<Component::DataComponent> feasibilityResultSchema;
 
-		public:
-			CommandSchema() = default;
-			CommandSchema(const std::string& commandFormat,
-				std::unique_ptr<Component::DataComponent> parametersSchema,
-				std::unique_ptr<Component::DataComponent> resultSchema)
-				: commandFormat(commandFormat), parametersSchema(std::move(parametersSchema)), resultSchema(std::move(resultSchema)) {
-			}
-
-			CommandSchema(const CommandSchema&) = delete;
-			CommandSchema& operator=(const CommandSchema&) = delete;
-			CommandSchema(CommandSchema&&) noexcept = default;
-			CommandSchema& operator=(CommandSchema&&) noexcept = default;
-
-			/// <summary>
-			/// Encoding format of the command.
-			/// </summary>
-			const std::string& getCommandFormat() const { return commandFormat; }
-			/// <summary>
-			/// Record schema for the command parameters property. If omitted, parameters are not included in the datastream.
-			/// </summary>
-			const Component::DataComponent* getParametersSchema() const { return parametersSchema.get(); }
-			/// <summary>
-			/// Schema for the command result property.
-			/// this describes the observed properties included in the result
-			/// and how they are structured if the result is a record, a vector quantity or a coverage.
-			/// </summary>
-			const Component::DataComponent* getResultSchema() const { return resultSchema.get(); }
-
-			friend void from_json(const nlohmann::json& j, CommandSchema& v);
-			friend void to_json(nlohmann::ordered_json& j, const CommandSchema& v);
-			friend std::ostream& operator<<(std::ostream& os, const CommandSchema& v);
-		};
-
-		inline void from_json(const nlohmann::json& j, CommandSchema& v) {
-			// Print the json for debugging
-			std::cout << "Deserializing CommandSchema from JSON: " << j.dump(2) << std::endl;
-			v.commandFormat = j.at("commandFormat").get<std::string>();
-			v.parametersSchema = Component::DataComponentRegistry::createDataComponent(j.at("paramsSchema"));
-			if (j.contains("resultSchema"))
-				v.resultSchema = Component::DataComponentRegistry::createDataComponent(j.at("resultSchema"));
+	public:
+		CommandSchema() = default;
+		CommandSchema(const std::string& commandFormat,
+			std::unique_ptr<Component::DataComponent> parametersSchema,
+			std::unique_ptr<Component::DataComponent> resultSchema,
+			std::unique_ptr<Component::DataComponent> feasibilityResultSchema = nullptr)
+			: commandFormat(commandFormat),
+			parametersSchema(std::move(parametersSchema)),
+			resultSchema(std::move(resultSchema)),
+			feasibilityResultSchema(std::move(feasibilityResultSchema)) {
 		}
 
-		inline void to_json(nlohmann::ordered_json& j, const CommandSchema& v) {
-			j = nlohmann::ordered_json::object();
+		CommandSchema(const CommandSchema&) = delete;
+		CommandSchema& operator=(const CommandSchema&) = delete;
+		CommandSchema(CommandSchema&&) noexcept = default;
+		CommandSchema& operator=(CommandSchema&&) noexcept = default;
 
-			j["commandFormat"] = v.commandFormat;
-			if (v.parametersSchema) j["paramsSchema"] = v.getParametersSchema()->toJson();
-			if (v.resultSchema) j["resultSchema"] = v.getResultSchema()->toJson();
-		}
+		/// <summary>
+		/// Encoding format of the command.
+		/// </summary>
+		const std::string& getCommandFormat() const { return commandFormat; }
+		/// <summary>
+		/// Record schema for the command parameters property. If omitted, parameters are not included in the datastream.
+		/// </summary>
+		const Component::DataComponent* getParametersSchema() const { return parametersSchema.get(); }
+		/// <summary>
+		/// Schema for the command result property.
+		/// this describes the observed properties included in the result
+		/// and how they are structured if the result is a record, a vector quantity or a coverage.
+		/// </summary>
+		const Component::DataComponent* getResultSchema() const { return resultSchema.get(); }
+		/// <summary>
+		/// Schema for the feasibility result property.
+		/// This describes the structure of the feasibility assessment result.
+		/// </summary>
+		const Component::DataComponent* getFeasibilityResultSchema() const { return feasibilityResultSchema.get(); }
 
-		inline std::ostream& operator<<(std::ostream& os, const CommandSchema& v) {
-			nlohmann::ordered_json j;
-			to_json(j, v);
-			return os << j.dump(2);
-		}
+		friend void from_json(const nlohmann::json& j, CommandSchema& v);
+		friend void to_json(nlohmann::ordered_json& j, const CommandSchema& v);
+		friend std::ostream& operator<<(std::ostream& os, const CommandSchema& v);
+	};
+
+	inline void from_json(const nlohmann::json& j, CommandSchema& v) {
+		// Print the json for debugging
+		std::cout << "Deserializing CommandSchema from JSON: " << j.dump(2) << std::endl;
+		v.commandFormat = j.at("commandFormat").get<std::string>();
+		v.parametersSchema = Component::DataComponentRegistry::createDataComponent(j.at("paramsSchema"));
+		if (j.contains("resultSchema"))
+			v.resultSchema = Component::DataComponentRegistry::createDataComponent(j.at("resultSchema"));
+		if (j.contains("feasibilityResultSchema"))
+			v.feasibilityResultSchema = Component::DataComponentRegistry::createDataComponent(j.at("feasibilityResultSchema"));
+	}
+
+	inline void to_json(nlohmann::ordered_json& j, const CommandSchema& v) {
+		j = nlohmann::ordered_json::object();
+
+		j["commandFormat"] = v.commandFormat;
+		if (v.parametersSchema) j["paramsSchema"] = v.getParametersSchema()->toJson();
+		if (v.resultSchema) j["resultSchema"] = v.getResultSchema()->toJson();
+		if (v.feasibilityResultSchema) j["feasibilityResultSchema"] = v.getFeasibilityResultSchema()->toJson();
+	}
+
+	inline std::ostream& operator<<(std::ostream& os, const CommandSchema& v) {
+		nlohmann::ordered_json j;
+		to_json(j, v);
+		return os << j.dump(2);
 	}
 }

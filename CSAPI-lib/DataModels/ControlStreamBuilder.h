@@ -4,8 +4,10 @@
 #include <vector>
 #include <optional>
 #include <utility>
+#include <memory>
 
 #include "ControlStream.h"
+#include "CommandSchema.h"
 #include "Link.h"
 #include "TimeExtent.h"
 #include "ControlledProperty.h"
@@ -35,6 +37,23 @@ namespace ConnectedSystemsAPI::DataModels {
 		std::optional<bool> live;
 		std::optional<bool> async;
 		std::optional<std::vector<Link>> links;
+		std::unique_ptr<CommandSchema> schema;
+
+		static std::unique_ptr<CommandSchema> cloneSchema(const CommandSchema* source) {
+			if (!source) return nullptr;
+			return std::make_unique<CommandSchema>(
+				source->getCommandFormat(),
+				cloneComponent(source->getParametersSchema()),
+				cloneComponent(source->getResultSchema()),
+				cloneComponent(source->getFeasibilityResultSchema())
+			);
+		}
+
+		static std::unique_ptr<Component::DataComponent> cloneComponent(const Component::DataComponent* source) {
+			if (!source) return nullptr;
+			nlohmann::ordered_json j = source->toJson();
+			return Component::DataComponentRegistry::createDataComponent(j);
+		}
 
 	public:
 		ControlStreamBuilder() = default;
@@ -44,8 +63,44 @@ namespace ConnectedSystemsAPI::DataModels {
 		/// </summary>
 		explicit ControlStreamBuilder(const ControlStream& cs) { withControlStream(cs); }
 
-		ControlStreamBuilder(const ControlStreamBuilder& other) = default;
-		ControlStreamBuilder& operator=(const ControlStreamBuilder& other) = default;
+		ControlStreamBuilder(const ControlStreamBuilder& other)
+			: id(other.id), name(other.name), description(other.description),
+			validTime(other.validTime), formats(other.formats),
+			systemLink(other.systemLink), inputName(other.inputName),
+			procedureLink(other.procedureLink), deploymentLink(other.deploymentLink),
+			featureOfInterestLink(other.featureOfInterestLink),
+			samplingFeatureLink(other.samplingFeatureLink),
+			controlledProperties(other.controlledProperties),
+			issueTime(other.issueTime), executionTime(other.executionTime),
+			live(other.live), async(other.async), links(other.links),
+			schema(cloneSchema(other.schema.get()))
+		{
+		}
+
+		ControlStreamBuilder& operator=(const ControlStreamBuilder& other) {
+			if (this != &other) {
+				id = other.id;
+				name = other.name;
+				description = other.description;
+				validTime = other.validTime;
+				formats = other.formats;
+				systemLink = other.systemLink;
+				inputName = other.inputName;
+				procedureLink = other.procedureLink;
+				deploymentLink = other.deploymentLink;
+				featureOfInterestLink = other.featureOfInterestLink;
+				samplingFeatureLink = other.samplingFeatureLink;
+				controlledProperties = other.controlledProperties;
+				issueTime = other.issueTime;
+				executionTime = other.executionTime;
+				live = other.live;
+				async = other.async;
+				links = other.links;
+				schema = cloneSchema(other.schema.get());
+			}
+			return *this;
+		}
+
 		ControlStreamBuilder(ControlStreamBuilder&&) noexcept = default;
 		ControlStreamBuilder& operator=(ControlStreamBuilder&&) noexcept = default;
 		~ControlStreamBuilder() = default;
@@ -79,6 +134,7 @@ namespace ConnectedSystemsAPI::DataModels {
 			live = cs.isLive();
 			async = cs.isAsync();
 			links = cs.getLinks();
+			schema = cloneSchema(cs.getSchema());
 			return *this;
 		}
 
@@ -103,6 +159,7 @@ namespace ConnectedSystemsAPI::DataModels {
 			live.reset();
 			async.reset();
 			links.reset();
+			schema.reset();
 			return *this;
 		}
 
@@ -244,6 +301,25 @@ namespace ConnectedSystemsAPI::DataModels {
 		ControlStreamBuilder& withLinks(std::vector<Link>&& v) noexcept { links = std::move(v); return *this; }
 
 		/// <summary>
+		/// Set the command schema by transferring ownership of a unique_ptr.
+		/// Schema for the control stream describing command parameters and result structure.
+		/// </summary>
+		ControlStreamBuilder& withSchema(std::unique_ptr<CommandSchema> v) noexcept {
+			schema = std::move(v);
+			return *this;
+		}
+
+		/// <summary>
+		/// Set the command schema by copying from an existing CommandSchema instance.
+		/// Schema for the control stream describing command parameters and result structure.
+		/// Note: This performs a deep copy.
+		/// </summary>
+		ControlStreamBuilder& withSchema(const CommandSchema& v) {
+			schema = cloneSchema(&v);
+			return *this;
+		}
+
+		/// <summary>
 		/// Add a format that the observations in the control stream can be encoded to.
 		/// </summary>
 		ControlStreamBuilder& addFormat(std::string_view f) {
@@ -321,6 +397,14 @@ namespace ConnectedSystemsAPI::DataModels {
 			return *this;
 		}
 
+		/// <summary>
+		/// Clear the schema.
+		/// </summary>
+		ControlStreamBuilder& clearSchema() noexcept {
+			schema.reset();
+			return *this;
+		}
+
 		const std::optional<std::string>& getId() const noexcept { return id; }
 		const std::optional<std::string>& getName() const noexcept { return name; }
 		const std::optional<std::string>& getDescription() const noexcept { return description; }
@@ -338,6 +422,7 @@ namespace ConnectedSystemsAPI::DataModels {
 		const std::optional<bool>& isLive() const noexcept { return live; }
 		const std::optional<bool>& isAsync() const noexcept { return async; }
 		const std::optional<std::vector<Link>>& getLinks() const noexcept { return links; }
+		const CommandSchema* getSchema() const noexcept { return schema.get(); }
 
 		/// <summary>
 		/// Check if the current builder state is valid. Optionally populate a vector with validation errors.
@@ -363,6 +448,7 @@ namespace ConnectedSystemsAPI::DataModels {
 
 		/// <summary>
 		/// Build a ControlStream instance from the current builder state.
+		/// Note: This method clones the schema, so the builder can be reused for multiple builds.
 		/// </summary>
 		/// <returns>A new ControlStream instance.</returns>
 		/// <exception cref="ValidationException">Thrown if validation fails.</exception>
@@ -388,7 +474,8 @@ namespace ConnectedSystemsAPI::DataModels {
 				executionTime,
 				live,
 				async,
-				links
+				links,
+				cloneSchema(schema.get())
 			);
 		}
 	};

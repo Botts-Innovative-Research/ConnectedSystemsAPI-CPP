@@ -219,5 +219,8 @@
     <ClInclude Include="DataModels\ControlStreamBuilder.h">
       <Filter>Header Files\DataModels</Filter>
     </ClInclude>
+    <ClInclude Include="DataModels\CommandSchemaBuilder.h">
+      <Filter>Header Files\DataModels</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
