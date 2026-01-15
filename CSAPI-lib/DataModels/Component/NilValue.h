@@ -2,9 +2,14 @@
 
 #include <string>
 #include <ostream>
+#include <stdexcept>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 namespace ConnectedSystemsAPI::DataModels::Component {
+	class NilValue;
+	void to_json(nlohmann::ordered_json& j, const NilValue& v);
+
 	class NilValue {
 		std::string reason;
 		std::string value;
@@ -19,6 +24,12 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		NilValue& operator=(const NilValue&) = default;
 		NilValue& operator=(NilValue&&) noexcept = default;
 		~NilValue() = default;
+
+		nlohmann::ordered_json toJson() const {
+			nlohmann::ordered_json j;
+			to_json(j, *this);
+			return j;
+		}
 
 		void validate() const {
 			if (reason.empty())
@@ -38,30 +49,32 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		/// </summary>
 		const std::string& getValue() const noexcept { return value; }
 		void setValue(const std::string& value) { this->value = value; }
+
+		friend void from_json(const nlohmann::json& j, NilValue& v);
+		friend void to_json(nlohmann::ordered_json& j, const NilValue& v);
+
+		friend bool operator==(const NilValue& a, const NilValue& b) {
+			return a.getReason() == b.getReason() && a.getValue() == b.getValue();
+		}
+		friend bool operator!=(const NilValue& a, const NilValue& b) {
+			return !(a == b);
+		}
+
+		friend std::ostream& operator<<(std::ostream& os, const NilValue& v) {
+			nlohmann::ordered_json j;
+			to_json(j, v);
+			return os << j.dump(2);
+		}
 	};
 
-	inline bool operator==(const NilValue& a, const NilValue& b) {
-		return a.getReason() == b.getReason() && a.getValue() == b.getValue();
-	}
-	inline bool operator!=(const NilValue& a, const NilValue& b) {
-		return !(a == b);
+	inline void from_json(const nlohmann::json& j, NilValue& v) {
+		v.reason = j["reason"].get<std::string>();
+		v.value = j["value"].get<std::string>();
 	}
 
-	inline void from_json(const nlohmann::json& j, NilValue& n) {
-		n = NilValue();
-		n.setReason(j["reason"].get<std::string>());
-		n.setValue(j["value"].get<std::string>());
-	}
-
-	inline void to_json(nlohmann::ordered_json& j, const NilValue& n) {
+	inline void to_json(nlohmann::ordered_json& j, const NilValue& v) {
 		j = nlohmann::ordered_json::object();
-		j["reason"] = n.getReason();
-		j["value"] = n.getValue();
-	}
-
-	inline std::ostream& operator<<(std::ostream& os, const NilValue& n) {
-		nlohmann::ordered_json j;
-		to_json(j, n);
-		return os << j.dump(2);
+		j["reason"] = v.reason;
+		j["value"] = v.value;
 	}
 }

@@ -5,7 +5,9 @@
 #include <vector>
 #include <memory>
 #include <ostream>
+#include <utility>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "Link.h"
 #include "TimeExtent.h"
@@ -13,6 +15,9 @@
 #include "ObservationSchema.h"
 
 namespace ConnectedSystemsAPI::DataModels {
+	class DataStream;
+	void to_json(nlohmann::ordered_json& j, const DataStream& v);
+
 	class DataStream {
 	private:
 		std::optional<std::string> id;
@@ -142,7 +147,7 @@ namespace ConnectedSystemsAPI::DataModels {
 		/// </summary>
 		const std::optional<std::string>& getDescription() const { return description; }
 		/// <summary>
-		/// The validity period of the data stream’s description.
+		/// The validity period of the data stream's description.
 		/// </summary>
 		const std::optional<TimeExtent>& getValidTime() const { return validTime; }
 		/// <summary>
@@ -216,98 +221,68 @@ namespace ConnectedSystemsAPI::DataModels {
 		/// The observation schema for the data stream, if available.
 		/// </summary>
 		const ObservationSchema* getSchema() const { return schema.get(); }
+
+		friend void from_json(const nlohmann::json& j, DataStream& ds);
+		friend void to_json(nlohmann::ordered_json& j, const DataStream& ds);
+
+		friend std::ostream& operator<<(std::ostream& os, const DataStream& ds) {
+			nlohmann::ordered_json j;
+			ConnectedSystemsAPI::DataModels::to_json(j, ds);
+			os << j.dump(2);
+			return os;
+		}
 	};
 
 	inline void from_json(const nlohmann::json& j, DataStream& ds) {
-		std::unique_ptr<ObservationSchema> schemaPtr;
+		ds.id = j.value("id", std::optional<std::string>{});
+		ds.name = j.value("name", std::optional<std::string>{});
+		ds.description = j.value("description", std::optional<std::string>{});
+		ds.validTime = j.value("validTime", std::optional<TimeExtent>{});
+		ds.formats = j.value("formats", std::optional<std::vector<std::string>>{});
+		ds.systemLink = j.value("system@link", std::optional<Link>{});
+		ds.outputName = j.value("outputName", std::optional<std::string>{});
+		ds.procedureLink = j.value("procedure@link", std::optional<Link>{});
+		ds.deploymentLink = j.value("deployment@link", std::optional<Link>{});
+		ds.featureOfInterestLink = j.value("featureOfInterest@link", std::optional<Link>{});
+		ds.samplingFeatureLink = j.value("samplingFeature@link", std::optional<Link>{});
+		ds.observedProperties = j.value("observedProperties", std::optional<std::vector<ObservedProperty>>{});
+		ds.phenomenonTime = j.value("phenomenonTime", std::optional<TimeExtent>{});
+		ds.phenomenonTimeInterval = j.value("phenomenonTimeInterval", std::optional<std::string>{});
+		ds.resultTime = j.value("resultTime", std::optional<TimeExtent>{});
+		ds.resultTimeInterval = j.value("resultTimeInterval", std::optional<std::string>{});
+		ds.dataStreamType = j.value("type", std::optional<std::string>{});
+		ds.resultType = j.value("resultType", std::optional<std::string>{});
+		ds.live = j.value("live", std::optional<bool>{});
+		ds.links = j.value("links", std::optional<std::vector<Link>>{});
+
 		if (j.contains("schema") && !j["schema"].is_null()) {
-			schemaPtr = std::make_unique<ObservationSchema>(j["schema"].get<ObservationSchema>());
+			ds.schema = std::make_unique<ObservationSchema>(j["schema"].get<ObservationSchema>());
 		}
-
-		auto idOpt = (j.contains("id") && !j["id"].is_null()) ? std::optional<std::string>{ j["id"].get<std::string>() } : std::optional<std::string>{};
-		auto nameOpt = (j.contains("name") && !j["name"].is_null()) ? std::optional<std::string>{ j["name"].get<std::string>() } : std::optional<std::string>{};
-		auto descOpt = (j.contains("description") && !j["description"].is_null()) ? std::optional<std::string>{ j["description"].get<std::string>() } : std::optional<std::string>{};
-		auto outputNameOpt = (j.contains("outputName") && !j["outputName"].is_null()) ? std::optional<std::string>{ j["outputName"].get<std::string>() } : std::optional<std::string>{};
-		auto phenomenonTimeIntervalOpt = (j.contains("phenomenonTimeInterval") && !j["phenomenonTimeInterval"].is_null()) ? std::optional<std::string>{ j["phenomenonTimeInterval"].get<std::string>() } : std::optional<std::string>{};
-		auto resultTimeIntervalOpt = (j.contains("resultTimeInterval") && !j["resultTimeInterval"].is_null()) ? std::optional<std::string>{ j["resultTimeInterval"].get<std::string>() } : std::optional<std::string>{};
-		auto dataStreamTypeOpt = (j.contains("type") && !j["type"].is_null()) ? std::optional<std::string>{ j["type"].get<std::string>() } : std::optional<std::string>{};
-		auto resultTypeOpt = (j.contains("resultType") && !j["resultType"].is_null()) ? std::optional<std::string>{ j["resultType"].get<std::string>() } : std::optional<std::string>{};
-
-		ds = DataStream(
-			idOpt,
-			nameOpt,
-			descOpt,
-			j.value("validTime", std::optional<TimeExtent>{}),
-			j.value("formats", std::optional<std::vector<std::string>>{}),
-			j.value("system@link", std::optional<Link>{}),
-			outputNameOpt,
-			j.value("procedure@link", std::optional<Link>{}),
-			j.value("deployment@link", std::optional<Link>{}),
-			j.value("featureOfInterest@link", std::optional<Link>{}),
-			j.value("samplingFeature@link", std::optional<Link>{}),
-			j.value("observedProperties", std::optional<std::vector<ObservedProperty>>{}),
-			j.value("phenomenonTime", std::optional<TimeExtent>{}),
-			phenomenonTimeIntervalOpt,
-			j.value("resultTime", std::optional<TimeExtent>{}),
-			resultTimeIntervalOpt,
-			dataStreamTypeOpt,
-			resultTypeOpt,
-			j.value("live", std::optional<bool>{}),
-			j.value("links", std::optional<std::vector<Link>>{}),
-			std::move(schemaPtr)
-		);
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const DataStream& ds) {
 		j = nlohmann::ordered_json::object();
-		if (ds.getId())
-			j["id"] = ds.getId().value();
-		if (ds.getName())
-			j["name"] = ds.getName().value();
-		if (ds.getDescription())
-			j["description"] = ds.getDescription().value();
-		if (ds.getValidTime())
-			j["validTime"] = ds.getValidTime().value();
-		if (ds.getFormats())
-			j["formats"] = ds.getFormats().value();
-		if (ds.getSystemLink())
-			j["system@link"] = ds.getSystemLink().value();
-		if (ds.getOutputName())
-			j["outputName"] = ds.getOutputName().value();
-		if (ds.getProcedureLink())
-			j["procedure@link"] = ds.getProcedureLink().value();
-		if (ds.getDeploymentLink())
-			j["deployment@link"] = ds.getDeploymentLink().value();
-		if (ds.getFeatureOfInterestLink())
-			j["featureOfInterest@link"] = ds.getFeatureOfInterestLink().value();
-		if (ds.getSamplingFeatureLink())
-			j["samplingFeature@link"] = ds.getSamplingFeatureLink().value();
-		if (ds.getObservedProperties())
-			j["observedProperties"] = ds.getObservedProperties().value();
-		if (ds.getPhenomenonTime())
-			j["phenomenonTime"] = ds.getPhenomenonTime().value();
-		if (ds.getPhenomenonTimeInterval())
-			j["phenomenonTimeInterval"] = ds.getPhenomenonTimeInterval().value();
-		if (ds.getResultTime())
-			j["resultTime"] = ds.getResultTime().value();
-		if (ds.getResultTimeInterval())
-			j["resultTimeInterval"] = ds.getResultTimeInterval().value();
-		if (ds.getDataStreamType())
-			j["type"] = ds.getDataStreamType().value();
-		if (ds.getResultType())
-			j["resultType"] = ds.getResultType().value();
-		if (ds.isLive())
-			j["live"] = ds.isLive().value();
-		if (ds.getLinks())
-			j["links"] = ds.getLinks().value();
-		if (ds.getSchema())
-			j["schema"] = *ds.getSchema();
-	}
 
-	inline std::ostream& operator<<(std::ostream& os, const DataStream& ds) {
-		nlohmann::ordered_json j;
-		ConnectedSystemsAPI::DataModels::to_json(j, ds);
-		os << j.dump(2);
-		return os;
+		if (ds.id.has_value()) j["id"] = ds.id.value();
+		if (ds.name.has_value()) j["name"] = ds.name.value();
+		if (ds.description.has_value()) j["description"] = ds.description.value();
+		if (ds.validTime.has_value()) j["validTime"] = ds.validTime.value();
+		if (ds.formats.has_value()) j["formats"] = ds.formats.value();
+		if (ds.systemLink.has_value()) j["system@link"] = ds.systemLink.value();
+		if (ds.outputName.has_value()) j["outputName"] = ds.outputName.value();
+		if (ds.procedureLink.has_value()) j["procedure@link"] = ds.procedureLink.value();
+		if (ds.deploymentLink.has_value()) j["deployment@link"] = ds.deploymentLink.value();
+		if (ds.featureOfInterestLink.has_value()) j["featureOfInterest@link"] = ds.featureOfInterestLink.value();
+		if (ds.samplingFeatureLink.has_value()) j["samplingFeature@link"] = ds.samplingFeatureLink.value();
+		if (ds.observedProperties.has_value()) j["observedProperties"] = ds.observedProperties.value();
+		if (ds.phenomenonTime.has_value()) j["phenomenonTime"] = ds.phenomenonTime.value();
+		if (ds.phenomenonTimeInterval.has_value()) j["phenomenonTimeInterval"] = ds.phenomenonTimeInterval.value();
+		if (ds.resultTime.has_value()) j["resultTime"] = ds.resultTime.value();
+		if (ds.resultTimeInterval.has_value()) j["resultTimeInterval"] = ds.resultTimeInterval.value();
+		if (ds.dataStreamType.has_value()) j["type"] = ds.dataStreamType.value();
+		if (ds.resultType.has_value()) j["resultType"] = ds.resultType.value();
+		if (ds.live.has_value()) j["live"] = ds.live.value();
+		if (ds.links.has_value()) j["links"] = ds.links.value();
+		if (ds.schema) j["schema"] = *ds.schema;
 	}
 }

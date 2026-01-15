@@ -3,7 +3,10 @@
 #include <chrono>
 #include <string>
 #include <optional>
+#include <ostream>
+#include <stdexcept>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "TimeUtils.h"
 
@@ -90,8 +93,20 @@ namespace ConnectedSystemsAPI::DataModels {
 
 		friend void from_json(const nlohmann::json& j, TimeExtent& t);
 		friend void to_json(nlohmann::ordered_json& j, const TimeExtent& t);
-		friend bool operator==(const TimeExtent& a, const TimeExtent& b);
-		friend bool operator!=(const TimeExtent& a, const TimeExtent& b);
+
+		friend bool operator== (const TimeExtent& a, const TimeExtent& b) {
+			return a.getStart() == b.getStart() && a.getEnd() == b.getEnd();
+		}
+
+		friend bool operator!= (const TimeExtent& a, const TimeExtent& b) {
+			return !(a == b);
+		}
+
+		friend std::ostream& operator<<(std::ostream& os, const TimeExtent& t) {
+			nlohmann::ordered_json j;
+			ConnectedSystemsAPI::DataModels::to_json(j, t);
+			return os << j.dump(2);
+		}
 	};
 
 	inline void from_json(const nlohmann::json& j, TimeExtent& t) {
@@ -147,19 +162,5 @@ namespace ConnectedSystemsAPI::DataModels {
 		std::string startStr = t.getStart() ? TimeUtils::timePointToString(t.getStart().value()) : TimeExtent::SPECIAL_VALUE_NOW;
 		std::string endStr = t.getEnd() ? TimeUtils::timePointToString(t.getEnd().value()) : TimeExtent::SPECIAL_VALUE_NOW;
 		j = nlohmann::json::array({ startStr, endStr });
-	}
-
-	inline std::ostream& operator<<(std::ostream& os, const TimeExtent& t) {
-		nlohmann::ordered_json j;
-		ConnectedSystemsAPI::DataModels::to_json(j, t);
-		return os << j.dump(2);
-	}
-
-	inline bool operator== (const TimeExtent& a, const TimeExtent& b) {
-		return a.getStart() == b.getStart() && a.getEnd() == b.getEnd();
-	}
-
-	inline bool operator!= (const TimeExtent& a, const TimeExtent& b) {
-		return !(a == b);
 	}
 }

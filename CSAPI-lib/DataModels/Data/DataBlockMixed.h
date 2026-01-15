@@ -1,11 +1,15 @@
 #pragma once
 
+#include <string>
+#include <unordered_map>
+#include <ostream>
+#include <utility>
+#include <vector>
+#include <nlohmann/json_fwd.hpp>
+
 #include "DataBlock.h"
 #include "DataType.h"
 #include "DataValue.h"
-
-#include <string>
-#include <unordered_map>
 
 namespace ConnectedSystemsAPI::DataModels::Data {
 	class DataBlockMixed : public DataBlock {

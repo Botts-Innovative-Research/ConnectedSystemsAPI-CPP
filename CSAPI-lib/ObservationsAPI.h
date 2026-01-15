@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <nlohmann/json_fwd.hpp>
 
 #include "APIRequest.h"
 #include "APIResponse.h"
@@ -25,7 +26,7 @@ namespace ConnectedSystemsAPI {
 		/// </summary>
 		/// <param name="query">The query string parameters.</param>
 		/// <returns>A response object containing a list of observations.</returns>
-		APIResponse<DataModels::Observation> getObservations(const Query::ObservationsQuery& query) {
+		APIResponse<DataModels::Observation> getObservations(const Query::ObservationsQuery& query) const {
 			return getObservations(query.toString());
 		}
 
@@ -34,7 +35,7 @@ namespace ConnectedSystemsAPI {
 		/// </summary>
 		/// <param name="query">The query string.</param>
 		/// <returns>A response object containing a list of observations.</returns>
-		APIResponse<DataModels::Observation> getObservations(std::string queryString = "") {
+		APIResponse<DataModels::Observation> getObservations(std::string queryString = "") const {
 			auto response = APIRequest::Builder()
 				.setApiRoot(apiRoot)
 				.setMethod("GET")
@@ -51,7 +52,7 @@ namespace ConnectedSystemsAPI {
 		/// </summary>
 		/// <param name="query">The query string parameters.</param>
 		/// <returns>A response object containing a list of observations.</returns>
-		APIResponse<DataModels::Observation> getObservationsOfDataStream(const std::string& dataStreamId, const Query::ObservationsOfDataStreamQuery& query) {
+		APIResponse<DataModels::Observation> getObservationsOfDataStream(const std::string& dataStreamId, const Query::ObservationsOfDataStreamQuery& query) const {
 			return getObservationsOfDataStream(dataStreamId, query.toString());
 		}
 
@@ -60,7 +61,7 @@ namespace ConnectedSystemsAPI {
 		/// </summary>
 		/// <param name="query">The query string.</param>
 		/// <returns>A response object containing a list of observations.</returns>
-		APIResponse<DataModels::Observation> getObservationsOfDataStream(const std::string& dataStreamId, std::string queryString = "") {
+		APIResponse<DataModels::Observation> getObservationsOfDataStream(const std::string& dataStreamId, std::string queryString = "") const {
 			auto response = APIRequest::Builder()
 				.setApiRoot(apiRoot)
 				.setMethod("GET")
@@ -79,7 +80,7 @@ namespace ConnectedSystemsAPI {
 		/// </summary>
 		/// <param name="observationId">The ID of the observation to retrieve.</param>
 		/// <returns>A response object containing the requested observation.</returns>
-		APIResponse<DataModels::Observation> getObservationById(const std::string& observationId) {
+		APIResponse<DataModels::Observation> getObservationById(const std::string& observationId) const {
 			auto response = APIRequest::Builder()
 				.setApiRoot(apiRoot)
 				.setMethod("GET")
@@ -97,7 +98,7 @@ namespace ConnectedSystemsAPI {
 		/// <param name="dataStreamId">The local identifier of the data stream.</param>
 		/// <param name="observation">The observation to create.</param>
 		/// <returns>A response object indicating success or failure.</returns>
-		APIResponse<void> createObservation(const std::string& dataStreamId, const DataModels::Observation& observation) {
+		APIResponse<void> createObservation(const std::string& dataStreamId, const DataModels::Observation& observation) const {
 			nlohmann::ordered_json j;
 			ConnectedSystemsAPI::DataModels::to_json(j, observation);
 			auto response = APIRequest::Builder()
@@ -120,7 +121,7 @@ namespace ConnectedSystemsAPI {
 		/// <param name="observationId">The ID of the observation to update.</param>
 		/// <param name="observation">The updated observation.</param>
 		/// <returns>A response object indicating success or failure.</returns>
-		APIResponse<void> updateObservation(const std::string& observationId, const DataModels::Observation& observation) {
+		APIResponse<void> updateObservation(const std::string& observationId, const DataModels::Observation& observation) const {
 			nlohmann::ordered_json j;
 			ConnectedSystemsAPI::DataModels::to_json(j, observation);
 			auto response = APIRequest::Builder()
@@ -141,7 +142,7 @@ namespace ConnectedSystemsAPI {
 		/// </summary>
 		/// <param name="observationId">The ID of the observation to delete.</param>
 		/// <returns>A response object indicating success or failure.</returns>
-		APIResponse<void> deleteObservation(const std::string& observationId) {
+		APIResponse<void> deleteObservation(const std::string& observationId) const {
 			auto response = APIRequest::Builder()
 				.setApiRoot(apiRoot)
 				.setMethod("DELETE")

@@ -3,10 +3,15 @@
 #include <string>
 #include <optional>
 #include <ostream>
+#include <utility>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
+
 #include "ScalarComponent.h"
 #include "UnitOfMeasure.h"
 #include "Util/JsonUtils.h"
+#include "DataComponent.h"
+#include "SimpleComponent.h"
 
 namespace ConnectedSystemsAPI::DataModels::Component {
 	class Quantity;
@@ -25,15 +30,15 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		Quantity& operator=(Quantity&&) noexcept = default;
 		~Quantity() override = default;
 
-		void validate() const override {
-			ScalarComponent::validate();
-			unitOfMeasure.validate();
-		}
-
 		nlohmann::ordered_json toJson() const override {
 			nlohmann::ordered_json j;
 			to_json(j, *this);
 			return j;
+		}
+
+		void validate() const override {
+			ScalarComponent::validate();
+			unitOfMeasure.validate();
 		}
 
 		/// <summary>
@@ -53,29 +58,33 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		const UnitOfMeasure& getUnitOfMeasure() const noexcept { return unitOfMeasure; }
 		void setUnitOfMeasure(const UnitOfMeasure& uom) { unitOfMeasure = uom; }
 		void setUnitOfMeasure(UnitOfMeasure&& uom) noexcept { unitOfMeasure = std::move(uom); }
+
+		friend void from_json(const nlohmann::json& j, Quantity& v);
+		friend void to_json(nlohmann::ordered_json& j, const Quantity& v);
+
+		friend bool operator==(const Quantity& a, const Quantity& b) { return a.toJson() == b.toJson(); }
+		friend bool operator!=(const Quantity& a, const Quantity& b) { return !(a == b); }
+
+		friend std::ostream& operator<<(std::ostream& os, const Quantity& v) {
+			nlohmann::ordered_json j;
+			to_json(j, v);
+			return os << j.dump(2);
+		}
 	};
 
-	inline DataComponent::Registrar<Quantity> registerQuantity{ "Quantity" };
-	inline bool operator==(const Quantity& a, const Quantity& b) { return a.toJson() == b.toJson(); }
-	inline bool operator!=(const Quantity& a, const Quantity& b) { return !(a == b); }
+	const inline DataComponent::Registrar<Quantity> registerQuantity{ "Quantity" };
 
 	inline void from_json(const nlohmann::json& j, Quantity& v) {
 		from_json(j, static_cast<ScalarComponent&>(v));
 
-		v.setValue(ConnectedSystemsAPI::JsonUtils::tryParseDouble(j, "value"));
-		v.setUnitOfMeasure(j.at("uom").get<UnitOfMeasure>());
+		v.value = ConnectedSystemsAPI::JsonUtils::tryParseDouble(j, "value");
+		v.unitOfMeasure = j.at("uom").get<UnitOfMeasure>();
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const Quantity& v) {
 		to_json(j, static_cast<const ScalarComponent&>(v));
 
-		if (v.getValue()) j["value"] = v.getValue().value();
-		j["uom"] = v.getUnitOfMeasure();
-	}
-
-	inline std::ostream& operator<<(std::ostream& os, const Quantity& v) {
-		nlohmann::ordered_json j;
-		to_json(j, v);
-		return os << j.dump(2);
+		if (v.value) j["value"] = v.value.value();
+		j["uom"] = v.unitOfMeasure;
 	}
 }

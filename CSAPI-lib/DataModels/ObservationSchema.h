@@ -1,7 +1,12 @@
 #pragma once
 
 #include <string>
+#include <memory>
+#include <optional>
+#include <ostream>
+#include <utility>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "Link.h"
 #include "Component/DataComponent.h"
@@ -74,34 +79,30 @@ namespace ConnectedSystemsAPI::DataModels {
 		/// Encoding information in case the result is provided out-of-band via the result@link property.
 		/// </summary>
 		const std::optional<Link>& getResultLink() const { return resultLink; }
+
+		friend void from_json(const nlohmann::json& j, ObservationSchema& v);
+		friend void to_json(nlohmann::ordered_json& j, const ObservationSchema& v);
+
+		friend std::ostream& operator<<(std::ostream& os, const ObservationSchema& o) {
+			nlohmann::ordered_json j;
+			to_json(j, o);
+			return os << j.dump(2);
+		}
 	};
 
-	inline void from_json(const nlohmann::json& j, ObservationSchema& o) {
-		o = ObservationSchema(
-			j.at("obsFormat").get<std::string>(),
-			j.value("parametersSchema", std::optional<Component::DataRecord>{}),
-			Component::DataComponentRegistry::createDataComponent(j.at("resultSchema")),
-			j.value("resultLink", std::optional<Link>{})
-		);
+	inline void from_json(const nlohmann::json& j, ObservationSchema& v) {
+		v.observationFormat = j.at("obsFormat").get<std::string>();
+		v.parametersSchema = j.value("parametersSchema", std::optional<Component::DataRecord>{});
+		v.resultSchema = Component::DataComponentRegistry::createDataComponent(j.at("resultSchema"));
+		v.resultLink = j.value("resultLink", std::optional<Link>{});
 	}
 
-	inline void to_json(nlohmann::ordered_json& j, const ObservationSchema& o) {
+	inline void to_json(nlohmann::ordered_json& j, const ObservationSchema& v) {
 		j = nlohmann::ordered_json::object();
-		j["obsFormat"] = o.getObservationFormat();
 
-		if (o.getParametersSchema())
-			j["parametersSchema"] = o.getParametersSchema().value().toJson();
-
-		if (o.getResultSchema())
-			j["resultSchema"] = o.getResultSchema()->toJson();
-
-		if (o.getResultLink())
-			j["resultLink"] = o.getResultLink().value();
-	}
-
-	inline std::ostream& operator<<(std::ostream& os, const ObservationSchema& o) {
-		nlohmann::ordered_json j;
-		to_json(j, o);
-		return os << j.dump(2);
+		j["obsFormat"] = v.observationFormat;
+		if (v.parametersSchema) j["paramsSchema"] = v.getParametersSchema()->toJson();
+		if (v.resultSchema) j["resultSchema"] = v.getResultSchema()->toJson();
+		if (v.resultLink) j["resultLink"] = *v.resultLink;
 	}
 }

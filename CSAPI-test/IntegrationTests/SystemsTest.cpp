@@ -78,7 +78,7 @@ namespace CSAPItest {
 			auto updatedSystem = testHelper.csapi.getSystemsAPI().getSystemById(systemId);
 			Assert::IsTrue(updatedSystem.isSuccessful());
 			Assert::AreEqual("Test System 001 - Updated"s, updatedSystem.getItems().at(0).getProperties().getName());
-			Assert::AreEqual("This is a test system created by CSAPI-test - Updated"s, updatedSystem.getItems().at(0).getProperties().getDescription());
+			Assert::AreEqual("This is a test system created by CSAPI-test - Updated"s, updatedSystem.getItems().at(0).getProperties().getDescription().value());
 		}
 
 		TEST_METHOD(DeleteSystem) {

@@ -2,7 +2,9 @@
 
 #include <chrono>
 #include <string>
+#include <ostream>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "TimeUtils.h"
 
@@ -24,6 +26,16 @@ namespace ConnectedSystemsAPI::DataModels {
 
 		friend void from_json(const nlohmann::json& j, TimeInstant& t);
 		friend void to_json(nlohmann::ordered_json& j, const TimeInstant& t);
+
+		friend bool operator==(const TimeInstant& a, const TimeInstant& b) { return a.getTimePoint() == b.getTimePoint(); }
+		friend bool operator!=(const TimeInstant& a, const TimeInstant& b) { return !(a == b); }
+
+		friend std::ostream& operator<<(std::ostream& os, const TimeInstant& t) {
+			nlohmann::ordered_json j;
+			ConnectedSystemsAPI::DataModels::to_json(j, t);
+			os << j.dump();
+			return os;
+		}
 	};
 
 	inline void from_json(const nlohmann::json& j, TimeInstant& t) {
@@ -34,19 +46,5 @@ namespace ConnectedSystemsAPI::DataModels {
 	inline void to_json(nlohmann::ordered_json& j, const TimeInstant& t) {
 		std::string timeStr = TimeUtils::timePointToString(t.getTimePoint());
 		j = timeStr;
-	}
-
-	inline std::ostream& operator<<(std::ostream& os, const TimeInstant& t) {
-		nlohmann::ordered_json j;
-		ConnectedSystemsAPI::DataModels::to_json(j, t);
-		os << j.dump();
-		return os;
-	}
-
-	inline bool operator==(const TimeInstant& a, const TimeInstant& b) {
-		return a.getTimePoint() == b.getTimePoint();
-	}
-	inline bool operator!=(const TimeInstant& a, const TimeInstant& b) {
-		return !(a == b);
 	}
 }

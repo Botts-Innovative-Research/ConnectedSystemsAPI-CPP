@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <nlohmann/json_fwd.hpp>
+
 #include "APIRequest.h"
 #include "APIResponse.h"
 #include "DataModels/System.h"

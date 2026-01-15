@@ -219,8 +219,7 @@ namespace ConnectedSystemsAPI::DataModels {
 		/// <returns>A new Observation instance.</returns>
 		/// <exception cref="ValidationException">Thrown if validation fails.</exception>
 		Observation build() const {
-			std::vector<ConnectedSystemsAPI::ValidationException::ValidationError> errors;
-			if (!isValid(&errors)) {
+			if (std::vector<ConnectedSystemsAPI::ValidationException::ValidationError> errors; !isValid(&errors)) {
 				throw ConnectedSystemsAPI::ValidationException("ObservationBuilder", errors);
 			}
 

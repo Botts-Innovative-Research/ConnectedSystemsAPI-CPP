@@ -1,12 +1,19 @@
 #pragma once
 
 #include <string>
+#include <memory>
+#include <ostream>
+#include <utility>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "Component/DataComponent.h"
 #include "Component/DataComponentRegistry.h"
 
 namespace ConnectedSystemsAPI::DataModels {
+	class CommandSchema;
+	void to_json(nlohmann::ordered_json& j, const CommandSchema& v);
+
 	class CommandSchema {
 	private:
 		std::string commandFormat;
@@ -30,6 +37,13 @@ namespace ConnectedSystemsAPI::DataModels {
 		CommandSchema& operator=(const CommandSchema&) = delete;
 		CommandSchema(CommandSchema&&) noexcept = default;
 		CommandSchema& operator=(CommandSchema&&) noexcept = default;
+		~CommandSchema() = default;
+
+		nlohmann::ordered_json toJson() const {
+			nlohmann::ordered_json j;
+			to_json(j, *this);
+			return j;
+		}
 
 		/// <summary>
 		/// Encoding format of the command.
@@ -53,12 +67,13 @@ namespace ConnectedSystemsAPI::DataModels {
 
 		friend void from_json(const nlohmann::json& j, CommandSchema& v);
 		friend void to_json(nlohmann::ordered_json& j, const CommandSchema& v);
-		friend std::ostream& operator<<(std::ostream& os, const CommandSchema& v);
+
+		friend std::ostream& operator<<(std::ostream& os, const CommandSchema& v) {
+			return os << v.toJson().dump(2);
+		}
 	};
 
 	inline void from_json(const nlohmann::json& j, CommandSchema& v) {
-		// Print the json for debugging
-		std::cout << "Deserializing CommandSchema from JSON: " << j.dump(2) << std::endl;
 		v.commandFormat = j.at("commandFormat").get<std::string>();
 		v.parametersSchema = Component::DataComponentRegistry::createDataComponent(j.at("paramsSchema"));
 		if (j.contains("resultSchema"))
@@ -74,11 +89,5 @@ namespace ConnectedSystemsAPI::DataModels {
 		if (v.parametersSchema) j["paramsSchema"] = v.getParametersSchema()->toJson();
 		if (v.resultSchema) j["resultSchema"] = v.getResultSchema()->toJson();
 		if (v.feasibilityResultSchema) j["feasibilityResultSchema"] = v.getFeasibilityResultSchema()->toJson();
-	}
-
-	inline std::ostream& operator<<(std::ostream& os, const CommandSchema& v) {
-		nlohmann::ordered_json j;
-		to_json(j, v);
-		return os << j.dump(2);
 	}
 }

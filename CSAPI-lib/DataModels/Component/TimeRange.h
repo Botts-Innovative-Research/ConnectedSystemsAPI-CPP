@@ -3,10 +3,15 @@
 #include <string>
 #include <optional>
 #include <ostream>
+#include <utility>
+#include <vector>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
+
 #include "SimpleComponent.h"
 #include "UnitOfMeasure.h"
 #include "Util/JsonUtils.h"
+#include "DataComponent.h"
 
 namespace ConnectedSystemsAPI::DataModels::Component {
 	class TimeRange;
@@ -27,7 +32,7 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		TimeRange& operator=(TimeRange&&) noexcept = default;
 		~TimeRange() override = default;
 
-		void validate() const {
+		void validate() const override {
 			SimpleComponent::validate();
 			if (unitOfMeasure)
 				unitOfMeasure->validate();
@@ -78,37 +83,41 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		void setUnitOfMeasure(UnitOfMeasure&& unitOfMeasure) noexcept { this->unitOfMeasure = std::move(unitOfMeasure); }
 		bool hasUnitOfMeasure() const noexcept { return unitOfMeasure.has_value(); }
 		void clearUnitOfMeasure() noexcept { unitOfMeasure.reset(); }
+
+		friend void from_json(const nlohmann::json& j, TimeRange& v);
+		friend void to_json(nlohmann::ordered_json& j, const TimeRange& v);
+
+		friend bool operator==(const TimeRange& a, const TimeRange& b) { return a.toJson() == b.toJson(); }
+		friend bool operator!=(const TimeRange& a, const TimeRange& b) { return !(a == b); }
+
+		friend std::ostream& operator<<(std::ostream& os, const TimeRange& v) {
+			nlohmann::ordered_json j;
+			to_json(j, v);
+			return os << j.dump(2);
+		}
 	};
 
-	inline DataComponent::Registrar<TimeRange> registerTimeRange{ "TimeRange" };
-	inline bool operator==(const TimeRange& a, const TimeRange& b) { return a.toJson() == b.toJson(); }
-	inline bool operator!=(const TimeRange& a, const TimeRange& b) { return !(a == b); }
+	const inline DataComponent::Registrar<TimeRange> registerTimeRange{ "TimeRange" };
 
 	inline void from_json(const nlohmann::json& j, TimeRange& v) {
 		from_json(j, static_cast<SimpleComponent&>(v));
 
-		v.setValue(ConnectedSystemsAPI::JsonUtils::tryParseDoubleArray(j, "value"));
-		v.setReferenceTime(ConnectedSystemsAPI::JsonUtils::tryParseString(j, "referenceTime"));
-		v.setLocalFrame(ConnectedSystemsAPI::JsonUtils::tryParseString(j, "localFrame"));
+		v.value = ConnectedSystemsAPI::JsonUtils::tryParseDoubleArray(j, "value");
+		v.referenceTime = ConnectedSystemsAPI::JsonUtils::tryParseString(j, "referenceTime");
+		v.localFrame = ConnectedSystemsAPI::JsonUtils::tryParseString(j, "localFrame");
 
 		if (j.contains("uom") && j["uom"].is_object())
-			v.setUnitOfMeasure(j["uom"].get<UnitOfMeasure>());
+			v.unitOfMeasure = j["uom"].get<UnitOfMeasure>();
 		else
-			v.setUnitOfMeasure(std::nullopt);
+			v.unitOfMeasure = std::nullopt;
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const TimeRange& v) {
 		to_json(j, static_cast<const SimpleComponent&>(v));
 
-		if (v.getValue()) j["value"] = v.getValue().value();
-		if (v.getReferenceTime()) j["referenceTime"] = v.getReferenceTime().value();
-		if (v.getLocalFrame()) j["localFrame"] = v.getLocalFrame().value();
-		if (v.getUnitOfMeasure()) j["uom"] = v.getUnitOfMeasure().value();
-	}
-
-	inline std::ostream& operator<<(std::ostream& os, const TimeRange& v) {
-		nlohmann::ordered_json j;
-		to_json(j, v);
-		return os << j.dump(2);
+		if (v.value) j["value"] = v.value.value();
+		if (v.referenceTime) j["referenceTime"] = v.referenceTime.value();
+		if (v.localFrame) j["localFrame"] = v.localFrame.value();
+		if (v.unitOfMeasure) j["uom"] = v.unitOfMeasure.value();
 	}
 }

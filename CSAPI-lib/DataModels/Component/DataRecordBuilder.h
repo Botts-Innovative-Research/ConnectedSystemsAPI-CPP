@@ -3,9 +3,11 @@
 #include <vector>
 #include <memory>
 #include <stdexcept>
+#include <utility>
 
 #include "DataRecord.h"
 #include "DataComponentBuilder.h"
+#include "DataComponent.h"
 
 namespace ConnectedSystemsAPI::DataModels::Component {
 	class DataRecordBuilder : public DataComponentBuilder<DataRecordBuilder, DataRecord> {

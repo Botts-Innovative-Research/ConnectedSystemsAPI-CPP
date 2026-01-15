@@ -5,6 +5,7 @@
 #include <optional>
 #include <utility>
 #include <memory>
+#include <nlohmann/json_fwd.hpp>
 
 #include "ControlStream.h"
 #include "CommandSchema.h"
@@ -12,6 +13,8 @@
 #include "TimeExtent.h"
 #include "ControlledProperty.h"
 #include "ValidationException.h"
+#include "Component/DataComponentRegistry.h"
+#include "Component/DataComponent.h"
 
 namespace ConnectedSystemsAPI::DataModels {
 	/// <summary>

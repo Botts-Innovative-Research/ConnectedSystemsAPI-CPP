@@ -5,12 +5,16 @@
 #include <vector>
 #include <memory>
 #include <ostream>
+#include <utility>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "Link.h"
 #include "TimeExtent.h"
 #include "ControlledProperty.h"
 #include "CommandSchema.h"
+#include "Component/DataComponent.h"
+#include "Component/DataComponentRegistry.h"
 
 namespace ConnectedSystemsAPI::DataModels {
 	class ControlStream {
@@ -202,8 +206,38 @@ namespace ConnectedSystemsAPI::DataModels {
 
 		friend void from_json(const nlohmann::json& j, ControlStream& o);
 		friend void to_json(nlohmann::ordered_json& j, const ControlStream& o);
-		friend bool operator==(const ControlStream& a, const ControlStream& b);
-		friend bool operator!=(const ControlStream& a, const ControlStream& b);
+
+		friend bool operator==(const ControlStream& a, const ControlStream& b) {
+			// Note: Schema comparison not implemented as CommandSchema doesn't have operator==
+			return a.id == b.id
+				&& a.name == b.name
+				&& a.description == b.description
+				&& a.validTime == b.validTime
+				&& a.formats == b.formats
+				&& a.systemLink == b.systemLink
+				&& a.inputName == b.inputName
+				&& a.procedureLink == b.procedureLink
+				&& a.deploymentLink == b.deploymentLink
+				&& a.featureOfInterestLink == b.featureOfInterestLink
+				&& a.samplingFeatureLink == b.samplingFeatureLink
+				&& a.controlledProperties == b.controlledProperties
+				&& a.issueTime == b.issueTime
+				&& a.executionTime == b.executionTime
+				&& a.live == b.live
+				&& a.async == b.async
+				&& a.links == b.links;
+		}
+
+		friend bool operator!=(const ControlStream& a, const ControlStream& b) {
+			return !(a == b);
+		}
+
+		friend std::ostream& operator<<(std::ostream& os, const ControlStream& v) {
+			nlohmann::ordered_json j;
+			ConnectedSystemsAPI::DataModels::to_json(j, v);
+			os << j.dump(2);
+			return os;
+		}
 
 	private:
 		static std::unique_ptr<Component::DataComponent> cloneComponent(const Component::DataComponent* source) {
@@ -260,37 +294,5 @@ namespace ConnectedSystemsAPI::DataModels {
 		if (v.async.has_value()) j["async"] = v.async.value();
 		if (v.links.has_value()) j["links"] = v.links.value();
 		if (v.schema) j["schema"] = *v.schema;
-	}
-
-	inline std::ostream& operator<<(std::ostream& os, const ControlStream& v) {
-		nlohmann::ordered_json j;
-		ConnectedSystemsAPI::DataModels::to_json(j, v);
-		os << j.dump(2);
-		return os;
-	}
-
-	inline bool operator==(const ControlStream& a, const ControlStream& b) {
-		// Note: Schema comparison not implemented as CommandSchema doesn't have operator==
-		return a.id == b.id
-			&& a.name == b.name
-			&& a.description == b.description
-			&& a.validTime == b.validTime
-			&& a.formats == b.formats
-			&& a.systemLink == b.systemLink
-			&& a.inputName == b.inputName
-			&& a.procedureLink == b.procedureLink
-			&& a.deploymentLink == b.deploymentLink
-			&& a.featureOfInterestLink == b.featureOfInterestLink
-			&& a.samplingFeatureLink == b.samplingFeatureLink
-			&& a.controlledProperties == b.controlledProperties
-			&& a.issueTime == b.issueTime
-			&& a.executionTime == b.executionTime
-			&& a.live == b.live
-			&& a.async == b.async
-			&& a.links == b.links;
-	}
-
-	inline bool operator!=(const ControlStream& a, const ControlStream& b) {
-		return !(a == b);
 	}
 }

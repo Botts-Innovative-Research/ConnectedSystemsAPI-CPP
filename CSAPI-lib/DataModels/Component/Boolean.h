@@ -3,9 +3,14 @@
 #include <string>
 #include <optional>
 #include <ostream>
+#include <utility>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
+
 #include "ScalarComponent.h"
 #include "Util/JsonUtils.h"
+#include "DataComponent.h"
+#include "SimpleComponent.h"
 
 namespace ConnectedSystemsAPI::DataModels::Component {
 	class Boolean;
@@ -23,10 +28,6 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		Boolean& operator=(Boolean&&) noexcept = default;
 		~Boolean() override = default;
 
-		void validate() const override {
-			ScalarComponent::validate();
-		}
-
 		nlohmann::ordered_json toJson() const override {
 			nlohmann::ordered_json j;
 			to_json(j, *this);
@@ -42,27 +43,29 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		void setValue(bool v) noexcept { value = v; }
 		bool hasValue() const noexcept { return value.has_value(); }
 		void clearValue() noexcept { value.reset(); }
+
+		friend void from_json(const nlohmann::json& j, Boolean& v);
+		friend void to_json(nlohmann::ordered_json& j, const Boolean& v);
+
+		friend bool operator==(const Boolean& a, const Boolean& b) { return a.toJson() == b.toJson(); }
+		friend bool operator!=(const Boolean& a, const Boolean& b) { return !(a == b); }
+
+		friend std::ostream& operator<<(std::ostream& os, const Boolean& v) {
+			return os << v.toJson().dump(2);
+		}
 	};
 
-	inline DataComponent::Registrar<Boolean> registerBoolean{ "Boolean" };
-	inline bool operator==(const Boolean& a, const Boolean& b) { return a.toJson() == b.toJson(); }
-	inline bool operator!=(const Boolean& a, const Boolean& b) { return !(a == b); }
+	const inline DataComponent::Registrar<Boolean> registerBoolean{ "Boolean" };
 
 	inline void from_json(const nlohmann::json& j, Boolean& v) {
 		from_json(j, static_cast<ScalarComponent&>(v));
 
-		v.setValue(ConnectedSystemsAPI::JsonUtils::tryParseBoolean(j, "value"));
+		v.value = ConnectedSystemsAPI::JsonUtils::tryParseBoolean(j, "value");
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const Boolean& v) {
 		to_json(j, static_cast<const ScalarComponent&>(v));
 
-		if (v.getValue()) j["value"] = v.getValue().value();
-	}
-
-	inline std::ostream& operator<<(std::ostream& os, const Boolean& v) {
-		nlohmann::ordered_json j;
-		to_json(j, v);
-		return os << j.dump(2);
+		if (v.hasValue()) j["value"] = v.value;
 	}
 }

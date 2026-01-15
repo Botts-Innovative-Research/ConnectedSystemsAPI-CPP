@@ -2,7 +2,9 @@
 
 #include <string>
 #include <optional>
+#include <ostream>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 namespace ConnectedSystemsAPI::DataModels {
 	class ObservedProperty {
@@ -34,8 +36,23 @@ namespace ConnectedSystemsAPI::DataModels {
 
 		friend void from_json(const nlohmann::json& j, ObservedProperty& o);
 		friend void to_json(nlohmann::ordered_json& j, const ObservedProperty& o);
-		friend bool operator==(const ObservedProperty& a, const ObservedProperty& b);
-		friend bool operator!=(const ObservedProperty& a, const ObservedProperty& b);
+
+		friend bool operator==(const ObservedProperty& a, const ObservedProperty& b) {
+			return a.definition == b.definition
+				&& a.label == b.label
+				&& a.description == b.description;
+		}
+
+		friend bool operator!=(const ObservedProperty& a, const ObservedProperty& b) {
+			return !(a == b);
+		}
+
+		friend std::ostream& operator<<(std::ostream& os, const ObservedProperty& v) {
+			nlohmann::ordered_json j;
+			ConnectedSystemsAPI::DataModels::to_json(j, v);
+			os << j.dump(2);
+			return os;
+		}
 	};
 
 	inline void from_json(const nlohmann::json& j, ObservedProperty& v) {
@@ -50,22 +67,5 @@ namespace ConnectedSystemsAPI::DataModels {
 		if (v.definition.has_value()) j["definition"] = v.definition.value();
 		if (v.label.has_value()) j["label"] = v.label.value();
 		if (v.description.has_value()) j["description"] = v.description.value();
-	}
-
-	inline std::ostream& operator<<(std::ostream& os, const ObservedProperty& v) {
-		nlohmann::ordered_json j;
-		ConnectedSystemsAPI::DataModels::to_json(j, v);
-		os << j.dump(2);
-		return os;
-	}
-
-	inline bool operator==(const ObservedProperty& a, const ObservedProperty& b) {
-		return a.definition == b.definition
-			&& a.label == b.label
-			&& a.description == b.description;
-	}
-
-	inline bool operator!=(const ObservedProperty& a, const ObservedProperty& b) {
-		return !(a == b);
 	}
 }

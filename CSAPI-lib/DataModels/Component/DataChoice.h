@@ -1,7 +1,13 @@
 #pragma once
 
 #include <optional>
+#include <memory>
+#include <ostream>
+#include <utility>
+#include <vector>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
+
 #include "Category.h"
 #include "DataComponent.h"
 #include "DataComponentRegistry.h"
@@ -32,7 +38,7 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		DataChoice& operator=(DataChoice&&) noexcept = default;
 		~DataChoice() override = default;
 
-		void validate() const {
+		void validate() const override {
 			DataComponent::validate();
 			if (choiceValue)
 				choiceValue->validate();
@@ -64,17 +70,27 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		void setItems(std::vector<std::unique_ptr<DataComponent>> f) { items = std::move(f); }
 		void addItem(std::unique_ptr<DataComponent> item) { items.push_back(std::move(item)); }
 		void clearItems() noexcept { items.clear(); }
+
+		friend void from_json(const nlohmann::json& j, DataChoice& v);
+		friend void to_json(nlohmann::ordered_json& j, const DataChoice& v);
+
+		friend bool operator==(const DataChoice& a, const DataChoice& b) { return a.toJson() == b.toJson(); }
+		friend bool operator!=(const DataChoice& a, const DataChoice& b) { return !(a == b); }
+
+		friend std::ostream& operator<<(std::ostream& os, const DataChoice& v) {
+			nlohmann::ordered_json j;
+			to_json(j, v);
+			return os << j.dump(2);
+		}
 	};
 
-	inline DataComponent::Registrar<DataChoice> registerDataChoice{ "DataChoice" };
-	inline bool operator==(const DataChoice& a, const DataChoice& b) { return a.toJson() == b.toJson(); }
-	inline bool operator!=(const DataChoice& a, const DataChoice& b) { return !(a == b); }
+	const inline DataComponent::Registrar<DataChoice> registerDataChoice{ "DataChoice" };
 
 	inline void from_json(const nlohmann::json& j, DataChoice& v) {
 		from_json(j, static_cast<DataComponent&>(v));
 
 		if (j.contains("choiceValue"))
-			v.setChoiceValue(j.at("choiceValue").get<Category>());
+			v.choiceValue = j.at("choiceValue").get<Category>();
 
 		if (j.contains("items") && j["items"].is_array()) {
 			std::vector<std::unique_ptr<DataComponent>> items;
@@ -82,19 +98,19 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 				auto created = DataComponentRegistry::createDataComponent(item);
 				if (created) items.push_back(std::move(created));
 			}
-			v.setItems(std::move(items));
+			v.items = std::move(items);
 		}
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const DataChoice& v) {
 		to_json(j, static_cast<const DataComponent&>(v));
 
-		if (v.getChoiceValue())
-			j["choiceValue"] = v.getChoiceValue().value();
+		if (v.choiceValue)
+			j["choiceValue"] = v.choiceValue.value();
 
-		if (!v.getItems().empty()) {
+		if (!v.items.empty()) {
 			j["items"] = nlohmann::ordered_json::array();
-			for (const auto& item : v.getItems()) {
+			for (const auto& item : v.items) {
 				j["items"].push_back(item ? item->toJson() : nlohmann::ordered_json(nullptr));
 			}
 		}

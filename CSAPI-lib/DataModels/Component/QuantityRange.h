@@ -3,9 +3,15 @@
 #include <string>
 #include <optional>
 #include <ostream>
+#include <vector>
+#include <utility>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
+
 #include "SimpleComponent.h"
 #include "Util/JsonUtils.h"
+#include "DataComponent.h"
+#include "UnitOfMeasure.h"
 
 namespace ConnectedSystemsAPI::DataModels::Component {
 	class QuantityRange;
@@ -24,15 +30,15 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		QuantityRange& operator=(QuantityRange&&) noexcept = default;
 		~QuantityRange() override = default;
 
-		void validate() const override {
-			SimpleComponent::validate();
-			unitOfMeasure.validate();
-		}
-
 		nlohmann::ordered_json toJson() const override {
 			nlohmann::ordered_json j;
 			to_json(j, *this);
 			return j;
+		}
+
+		void validate() const override {
+			SimpleComponent::validate();
+			unitOfMeasure.validate();
 		}
 
 		/// <summary>
@@ -53,29 +59,33 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		const UnitOfMeasure& getUnitOfMeasure() const noexcept { return unitOfMeasure; }
 		void setUnitOfMeasure(const UnitOfMeasure& unitOfMeasure) { this->unitOfMeasure = unitOfMeasure; }
 		void setUnitOfMeasure(UnitOfMeasure&& unitOfMeasure) noexcept { this->unitOfMeasure = std::move(unitOfMeasure); }
+
+		friend void from_json(const nlohmann::json& j, QuantityRange& v);
+		friend void to_json(nlohmann::ordered_json& j, const QuantityRange& v);
+
+		friend bool operator==(const QuantityRange& a, const QuantityRange& b) { return a.toJson() == b.toJson(); }
+		friend bool operator!=(const QuantityRange& a, const QuantityRange& b) { return !(a == b); }
+
+		friend std::ostream& operator<<(std::ostream& os, const QuantityRange& v) {
+			nlohmann::ordered_json j;
+			to_json(j, v);
+			return os << j.dump(2);
+		}
 	};
 
-	inline DataComponent::Registrar<QuantityRange> registerQuantityRange{ "QuantityRange" };
-	inline bool operator==(const QuantityRange& a, const QuantityRange& b) { return a.toJson() == b.toJson(); }
-	inline bool operator!=(const QuantityRange& a, const QuantityRange& b) { return !(a == b); }
+	const inline DataComponent::Registrar<QuantityRange> registerQuantityRange{ "QuantityRange" };
 
 	inline void from_json(const nlohmann::json& j, QuantityRange& v) {
 		from_json(j, static_cast<SimpleComponent&>(v));
 
-		v.setValue(ConnectedSystemsAPI::JsonUtils::tryParseDoubleArray(j, "value"));
-		v.setUnitOfMeasure(j.at("uom").get<UnitOfMeasure>());
+		v.value = ConnectedSystemsAPI::JsonUtils::tryParseDoubleArray(j, "value");
+		v.unitOfMeasure = j.at("uom").get<UnitOfMeasure>();
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const QuantityRange& v) {
 		to_json(j, static_cast<const SimpleComponent&>(v));
 
-		if (v.getValue()) j["value"] = v.getValue().value();
-		j["uom"] = v.getUnitOfMeasure();
-	}
-
-	inline std::ostream& operator<<(std::ostream& os, const QuantityRange& v) {
-		nlohmann::ordered_json j;
-		to_json(j, v);
-		return os << j.dump(2);
+		if (v.value) j["value"] = v.value.value();
+		j["uom"] = v.unitOfMeasure;
 	}
 }

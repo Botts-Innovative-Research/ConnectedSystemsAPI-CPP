@@ -2,11 +2,18 @@
 
 #include <string>
 #include <ostream>
+#include <exception>
+#include <cstdint>
+#include <memory>
+#include <utility>
+#include <vector>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "DataComponent.h"
 #include "DataComponentRegistry.h"
 #include "DataModels/Data/DataBlockMixed.h"
+#include <DataModels/Data/DataValue.h>
 
 namespace ConnectedSystemsAPI::DataModels::Component {
 	class DataRecord;
@@ -79,11 +86,21 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 			}
 			return dataBlock;
 		}
+
+		friend void from_json(const nlohmann::json& j, DataRecord& v);
+		friend void to_json(nlohmann::ordered_json& j, const DataRecord& v);
+
+		friend bool operator==(const DataRecord& a, const DataRecord& b) { return a.toJson() == b.toJson(); }
+		friend bool operator!=(const DataRecord& a, const DataRecord& b) { return !(a == b); }
+
+		friend std::ostream& operator<<(std::ostream& os, const DataRecord& r) {
+			nlohmann::ordered_json j;
+			to_json(j, r);
+			return os << j.dump(2);
+		}
 	};
 
-	inline DataComponent::Registrar<DataRecord> registerDataRecord{ "DataRecord" };
-	inline bool operator==(const DataRecord& a, const DataRecord& b) { return a.toJson() == b.toJson(); }
-	inline bool operator!=(const DataRecord& a, const DataRecord& b) { return !(a == b); }
+	const inline DataComponent::Registrar<DataRecord> registerDataRecord{ "DataRecord" };
 
 	inline void from_json(const nlohmann::json& j, DataRecord& r) {
 		from_json(j, static_cast<DataComponent&>(r));
@@ -101,7 +118,7 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 					// Skip invalid field.
 				}
 			}
-			r.setFields(std::move(tempFields));
+			r.fields = std::move(tempFields);
 		}
 		else {
 			r.clearFields();
@@ -112,16 +129,10 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		to_json(j, static_cast<const DataComponent&>(r));
 
 		j["fields"] = nlohmann::ordered_json::array();
-		for (const auto& fieldPtr : r.getFields()) {
+		for (const auto& fieldPtr : r.fields) {
 			if (fieldPtr) {
 				j["fields"].push_back(fieldPtr->toJson());
 			}
 		}
-	}
-
-	inline std::ostream& operator<<(std::ostream& os, const DataRecord& r) {
-		nlohmann::ordered_json j;
-		to_json(j, r);
-		return os << j.dump(2);
 	}
 }

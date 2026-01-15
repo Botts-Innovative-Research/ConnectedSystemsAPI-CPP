@@ -3,8 +3,11 @@
 #include <string>
 #include <iostream>
 #include <stdexcept>
-#include <curl/curl.h>
 #include <map>
+#include <vector>
+#include <curl/curl.h>
+#include <curl/easy.h>
+
 #include "APIResponse.h"
 
 namespace ConnectedSystemsAPI {
@@ -86,10 +89,9 @@ namespace ConnectedSystemsAPI {
 		static size_t HeaderCallback(char* buffer, size_t size, size_t nitems, void* userdata) {
 			size_t totalSize = size * nitems;
 			auto* response = static_cast<RawHttpResponse*>(userdata);
-			std::string headerLine(buffer, totalSize);
 
 			// Check for the status line (e.g., "HTTP/1.1 200 OK\r\n")
-			if (headerLine.find("HTTP/") == 0) {
+			if (std::string headerLine(buffer, totalSize); headerLine.find("HTTP/") == 0) {
 				// Remove trailing \r\n
 				headerLine.erase(headerLine.find_last_not_of("\r\n") + 1);
 				// Remove "HTTP/1.1 " prefix to get the status message

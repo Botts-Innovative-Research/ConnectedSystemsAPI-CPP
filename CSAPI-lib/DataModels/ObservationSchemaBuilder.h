@@ -5,12 +5,15 @@
 #include <optional>
 #include <memory>
 #include <utility>
+#include <vector>
+#include <nlohmann/json_fwd.hpp>
 
 #include "ObservationSchema.h"
 #include "Link.h"
 #include "Component/DataRecord.h"
 #include "Component/DataComponent.h"
 #include "ValidationException.h"
+#include "Component/DataComponentRegistry.h"
 
 namespace ConnectedSystemsAPI::DataModels {
 	/// <summary>

@@ -4,7 +4,11 @@
 #include <optional>
 #include <ostream>
 #include <vector>
+#include <memory>
+#include <utility>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
+
 #include "DataComponent.h"
 #include "DataComponentRegistry.h"
 #include "Util/JsonUtils.h"
@@ -68,17 +72,27 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		void setCoordinates(std::vector<std::unique_ptr<DataComponent>> f) { coordinates = std::move(f); }
 		bool hasCoordinates() const noexcept { return !coordinates.empty(); }
 		void clearCoordinates() noexcept { coordinates.clear(); }
+
+		friend void from_json(const nlohmann::json& j, Vector& v);
+		friend void to_json(nlohmann::ordered_json& j, const Vector& v);
+
+		friend bool operator==(const Vector& a, const Vector& b) { return a.toJson() == b.toJson(); }
+		friend bool operator!=(const Vector& a, const Vector& b) { return !(a == b); }
+
+		friend std::ostream& operator<<(std::ostream& os, const Vector& v) {
+			nlohmann::ordered_json j;
+			to_json(j, v);
+			return os << j.dump(2);
+		}
 	};
 
-	inline DataComponent::Registrar<Vector> registerVector{ "Vector" };
-	inline bool operator==(const Vector& a, const Vector& b) { return a.toJson() == b.toJson(); }
-	inline bool operator!=(const Vector& a, const Vector& b) { return !(a == b); }
+	const inline DataComponent::Registrar<Vector> registerVector{ "Vector" };
 
 	inline void from_json(const nlohmann::json& j, Vector& v) {
 		from_json(j, static_cast<DataComponent&>(v));
 
-		v.setReferenceFrame(ConnectedSystemsAPI::JsonUtils::tryParseString(j, "referenceFrame"));
-		v.setLocalFrame(ConnectedSystemsAPI::JsonUtils::tryParseString(j, "localFrame"));
+		v.referenceFrame = ConnectedSystemsAPI::JsonUtils::tryParseString(j, "referenceFrame");
+		v.localFrame = ConnectedSystemsAPI::JsonUtils::tryParseString(j, "localFrame");
 
 		if (j.contains("coordinates") && j["coordinates"].is_array()) {
 			std::vector<std::unique_ptr<DataComponent>> tempFields;
@@ -87,18 +101,18 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 					tempFields.push_back(std::move(ptr));
 				}
 			}
-			v.setCoordinates(std::move(tempFields));
+			v.coordinates = std::move(tempFields);
 		}
 		else {
-			v.clearCoordinates();
+			v.coordinates.clear();
 		}
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const Vector& v) {
 		to_json(j, static_cast<const DataComponent&>(v));
 
-		if (v.getReferenceFrame()) j["referenceFrame"] = v.getReferenceFrame().value();
-		if (v.getLocalFrame()) j["localFrame"] = v.getLocalFrame().value();
+		if (v.referenceFrame) j["referenceFrame"] = v.referenceFrame.value();
+		if (v.localFrame) j["localFrame"] = v.localFrame.value();
 
 		j["coordinates"] = nlohmann::ordered_json::array();
 		for (const auto& coordPtr : v.getCoordinates()) {
@@ -106,11 +120,5 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 				j["coordinates"].push_back(coordPtr->toJson());
 			}
 		}
-	}
-
-	inline std::ostream& operator<<(std::ostream& os, const Vector& v) {
-		nlohmann::ordered_json j;
-		to_json(j, v);
-		return os << j.dump(2);
 	}
 }

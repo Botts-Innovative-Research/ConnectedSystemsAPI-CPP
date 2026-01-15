@@ -4,6 +4,7 @@
 #include <string_view>
 #include <optional>
 #include <utility>
+#include <vector>
 
 #include "Properties.h"
 #include "TimeExtent.h"

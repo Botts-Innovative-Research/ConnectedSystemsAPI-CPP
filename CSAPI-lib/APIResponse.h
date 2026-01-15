@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 namespace ConnectedSystemsAPI {
 	template <typename T>

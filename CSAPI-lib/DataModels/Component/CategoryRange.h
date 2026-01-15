@@ -4,9 +4,14 @@
 #include <optional>
 #include <ostream>
 #include <vector>
+#include <initializer_list>
+#include <utility>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
+
 #include "SimpleComponent.h"
 #include "Util/JsonUtils.h"
+#include "DataComponent.h"
 
 namespace ConnectedSystemsAPI::DataModels::Component {
 	class CategoryRange;
@@ -24,10 +29,6 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		CategoryRange& operator=(const CategoryRange&) = default;
 		CategoryRange& operator=(CategoryRange&&) noexcept = default;
 		~CategoryRange() override = default;
-
-		void validate() const override {
-			SimpleComponent::validate();
-		}
 
 		nlohmann::ordered_json toJson() const override {
 			nlohmann::ordered_json j;
@@ -62,29 +63,33 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		void setCodeSpace(std::string cs) { codeSpace = std::move(cs); }
 		bool hasCodeSpace() const noexcept { return codeSpace.has_value(); }
 		void clearCodeSpace() noexcept { codeSpace = std::nullopt; }
+
+		friend void from_json(const nlohmann::json& j, CategoryRange& v);
+		friend void to_json(nlohmann::ordered_json& j, const CategoryRange& v);
+
+		friend bool operator==(const CategoryRange& a, const CategoryRange& b) { return a.toJson() == b.toJson(); }
+		friend bool operator!=(const CategoryRange& a, const CategoryRange& b) { return !(a == b); }
+
+		friend std::ostream& operator<<(std::ostream& os, const CategoryRange& v) {
+			nlohmann::ordered_json j;
+			to_json(j, v);
+			return os << j.dump(2);
+		}
 	};
 
-	inline DataComponent::Registrar<CategoryRange> registerCategoryRange{ "CategoryRange" };
-	inline bool operator==(const CategoryRange& a, const CategoryRange& b) { return a.toJson() == b.toJson(); }
-	inline bool operator!=(const CategoryRange& a, const CategoryRange& b) { return !(a == b); }
+	const inline DataComponent::Registrar<CategoryRange> registerCategoryRange{ "CategoryRange" };
 
 	inline void from_json(const nlohmann::json& j, CategoryRange& v) {
 		from_json(j, static_cast<SimpleComponent&>(v));
 
-		v.setValue(ConnectedSystemsAPI::JsonUtils::tryParseStringArray(j, "value"));
-		v.setCodeSpace(ConnectedSystemsAPI::JsonUtils::tryParseString(j, "codeSpace"));
+		v.value = ConnectedSystemsAPI::JsonUtils::tryParseStringArray(j, "value");
+		v.codeSpace = ConnectedSystemsAPI::JsonUtils::tryParseString(j, "codeSpace");
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const CategoryRange& v) {
 		to_json(j, static_cast<const SimpleComponent&>(v));
 
-		if (v.getValue()) j["value"] = v.getValue().value();
-		if (v.getCodeSpace()) j["codeSpace"] = v.getCodeSpace().value();
-	}
-
-	inline std::ostream& operator<<(std::ostream& os, const CategoryRange& v) {
-		nlohmann::ordered_json j;
-		to_json(j, v);
-		return os << j.dump(2);
+		if (v.hasValue()) j["value"] = v.value.value();
+		if (v.hasCodeSpace()) j["codeSpace"] = v.codeSpace.value();
 	}
 }

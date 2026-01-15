@@ -8,10 +8,6 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 	/// </summary>
 	class ScalarComponent : public SimpleComponent {
 	public:
-		virtual ~ScalarComponent() = default;
-
-		void validate() const {
-			SimpleComponent::validate();
-		}
+		~ScalarComponent() override = default;
 	};
 }

@@ -2,6 +2,9 @@
 
 #include <string>
 #include <variant>
+#include <cstdint>
+#include <utility>
+#include <nlohmann/json_fwd.hpp>
 
 namespace ConnectedSystemsAPI::DataModels::Data {
 	struct DataValue {
@@ -21,13 +24,13 @@ namespace ConnectedSystemsAPI::DataModels::Data {
 		DataValue& operator=(DataValue&&) noexcept = default;
 		~DataValue() = default;
 
-		DataValue(bool v) : value(v) {}
-		DataValue(int64_t v) : value(v) {}
-		DataValue(uint64_t v) : value(v) {}
-		DataValue(double v) : value(v) {}
-		DataValue(const std::string& v) : value(v) {}
-		DataValue(std::string&& v) : value(std::move(v)) {}
-		DataValue(const char* s) : value(std::string(s)) {}
+		explicit DataValue(bool v) : value(v) {}
+		explicit DataValue(int64_t v) : value(v) {}
+		explicit DataValue(uint64_t v) : value(v) {}
+		explicit DataValue(double v) : value(v) {}
+		explicit DataValue(const std::string& v) : value(v) {}
+		explicit DataValue(std::string&& v) : value(std::move(v)) {}
+		explicit DataValue(const char* s) : value(std::string(s)) {}
 
 		// Assignment operators for underlying types
 		DataValue& operator=(bool v) { value = v; return *this; }

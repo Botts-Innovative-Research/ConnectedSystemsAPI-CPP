@@ -3,9 +3,14 @@
 #include <string>
 #include <optional>
 #include <ostream>
+#include <utility>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
+
 #include "ScalarComponent.h"
 #include "Util/JsonUtils.h"
+#include "DataComponent.h"
+#include "SimpleComponent.h"
 
 namespace ConnectedSystemsAPI::DataModels::Component {
 	class Category;
@@ -24,10 +29,6 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		Category& operator=(Category&&) noexcept = default;
 		~Category() override = default;
 
-		void validate() const override {
-			ScalarComponent::validate();
-		}
-
 		nlohmann::ordered_json toJson() const override {
 			nlohmann::ordered_json j;
 			to_json(j, *this);
@@ -39,11 +40,7 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		/// This property is optional to enable structure to act as a schema for values provided separately (e.g., in a datastream)
 		/// </summary>
 		const std::optional<std::string>& getValue() const noexcept { return value; }
-		void setValue(const std::optional<std::string>& v) { value = v; }
-		void setValue(std::optional<std::string>&& v) { value = std::move(v); }
-		void setValue(const std::string& v) { value = v; }
-		void setValue(std::string&& v) { value = std::move(v); }
-		void setValue(const char* v) { value = v ? std::optional<std::string>(v) : std::nullopt; }
+		void setValue(std::optional<std::string> v) { value = std::move(v); }
 		bool hasValue() const noexcept { return value.has_value(); }
 		void clearValue() noexcept { value.reset(); }
 
@@ -51,37 +48,36 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		/// Name of the dictionary where the possible values for this component are listed and defined.
 		/// </summary>
 		const std::optional<std::string>& getCodeSpace() const noexcept { return codeSpace; }
-		void setCodeSpace(const std::optional<std::string>& cs) { codeSpace = cs; }
-		void setCodeSpace(std::optional<std::string>&& cs) { codeSpace = std::move(cs); }
-		void setCodeSpace(const std::string& cs) { codeSpace = cs; }
-		void setCodeSpace(std::string&& cs) { codeSpace = std::move(cs); }
-		void setCodeSpace(const char* cs) { codeSpace = cs ? std::optional<std::string>(cs) : std::nullopt; }
+		void setCodeSpace(std::optional<std::string> cs) { codeSpace = std::move(cs); }
 		bool hasCodeSpace() const noexcept { return codeSpace.has_value(); }
 		void clearCodeSpace() noexcept { codeSpace.reset(); }
+
+		friend void from_json(const nlohmann::json& j, Category& v);
+		friend void to_json(nlohmann::ordered_json& j, const Category& v);
+
+		friend bool operator==(const Category& a, const Category& b) { return a.toJson() == b.toJson(); }
+		friend bool operator!=(const Category& a, const Category& b) { return !(a == b); }
 
 		friend std::ostream& operator<<(std::ostream& os, const Category& v) {
 			nlohmann::ordered_json j;
 			to_json(j, v);
 			return os << j.dump(2);
 		}
-
-		friend bool operator==(const Category& a, const Category& b) { return a.toJson() == b.toJson(); }
-		friend bool operator!=(const Category& a, const Category& b) { return !(a == b); }
 	};
 
-	inline DataComponent::Registrar<Category> registerCategory{ "Category" };
+	const inline DataComponent::Registrar<Category> registerCategory{ "Category" };
 
 	inline void from_json(const nlohmann::json& j, Category& v) {
 		from_json(j, static_cast<ScalarComponent&>(v));
 
-		v.setValue(ConnectedSystemsAPI::JsonUtils::tryParseString(j, "value"));
-		v.setCodeSpace(ConnectedSystemsAPI::JsonUtils::tryParseString(j, "codeSpace"));
+		v.value = ConnectedSystemsAPI::JsonUtils::tryParseString(j, "value");
+		v.codeSpace = ConnectedSystemsAPI::JsonUtils::tryParseString(j, "codeSpace");
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const Category& v) {
 		to_json(j, static_cast<const ScalarComponent&>(v));
 
-		if (v.getValue()) j["value"] = v.getValue().value();
-		if (v.getCodeSpace()) j["codeSpace"] = v.getCodeSpace().value();
+		if (v.hasValue()) j["value"] = v.value.value();
+		if (v.hasCodeSpace()) j["codeSpace"] = v.codeSpace.value();
 	}
 }

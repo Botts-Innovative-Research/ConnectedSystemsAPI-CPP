@@ -2,7 +2,10 @@
 
 #include <string>
 #include <optional>
+#include <ostream>
+#include <vector>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "Link.h"
 #include "TimeInstant.h"
@@ -88,6 +91,13 @@ namespace ConnectedSystemsAPI::DataModels {
 
 		friend void from_json(const nlohmann::ordered_json& j, Observation& o);
 		friend void to_json(nlohmann::ordered_json& j, const Observation& o);
+
+		friend std::ostream& operator<<(std::ostream& os, const Observation& o) {
+			nlohmann::ordered_json j;
+			to_json(j, o);
+			os << j.dump(2);
+			return os;
+		}
 	};
 
 	inline void from_json(const nlohmann::ordered_json& j, Observation& o) {
@@ -108,30 +118,14 @@ namespace ConnectedSystemsAPI::DataModels {
 	inline void to_json(nlohmann::ordered_json& j, const Observation& o) {
 		j = nlohmann::ordered_json::object();
 
-		if (o.id)
-			j["id"] = o.id.value();
-		if (o.dataStreamId)
-			j["datastream@id"] = o.dataStreamId.value();
-		if (o.samplingFeatureId)
-			j["samplingFeature@id"] = o.samplingFeatureId.value();
-		if (o.procedureLink)
-			j["procedure@link"] = o.procedureLink.value();
-		if (o.phenomenonTime)
-			j["phenomenonTime"] = o.phenomenonTime.value();
-		if (o.resultTime)
-			j["resultTime"] = o.resultTime.value();
-		if (o.resultLink)
-			j["result@link"] = o.resultLink.value();
-		if (o.links)
-			j["links"] = o.links.value();
-
+		if (o.id) j["id"] = o.id.value();
+		if (o.dataStreamId) j["datastream@id"] = o.dataStreamId.value();
+		if (o.samplingFeatureId) j["samplingFeature@id"] = o.samplingFeatureId.value();
+		if (o.procedureLink) j["procedure@link"] = o.procedureLink.value();
+		if (o.phenomenonTime) j["phenomenonTime"] = o.phenomenonTime.value();
+		if (o.resultTime) j["resultTime"] = o.resultTime.value();
 		j["result"] = o.result;
-	}
-
-	inline std::ostream& operator<<(std::ostream& os, const Observation& o) {
-		nlohmann::ordered_json j;
-		to_json(j, o);
-		os << j.dump(2);
-		return os;
+		if (o.resultLink) j["result@link"] = o.resultLink.value();
+		if (o.links) j["links"] = o.links.value();
 	}
 }

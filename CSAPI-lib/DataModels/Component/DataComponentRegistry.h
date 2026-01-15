@@ -1,13 +1,17 @@
 #pragma once
 
-#include <iostream>
+#include <functional>
 #include <string>
 #include <unordered_map>
+#include <memory>
+#include <utility>
+#include <stdexcept>
 #include <nlohmann/json.hpp>
-
-#include "DataComponent.h"
+#include <nlohmann/json_fwd.hpp>
 
 namespace ConnectedSystemsAPI::DataModels::Component {
+	class DataComponent;
+
 	/// <summary>
 	/// Registry for DataComponent types to support polymorphic deserialization from JSON.
 	/// </summary>
@@ -28,7 +32,6 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 			if (it != registry.end()) {
 				return it->second(j);
 			}
-			std::cout << "Unknown component type during deserialization: " << type << std::endl;
 			throw std::runtime_error("DataComponentRegistry: Unknown component type: " + type);
 		}
 

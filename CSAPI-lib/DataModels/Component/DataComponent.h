@@ -3,10 +3,18 @@
 #include <string>
 #include <optional>
 #include <ostream>
+#include <stdexcept>
+#include <utility>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
+
 #include "Util/JsonUtils.h"
+#include "DataComponentRegistry.h"
 
 namespace ConnectedSystemsAPI::DataModels::Component {
+	class DataComponent;
+	void to_json(nlohmann::ordered_json& j, const DataComponent& v);
+
 	/// <summary>
 	/// Base class for all data components.
 	/// Derived types must:
@@ -100,7 +108,7 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		/// </summary>
 		template<typename T>
 		struct Registrar {
-			Registrar(const std::string& typeName) {
+			explicit Registrar(const std::string& typeName) {
 				ConnectedSystemsAPI::DataModels::Component::DataComponentRegistry::registerType(
 					typeName, [](const nlohmann::json& j) {
 					// Deserialize a T from json and return a polymorphic unique_ptr
@@ -109,6 +117,12 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 				);
 			}
 		};
+
+		friend std::ostream& operator<<(std::ostream& os, const DataComponent& c) {
+			nlohmann::ordered_json j;
+			to_json(j, c);
+			return os << j.dump(2);
+		}
 	};
 
 	inline void from_json(const nlohmann::json& j, DataComponent& v) {
@@ -132,11 +146,5 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		if (c.isUpdatable()) j["updatable"] = c.isUpdatable().value();
 		if (c.isOptional()) j["optional"] = c.isOptional().value();
 		if (c.getDefinition()) j["definition"] = c.getDefinition().value();
-	}
-
-	inline std::ostream& operator<<(std::ostream& os, const DataComponent& c) {
-		nlohmann::ordered_json j;
-		to_json(j, c);
-		return os << j.dump(2);
 	}
 }

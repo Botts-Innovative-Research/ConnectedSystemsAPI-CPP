@@ -1,11 +1,19 @@
 #pragma once
 
 #include <string>
+#include <optional>
+#include <ostream>
+#include <vector>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
+
 #include "Properties.h"
 #include "Link.h"
 
 namespace ConnectedSystemsAPI::DataModels {
+	class System;
+	void to_json(nlohmann::ordered_json& j, const System& v);
+
 	class System {
 	private:
 		std::string type;
@@ -33,6 +41,12 @@ namespace ConnectedSystemsAPI::DataModels {
 		const std::optional<std::vector<double>>& getBbox() const { return bbox; }
 		/// <returns>Links to related resources.</returns>
 		const std::optional<std::vector<Link>>& getLinks() const { return links; }
+
+		friend std::ostream& operator<<(std::ostream& os, const System& s) {
+			nlohmann::ordered_json j;
+			ConnectedSystemsAPI::DataModels::to_json(j, s);
+			return os << j.dump(2);
+		}
 	};
 
 	inline void from_json(const nlohmann::json& j, System& s) {
@@ -57,11 +71,5 @@ namespace ConnectedSystemsAPI::DataModels {
 		if (s.getLinks()) {
 			j["links"] = s.getLinks().value();
 		}
-	}
-
-	inline std::ostream& operator<<(std::ostream& os, const System& s) {
-		nlohmann::ordered_json j;
-		ConnectedSystemsAPI::DataModels::to_json(j, s);
-		return os << j.dump(2);
 	}
 }

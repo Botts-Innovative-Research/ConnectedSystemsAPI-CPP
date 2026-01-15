@@ -3,10 +3,15 @@
 #include <string>
 #include <optional>
 #include <ostream>
+#include <utility>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
+
 #include "ScalarComponent.h"
 #include "UnitOfMeasure.h"
 #include "Util/JsonUtils.h"
+#include "DataComponent.h"
+#include "SimpleComponent.h"
 
 namespace ConnectedSystemsAPI::DataModels::Component {
 	class Time;
@@ -76,37 +81,41 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		void setUnitOfMeasure(UnitOfMeasure&& unitOfMeasure) noexcept { this->unitOfMeasure = std::move(unitOfMeasure); }
 		bool hasUnitOfMeasure() const noexcept { return unitOfMeasure.has_value(); }
 		void clearUnitOfMeasure() noexcept { unitOfMeasure.reset(); }
+
+		friend void from_json(const nlohmann::json& j, Time& v);
+		friend void to_json(nlohmann::ordered_json& j, const Time& v);
+
+		friend bool operator==(const Time& a, const Time& b) { return a.toJson() == b.toJson(); }
+		friend bool operator!=(const Time& a, const Time& b) { return !(a == b); }
+
+		friend std::ostream& operator<<(std::ostream& os, const Time& v) {
+			nlohmann::ordered_json j;
+			to_json(j, v);
+			return os << j.dump(2);
+		}
 	};
 
-	inline DataComponent::Registrar<Time> registerTime{ "Time" };
-	inline bool operator==(const Time& a, const Time& b) { return a.toJson() == b.toJson(); }
-	inline bool operator!=(const Time& a, const Time& b) { return !(a == b); }
+	const inline DataComponent::Registrar<Time> registerTime{ "Time" };
 
 	inline void from_json(const nlohmann::json& j, Time& v) {
 		from_json(j, static_cast<ScalarComponent&>(v));
 
-		v.setValue(ConnectedSystemsAPI::JsonUtils::tryParseDouble(j, "value"));
-		v.setReferenceTime(ConnectedSystemsAPI::JsonUtils::tryParseString(j, "referenceTime"));
-		v.setLocalFrame(ConnectedSystemsAPI::JsonUtils::tryParseString(j, "localFrame"));
+		v.value = ConnectedSystemsAPI::JsonUtils::tryParseDouble(j, "value");
+		v.referenceTime = ConnectedSystemsAPI::JsonUtils::tryParseString(j, "referenceTime");
+		v.localFrame = ConnectedSystemsAPI::JsonUtils::tryParseString(j, "localFrame");
 
 		if (j.contains("uom") && j["uom"].is_object())
-			v.setUnitOfMeasure(j["uom"].get<UnitOfMeasure>());
+			v.unitOfMeasure = j["uom"].get<UnitOfMeasure>();
 		else
-			v.setUnitOfMeasure(std::nullopt);
+			v.unitOfMeasure = std::nullopt;
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const Time& v) {
 		to_json(j, static_cast<const ScalarComponent&>(v));
 
-		if (v.getValue()) j["value"] = v.getValue().value();
-		if (v.getReferenceTime()) j["referenceTime"] = v.getReferenceTime().value();
-		if (v.getLocalFrame()) j["localFrame"] = v.getLocalFrame().value();
-		if (v.getUnitOfMeasure()) j["uom"] = v.getUnitOfMeasure().value();
-	}
-
-	inline std::ostream& operator<<(std::ostream& os, const Time& v) {
-		nlohmann::ordered_json j;
-		to_json(j, v);
-		return os << j.dump(2);
+		if (v.value) j["value"] = v.value.value();
+		if (v.referenceTime) j["referenceTime"] = v.referenceTime.value();
+		if (v.localFrame) j["localFrame"] = v.localFrame.value();
+		if (v.unitOfMeasure) j["uom"] = v.unitOfMeasure.value();
 	}
 }
