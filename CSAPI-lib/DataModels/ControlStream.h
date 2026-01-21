@@ -17,6 +17,9 @@
 #include "Component/DataComponentRegistry.h"
 
 namespace ConnectedSystemsAPI::DataModels {
+	class ControlStream;
+	void to_json(nlohmann::ordered_json& j, const ControlStream& v);
+
 	class ControlStream {
 	private:
 		std::optional<std::string> id;

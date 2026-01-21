@@ -11,6 +11,9 @@
 #include "TimeUtils.h"
 
 namespace ConnectedSystemsAPI::DataModels {
+	class TimeExtent;
+	void to_json(nlohmann::ordered_json& j, const TimeExtent& v);
+
 	/// <summary>
 	/// Represents a time or time range.
 	/// Also supports special cases of time instants at 'now',

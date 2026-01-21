@@ -7,6 +7,9 @@
 #include <nlohmann/json_fwd.hpp>
 
 namespace ConnectedSystemsAPI::DataModels {
+	class ObservedProperty;
+	void to_json(nlohmann::ordered_json& j, const ObservedProperty& v);
+
 	class ObservedProperty {
 	private:
 		std::optional<std::string> definition;
