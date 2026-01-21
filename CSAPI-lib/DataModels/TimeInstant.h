@@ -9,6 +9,9 @@
 #include "TimeUtils.h"
 
 namespace ConnectedSystemsAPI::DataModels {
+	class TimeInstant;
+	void to_json(nlohmann::ordered_json& j, const TimeInstant& v);
+
 	class TimeInstant {
 	private:
 		std::chrono::system_clock::time_point timePoint;
