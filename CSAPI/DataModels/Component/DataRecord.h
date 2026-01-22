@@ -13,7 +13,7 @@
 #include "DataComponent.h"
 #include "DataComponentRegistry.h"
 #include "DataModels/Data/DataBlockMixed.h"
-#include <DataModels/Data/DataValue.h>
+#include "DataModels/Data/DataValue.h"
 
 namespace ConnectedSystemsAPI::DataModels::Component {
 	class DataRecord;

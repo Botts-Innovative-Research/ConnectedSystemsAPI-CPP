@@ -45,9 +45,6 @@
     <ClInclude Include="SystemsAPI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TimeUtils.h">
-      <Filter>Header Files\Util</Filter>
-    </ClInclude>
     <ClInclude Include="DataModels\System.h">
       <Filter>Header Files\DataModels</Filter>
     </ClInclude>
@@ -221,6 +218,9 @@
     </ClInclude>
     <ClInclude Include="DataModels\CommandSchemaBuilder.h">
       <Filter>Header Files\DataModels</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\TimeUtils.h">
+      <Filter>Header Files\Util</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
