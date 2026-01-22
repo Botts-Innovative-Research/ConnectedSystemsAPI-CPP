@@ -197,6 +197,7 @@
     <ClInclude Include="SystemsAPI.h" />
     <ClInclude Include="Util\JsonUtils.h" />
     <ClInclude Include="Util\TimeUtils.h" />
+    <ClInclude Include="Util\Utilities.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
