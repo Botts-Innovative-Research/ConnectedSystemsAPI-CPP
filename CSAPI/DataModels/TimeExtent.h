@@ -8,7 +8,7 @@
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
-#include "Util/TimeUtils.h"
+#include "../Util/TimeUtils.h"
 
 namespace ConnectedSystemsAPI::DataModels {
 	class TimeExtent;
