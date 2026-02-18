@@ -12,8 +12,8 @@
 
 #include "DataComponent.h"
 #include "DataComponentRegistry.h"
-#include "DataModels/Data/DataBlockMixed.h"
-#include "DataModels/Data/DataValue.h"
+#include "../Data/DataBlockMixed.h"
+#include "../Data/DataValue.h"
 
 namespace ConnectedSystemsAPI::DataModels::Component {
 	class DataRecord;

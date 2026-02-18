@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DataModels/Data/DataType.h"
+#include "../Data/DataType.h"
 
 namespace ConnectedSystemsAPI::DataModels::Data {
 	class DataBlock {

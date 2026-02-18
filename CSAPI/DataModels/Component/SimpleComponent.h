@@ -10,7 +10,7 @@
 
 #include "DataComponent.h"
 #include "NilValue.h"
-#include "Util/JsonUtils.h"
+#include "../../Util/JsonUtils.h"
 
 namespace ConnectedSystemsAPI::DataModels::Component {
 	class SimpleComponent : public DataComponent {

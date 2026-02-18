@@ -5,10 +5,11 @@
 #include <ostream>
 #include <stdexcept>
 #include <utility>
+#include <memory>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
-#include "Util/JsonUtils.h"
+#include "../../Util/JsonUtils.h"
 #include "DataComponentRegistry.h"
 
 namespace ConnectedSystemsAPI::DataModels::Component {
