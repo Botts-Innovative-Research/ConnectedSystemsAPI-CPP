@@ -44,3 +44,5 @@
 /CSAPI/x64/Debug
 /x64/Debug
 /CSAPI-test/x64/Debug
+
+*/vcpkg_installed/*
