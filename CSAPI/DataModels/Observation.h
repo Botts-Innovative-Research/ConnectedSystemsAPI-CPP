@@ -9,7 +9,7 @@
 
 #include "Link.h"
 #include "TimeInstant.h"
-#include "DataModels/Data/DataBlockMixed.h"
+#include "Data/DataBlockMixed.h"
 
 namespace ConnectedSystemsAPI::DataModels {
 	class Observation;
