@@ -41,6 +41,8 @@
 
 # debug information files
 *.dwo
-/CSAPI-lib/x64/Debug
+/CSAPI/x64/Debug
 /x64/Debug
 /CSAPI-test/x64/Debug
+
+*/vcpkg_installed/*

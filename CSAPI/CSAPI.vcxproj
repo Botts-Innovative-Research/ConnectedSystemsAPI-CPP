@@ -21,34 +21,35 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{79a4b6b0-9ca1-42aa-9b79-3b5cb91252f3}</ProjectGuid>
-    <RootNamespace>ConnectedSystemsAPICPP</RootNamespace>
+    <ProjectGuid>{7aedcc9e-20ec-40c7-a6e7-dbdb997ff9c8}</ProjectGuid>
+    <RootNamespace>CSAPIlib</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>CSAPI</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -70,6 +71,12 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)CSAPI;</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgEnableManifest>true</VcpkgEnableManifest>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -104,6 +111,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -119,6 +127,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -127,10 +136,74 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="APIRequest.h" />
+    <ClInclude Include="APIResponse.h" />
+    <ClInclude Include="ConnectedSystemsAPI.h" />
+    <ClInclude Include="ControlStreamsAPI.h" />
+    <ClInclude Include="DataModels\CommandSchema.h" />
+    <ClInclude Include="DataModels\CommandSchemaBuilder.h" />
+    <ClInclude Include="DataModels\Component\Boolean.h" />
+    <ClInclude Include="DataModels\Component\BooleanBuilder.h" />
+    <ClInclude Include="DataModels\Component\Category.h" />
+    <ClInclude Include="DataModels\Component\CategoryRange.h" />
+    <ClInclude Include="DataModels\Component\Count.h" />
+    <ClInclude Include="DataModels\Component\CountRange.h" />
+    <ClInclude Include="DataModels\Component\DataArray.h" />
+    <ClInclude Include="DataModels\Component\DataChoice.h" />
+    <ClInclude Include="DataModels\Component\DataComponent.h" />
+    <ClInclude Include="DataModels\Component\DataComponentBuilder.h" />
+    <ClInclude Include="DataModels\Component\DataComponentRegistry.h" />
+    <ClInclude Include="DataModels\Component\DataRecord.h" />
+    <ClInclude Include="DataModels\Component\DataRecordBuilder.h" />
+    <ClInclude Include="DataModels\Component\NilValue.h" />
+    <ClInclude Include="DataModels\Component\Quantity.h" />
+    <ClInclude Include="DataModels\Component\QuantityRange.h" />
+    <ClInclude Include="DataModels\Component\ScalarComponent.h" />
+    <ClInclude Include="DataModels\Component\SimpleComponent.h" />
+    <ClInclude Include="DataModels\Component\Text.h" />
+    <ClInclude Include="DataModels\Component\Time.h" />
+    <ClInclude Include="DataModels\Component\TimeRange.h" />
+    <ClInclude Include="DataModels\Component\UnitOfMeasure.h" />
+    <ClInclude Include="DataModels\Component\Vector.h" />
+    <ClInclude Include="DataModels\ControlledProperty.h" />
+    <ClInclude Include="DataModels\ControlStream.h" />
+    <ClInclude Include="DataModels\ControlStreamBuilder.h" />
+    <ClInclude Include="DataModels\DataStream.h" />
+    <ClInclude Include="DataModels\DataStreamBuilder.h" />
+    <ClInclude Include="DataModels\Data\DataBlock.h" />
+    <ClInclude Include="DataModels\Data\DataBlockMixed.h" />
+    <ClInclude Include="DataModels\Data\DataType.h" />
+    <ClInclude Include="DataModels\Data\DataValue.h" />
+    <ClInclude Include="DataModels\Link.h" />
+    <ClInclude Include="DataModels\Observation.h" />
+    <ClInclude Include="DataModels\ObservationBuilder.h" />
+    <ClInclude Include="DataModels\ObservationSchema.h" />
+    <ClInclude Include="DataModels\ObservationSchemaBuilder.h" />
+    <ClInclude Include="DataModels\ObservedProperty.h" />
+    <ClInclude Include="DataModels\Properties.h" />
+    <ClInclude Include="DataModels\PropertiesBuilder.h" />
+    <ClInclude Include="DataModels\System.h" />
+    <ClInclude Include="DataModels\SystemBuilder.h" />
+    <ClInclude Include="DataModels\TimeExtent.h" />
+    <ClInclude Include="DataModels\TimeInstant.h" />
+    <ClInclude Include="DataModels\ValidationException.h" />
+    <ClInclude Include="DataStreamsAPI.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="ObservationsAPI.h" />
+    <ClInclude Include="Query\DataStreamsOfSystemQuery.h" />
+    <ClInclude Include="Query\DataStreamsQuery.h" />
+    <ClInclude Include="Query\ObservationsOfDataStreamQuery.h" />
+    <ClInclude Include="Query\ObservationsQuery.h" />
+    <ClInclude Include="Query\QueryParameters.h" />
+    <ClInclude Include="Query\SystemsQuery.h" />
+    <ClInclude Include="RegistryInit.h" />
+    <ClInclude Include="SystemsAPI.h" />
+    <ClInclude Include="Util\JsonUtils.h" />
+    <ClInclude Include="Util\TimeUtils.h" />
+    <ClInclude Include="Util\Utilities.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ConnectedSystemsAPI.cpp" />
+    <None Include="vcpkg.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
