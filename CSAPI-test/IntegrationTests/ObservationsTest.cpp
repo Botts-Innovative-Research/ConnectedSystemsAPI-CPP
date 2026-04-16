@@ -37,7 +37,7 @@ namespace CSAPItest {
 		}
 
 		ConnectedSystemsAPI::DataModels::Observation getTestObservation(const std::string& dataStreamId) {
-			auto observationsResponse = testHelper.csapi.getObservationsAPI().getObservationsOfDataStream(dataStreamId);
+			auto observationsResponse = testHelper.csapi.getObservationsAPI().fetchObservationsOfDataStream(dataStreamId);
 			Assert::IsTrue(observationsResponse.isSuccessful());
 			Assert::IsFalse(observationsResponse.getItems().empty());
 			return observationsResponse.getItems().at(0);
@@ -52,14 +52,14 @@ namespace CSAPItest {
 		}
 
 		TEST_METHOD(GetObservations) {
-			auto response = testHelper.csapi.getObservationsAPI().getObservations();
+			auto response = testHelper.csapi.getObservationsAPI().fetchObservations();
 			Assert::IsTrue(response.isSuccessful());
 		}
 
 		TEST_METHOD(GetObservationsOfDataStream) {
 			auto dataStreamsResponse = testHelper.csapi.getDataStreamsAPI().getDataStreams();
 			std::string dataStreamId = dataStreamsResponse.getItems().at(0).getId().value_or("");
-			auto response = testHelper.csapi.getObservationsAPI().getObservationsOfDataStream(dataStreamId);
+			auto response = testHelper.csapi.getObservationsAPI().fetchObservationsOfDataStream(dataStreamId);
 			Assert::IsTrue(response.isSuccessful());
 		}
 
@@ -112,7 +112,7 @@ namespace CSAPItest {
 			Assert::IsTrue(observationCreateResponse.isSuccessful());
 
 			// Get the observations to verify
-			auto observationsResponse = testHelper.csapi.getObservationsAPI().getObservationsOfDataStream(dataStreamId);
+			auto observationsResponse = testHelper.csapi.getObservationsAPI().fetchObservationsOfDataStream(dataStreamId);
 			Assert::IsTrue(observationsResponse.isSuccessful());
 			Assert::IsFalse(observationsResponse.getItems().empty());
 			Assert::AreEqual(dataStreamId, observationsResponse.getItems().at(0).getDataStreamId().value_or(""));
@@ -130,7 +130,7 @@ namespace CSAPItest {
 			auto observation = pushTestObservation(dataStreamId, dataBlock);
 			auto observationId = observation.getId().value_or("");
 
-			auto getResponse = testHelper.csapi.getObservationsAPI().getObservationById(observationId);
+			auto getResponse = testHelper.csapi.getObservationsAPI().fetchObservationById(observationId);
 			Assert::IsTrue(getResponse.isSuccessful());
 			Assert::AreEqual(observationId, getResponse.getItems().at(0).getId().value_or(""));
 		}
@@ -145,7 +145,7 @@ namespace CSAPItest {
 			auto deleteResponse = testHelper.csapi.getObservationsAPI().deleteObservation(observationId);
 			Assert::IsTrue(deleteResponse.isSuccessful());
 
-			auto getResponse = testHelper.csapi.getObservationsAPI().getObservationById(observationId);
+			auto getResponse = testHelper.csapi.getObservationsAPI().fetchObservationById(observationId);
 			Assert::IsFalse(getResponse.isSuccessful());
 		}
 	};

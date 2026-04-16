@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <nlohmann/json_fwd.hpp>
 
 #include "APIRequest.h"
 #include "APIResponse.h"
@@ -10,13 +9,16 @@
 #include "Query/ObservationsOfDataStreamQuery.h"
 
 namespace ConnectedSystemsAPI {
+	/// <summary>
+	/// API for interacting with observations in the Connected Systems API.
+	/// </summary>
 	class ObservationsAPI {
 	private:
 		std::string apiRoot;
 		std::string authHeader;
 
 	public:
-		ObservationsAPI() {}
+		ObservationsAPI() = default;
 		ObservationsAPI(const std::string& apiRoot, const std::string& authHeader)
 			: apiRoot(apiRoot), authHeader(authHeader) {
 		}
@@ -26,8 +28,8 @@ namespace ConnectedSystemsAPI {
 		/// </summary>
 		/// <param name="query">The query string parameters.</param>
 		/// <returns>A response object containing a list of observations.</returns>
-		APIResponse<DataModels::Observation> getObservations(const Query::ObservationsQuery& query) const {
-			return getObservations(query.toString());
+		APIResponse<DataModels::Observation> fetchObservations(const Query::ObservationsQuery& query) const {
+			return fetchObservations(query.toString());
 		}
 
 		/// <summary>
@@ -35,7 +37,7 @@ namespace ConnectedSystemsAPI {
 		/// </summary>
 		/// <param name="query">The query string.</param>
 		/// <returns>A response object containing a list of observations.</returns>
-		APIResponse<DataModels::Observation> getObservations(std::string queryString = "") const {
+		APIResponse<DataModels::Observation> fetchObservations(const std::string& queryString = "") const {
 			auto response = APIRequest::Builder()
 				.setApiRoot(apiRoot)
 				.setMethod("GET")
@@ -52,8 +54,8 @@ namespace ConnectedSystemsAPI {
 		/// </summary>
 		/// <param name="query">The query string parameters.</param>
 		/// <returns>A response object containing a list of observations.</returns>
-		APIResponse<DataModels::Observation> getObservationsOfDataStream(const std::string& dataStreamId, const Query::ObservationsOfDataStreamQuery& query) const {
-			return getObservationsOfDataStream(dataStreamId, query.toString());
+		APIResponse<DataModels::Observation> fetchObservationsOfDataStream(const std::string& dataStreamId, const Query::ObservationsOfDataStreamQuery& query) const {
+			return fetchObservationsOfDataStream(dataStreamId, query.toString());
 		}
 
 		/// <summary>
@@ -61,7 +63,10 @@ namespace ConnectedSystemsAPI {
 		/// </summary>
 		/// <param name="query">The query string.</param>
 		/// <returns>A response object containing a list of observations.</returns>
-		APIResponse<DataModels::Observation> getObservationsOfDataStream(const std::string& dataStreamId, std::string queryString = "") const {
+		APIResponse<DataModels::Observation> fetchObservationsOfDataStream(const std::string& dataStreamId, const std::string& queryString = "") const {
+			if (dataStreamId.empty())
+				return APIResponse<DataModels::Observation>(400, "Invalid dataStreamId", "", {});
+
 			auto response = APIRequest::Builder()
 				.setApiRoot(apiRoot)
 				.setMethod("GET")
@@ -80,7 +85,10 @@ namespace ConnectedSystemsAPI {
 		/// </summary>
 		/// <param name="observationId">The ID of the observation to retrieve.</param>
 		/// <returns>A response object containing the requested observation.</returns>
-		APIResponse<DataModels::Observation> getObservationById(const std::string& observationId) const {
+		APIResponse<DataModels::Observation> fetchObservationById(const std::string& observationId) const {
+			if (observationId.empty())
+				return APIResponse<DataModels::Observation>(400, "Invalid observationId", "", {});
+
 			auto response = APIRequest::Builder()
 				.setApiRoot(apiRoot)
 				.setMethod("GET")
@@ -99,8 +107,9 @@ namespace ConnectedSystemsAPI {
 		/// <param name="observation">The observation to create.</param>
 		/// <returns>A response object indicating success or failure.</returns>
 		APIResponse<void> createObservation(const std::string& dataStreamId, const DataModels::Observation& observation) const {
-			nlohmann::ordered_json j;
-			ConnectedSystemsAPI::DataModels::to_json(j, observation);
+			if (dataStreamId.empty())
+				return APIResponse<void>(400, "Invalid dataStreamId", "", {});
+
 			auto response = APIRequest::Builder()
 				.setApiRoot(apiRoot)
 				.setMethod("POST")
@@ -109,7 +118,7 @@ namespace ConnectedSystemsAPI {
 				.setResourcePath("datastreams")
 				.setResourceId(dataStreamId)
 				.setSubResourcePath("observations")
-				.setBody(j.dump())
+				.setBody(observation.toJson().dump())
 				.build()
 				.execute<void>();
 			return response;
@@ -122,8 +131,9 @@ namespace ConnectedSystemsAPI {
 		/// <param name="observation">The updated observation.</param>
 		/// <returns>A response object indicating success or failure.</returns>
 		APIResponse<void> updateObservation(const std::string& observationId, const DataModels::Observation& observation) const {
-			nlohmann::ordered_json j;
-			ConnectedSystemsAPI::DataModels::to_json(j, observation);
+			if (observationId.empty())
+				return APIResponse<void>(400, "Invalid observationId", "", {});
+
 			auto response = APIRequest::Builder()
 				.setApiRoot(apiRoot)
 				.setMethod("PUT")
@@ -131,7 +141,7 @@ namespace ConnectedSystemsAPI {
 				.addHeader("Content-Type", "application/json")
 				.setResourcePath("observations")
 				.setResourceId(observationId)
-				.setBody(j.dump())
+				.setBody(observation.toJson().dump())
 				.build()
 				.execute<void>();
 			return response;
@@ -143,6 +153,9 @@ namespace ConnectedSystemsAPI {
 		/// <param name="observationId">The ID of the observation to delete.</param>
 		/// <returns>A response object indicating success or failure.</returns>
 		APIResponse<void> deleteObservation(const std::string& observationId) const {
+			if (observationId.empty())
+				return APIResponse<void>(400, "Invalid observationId", "", {});
+
 			auto response = APIRequest::Builder()
 				.setApiRoot(apiRoot)
 				.setMethod("DELETE")

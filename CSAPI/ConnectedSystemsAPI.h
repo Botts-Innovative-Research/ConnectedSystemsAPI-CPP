@@ -3,10 +3,12 @@
 #include <string>
 
 #include "DataStreamsAPI.h"
+#include "CommandsAPI.h"
 #include "ObservationsAPI.h"
 #include "SystemsAPI.h"
 #include "ControlStreamsAPI.h"
 #include "Util/Utilities.h"
+#include "RegistryInit.h" // Ensure registry is initialized before any API calls. Do not remove this include.
 
 namespace ConnectedSystemsAPI {
 	/// <summary>
@@ -20,6 +22,7 @@ namespace ConnectedSystemsAPI {
 		DataStreamsAPI dataStreamsAPI;
 		ObservationsAPI observationsAPI;
 		ControlStreamsAPI controlStreamsAPI;
+		CommandsAPI commandsAPI;
 
 	public:
 		/// <summary>
@@ -34,7 +37,8 @@ namespace ConnectedSystemsAPI {
 			systemsAPI(this->apiRoot, authHeader),
 			dataStreamsAPI(this->apiRoot, authHeader),
 			observationsAPI(this->apiRoot, authHeader),
-			controlStreamsAPI(this->apiRoot, authHeader) {
+			controlStreamsAPI(this->apiRoot, authHeader),
+			commandsAPI(this->apiRoot, authHeader) {
 		}
 
 		/// <summary>
@@ -64,5 +68,6 @@ namespace ConnectedSystemsAPI {
 		DataStreamsAPI& getDataStreamsAPI() { return dataStreamsAPI; }
 		ObservationsAPI& getObservationsAPI() { return observationsAPI; }
 		ControlStreamsAPI& getControlStreamsAPI() { return controlStreamsAPI; }
+		CommandsAPI& getCommandsAPI() { return commandsAPI; }
 	};
 }

@@ -8,6 +8,8 @@
 #include "APIResponse.h"
 #include "DataModels/ControlStream.h"
 #include "DataModels/CommandSchema.h"
+#include "Query/ControlStreamsOfSystemQuery.h"
+#include "Query/ControlStreamsQuery.h"
 
 namespace ConnectedSystemsAPI {
 	/// <summary>
@@ -42,6 +44,15 @@ namespace ConnectedSystemsAPI {
 		}
 
 		/// <summary>
+		/// List all control streams available from this server endpoint.
+		/// </summary>
+		/// <param name="query">The query.</param>
+		/// <returns>A response object containing a list of control streams.</returns>
+		APIResponse<DataModels::ControlStream> getControlStreams(const Query::ControlStreamsQuery& query) const {
+			return getControlStreams(query.toString());
+		}
+
+		/// <summary>
 		/// List all control streams available from the parent system.
 		/// </summary>
 		/// <param name="systemId">The local identifier of a system.</param>
@@ -62,6 +73,16 @@ namespace ConnectedSystemsAPI {
 				.build()
 				.execute<DataModels::ControlStream>();
 			return response;
+		}
+
+		/// <summary>
+		/// List all control streams available from the parent system.
+		/// </summary>
+		/// <param name="systemId">The local identifier of a system.</param>
+		/// <param name="query">The query.</param>
+		/// <returns>A response object containing a list of control streams.</returns>
+		APIResponse<DataModels::ControlStream> getControlStreamsOfSystem(const std::string& systemId, const Query::ControlStreamsOfSystemQuery& query) const {
+			return getControlStreamsOfSystem(systemId, query.toString());
 		}
 
 		/// <summary>

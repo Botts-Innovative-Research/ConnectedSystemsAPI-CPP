@@ -2,6 +2,7 @@
 
 #include <string>
 #include <ostream>
+#include <iostream>
 #include <exception>
 #include <cstdint>
 #include <memory>
@@ -114,8 +115,8 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 					if (comp)
 						tempFields.push_back(std::move(comp));
 				}
-				catch (const std::exception&) {
-					// Skip invalid field.
+				catch (const std::exception& e) {
+					std::cerr << "DataRecord::from_json: failed to create field: " << e.what() << std::endl;
 				}
 			}
 			r.fields = std::move(tempFields);
