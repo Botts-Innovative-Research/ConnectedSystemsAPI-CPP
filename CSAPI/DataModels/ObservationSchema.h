@@ -31,8 +31,8 @@ namespace ConnectedSystemsAPI::DataModels {
 			resultSchema(std::move(resultSchema)), resultLink(resultLink) {
 		}
 
-		ObservationSchema(const ObservationSchema& other)
-			: observationFormat(other.observationFormat),
+		ObservationSchema(const ObservationSchema& other) :
+			observationFormat(other.observationFormat),
 			parametersSchema(other.parametersSchema),
 			resultLink(other.resultLink) {
 			if (other.resultSchema) {

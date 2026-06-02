@@ -225,6 +225,24 @@
     <ClInclude Include="Util\Utilities.h">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
+    <ClInclude Include="DataModels\Command.h">
+      <Filter>Header Files\DataModels</Filter>
+    </ClInclude>
+    <ClInclude Include="Query\ControlStreamsOfSystemQuery.h">
+      <Filter>Header Files\Query</Filter>
+    </ClInclude>
+    <ClInclude Include="Query\ControlStreamsQuery.h">
+      <Filter>Header Files\Query</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandsAPI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Query\CommandsQuery.h">
+      <Filter>Header Files\Query</Filter>
+    </ClInclude>
+    <ClInclude Include="Query\CommandsOfControlStreamQuery.h">
+      <Filter>Header Files\Query</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="vcpkg.json" />

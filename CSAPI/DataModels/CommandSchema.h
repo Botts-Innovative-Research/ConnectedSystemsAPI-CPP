@@ -33,7 +33,22 @@ namespace ConnectedSystemsAPI::DataModels {
 			feasibilityResultSchema(std::move(feasibilityResultSchema)) {
 		}
 
-		CommandSchema(const CommandSchema&) = delete;
+		CommandSchema(const CommandSchema& other) :
+			commandFormat(other.commandFormat) {
+			if (other.parametersSchema) {
+				nlohmann::ordered_json j = other.parametersSchema->toJson();
+				parametersSchema = Component::DataComponentRegistry::createDataComponent(j);
+			}
+			if (other.resultSchema) {
+				nlohmann::ordered_json j = other.resultSchema->toJson();
+				resultSchema = Component::DataComponentRegistry::createDataComponent(j);
+			}
+			if (other.feasibilityResultSchema) {
+				nlohmann::ordered_json j = other.feasibilityResultSchema->toJson();
+				feasibilityResultSchema = Component::DataComponentRegistry::createDataComponent(j);
+			}
+		}
+
 		CommandSchema& operator=(const CommandSchema&) = delete;
 		CommandSchema(CommandSchema&&) noexcept = default;
 		CommandSchema& operator=(CommandSchema&&) noexcept = default;
@@ -75,7 +90,7 @@ namespace ConnectedSystemsAPI::DataModels {
 
 	inline void from_json(const nlohmann::json& j, CommandSchema& v) {
 		v.commandFormat = j.at("commandFormat").get<std::string>();
-		v.parametersSchema = Component::DataComponentRegistry::createDataComponent(j.at("paramsSchema"));
+		v.parametersSchema = Component::DataComponentRegistry::createDataComponent(j.at("parametersSchema"));
 		if (j.contains("resultSchema"))
 			v.resultSchema = Component::DataComponentRegistry::createDataComponent(j.at("resultSchema"));
 		if (j.contains("feasibilityResultSchema"))
@@ -86,7 +101,7 @@ namespace ConnectedSystemsAPI::DataModels {
 		j = nlohmann::ordered_json::object();
 
 		j["commandFormat"] = v.commandFormat;
-		if (v.parametersSchema) j["paramsSchema"] = v.getParametersSchema()->toJson();
+		if (v.parametersSchema) j["parametersSchema"] = v.getParametersSchema()->toJson();
 		if (v.resultSchema) j["resultSchema"] = v.getResultSchema()->toJson();
 		if (v.feasibilityResultSchema) j["feasibilityResultSchema"] = v.getFeasibilityResultSchema()->toJson();
 	}
