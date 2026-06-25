@@ -18,7 +18,7 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 
 	class Text : public ScalarComponent {
 	private:
-		std::optional<std::string> value;
+		std::optional<std::string> m_value;
 
 	public:
 		Text() = default;
@@ -38,13 +38,13 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		/// Inline value(s) for the component.
 		/// This property is optional to enable structure to act as a schema for values provided separately (e.g., in a datastream)
 		/// </summary>
-		std::optional<std::string> getValue() const noexcept { return value; }
-		void setValue(const std::optional<std::string>& value) { this->value = value; }
-		void setValue(std::optional<std::string>&& value) noexcept { this->value = std::move(value); }
-		void setValue(const std::string& value) { this->value = value; }
-		void setValue(std::string&& value) noexcept { this->value = std::move(value); }
-		bool hasValue() const noexcept { return value.has_value(); }
-		void clearValue() noexcept { value.reset(); }
+		std::optional<std::string> getValue() const noexcept { return m_value; }
+		void setValue(const std::optional<std::string>& value) { m_value = value; }
+		void setValue(std::optional<std::string>&& value) noexcept { m_value = std::move(value); }
+		void setValue(const std::string& value) { m_value = value; }
+		void setValue(std::string&& value) noexcept { m_value = std::move(value); }
+		bool hasValue() const noexcept { return m_value.has_value(); }
+		void clearValue() noexcept { m_value.reset(); }
 
 		friend void from_json(const nlohmann::json& j, Text& v);
 		friend void to_json(nlohmann::ordered_json& j, const Text& v);
@@ -64,12 +64,12 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 	inline void from_json(const nlohmann::json& j, Text& v) {
 		from_json(j, static_cast<ScalarComponent&>(v));
 
-		v.value = ConnectedSystemsAPI::JsonUtils::tryParseString(j, "value");
+		v.m_value = ConnectedSystemsAPI::JsonUtils::tryParseString(j, "value");
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const Text& v) {
 		to_json(j, static_cast<const ScalarComponent&>(v));
 
-		if (v.value) j["value"] = v.value.value();
+		if (v.m_value) j["value"] = v.m_value.value();
 	}
 }

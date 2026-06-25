@@ -11,13 +11,13 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 	void to_json(nlohmann::ordered_json& j, const NilValue& v);
 
 	class NilValue {
-		std::string reason;
-		std::string value;
+		std::string m_reason;
+		std::string m_value;
 
 	public:
 		NilValue() = default;
 		NilValue(const std::string& reason, const std::string& value)
-			: reason(reason), value(value) {
+			: m_reason(reason), m_value(value) {
 		}
 		NilValue(const NilValue&) = default;
 		NilValue(NilValue&&) noexcept = default;
@@ -32,23 +32,23 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		}
 
 		void validate() const {
-			if (reason.empty())
+			if (m_reason.empty())
 				throw std::invalid_argument("NilValue.reason is required.");
-			if (value.empty())
+			if (m_value.empty())
 				throw std::invalid_argument("NilValue.value is required.");
 		}
 
 		/// <summary>
 		/// The reason for using the reserved value.
 		/// </summary>
-		const std::string& getReason() const noexcept { return reason; }
-		void setReason(const std::string& reason) { this->reason = reason; }
+		const std::string& getReason() const noexcept { return m_reason; }
+		void setReason(const std::string& reason) { m_reason = reason; }
 
 		/// <summary>
 		/// The reserved value itself.
 		/// </summary>
-		const std::string& getValue() const noexcept { return value; }
-		void setValue(const std::string& value) { this->value = value; }
+		const std::string& getValue() const noexcept { return m_value; }
+		void setValue(const std::string& value) { m_value = value; }
 
 		friend void from_json(const nlohmann::json& j, NilValue& v);
 		friend void to_json(nlohmann::ordered_json& j, const NilValue& v);
@@ -68,13 +68,13 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 	};
 
 	inline void from_json(const nlohmann::json& j, NilValue& v) {
-		v.reason = j["reason"].get<std::string>();
-		v.value = j["value"].get<std::string>();
+		v.m_reason = j["reason"].get<std::string>();
+		v.m_value = j["value"].get<std::string>();
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const NilValue& v) {
 		j = nlohmann::ordered_json::object();
-		j["reason"] = v.reason;
-		j["value"] = v.value;
+		j["reason"] = v.m_reason;
+		j["value"] = v.m_value;
 	}
 }

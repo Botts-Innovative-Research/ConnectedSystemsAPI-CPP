@@ -22,7 +22,7 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 
 	class DataRecord : public DataComponent {
 	private:
-		std::vector<std::unique_ptr<DataComponent>> fields;
+		std::vector<std::unique_ptr<DataComponent>> m_fields;
 
 	public:
 		DataRecord() = default;
@@ -43,7 +43,7 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 
 		void validate() const override {
 			DataComponent::validate();
-			for (const auto& f : fields) {
+			for (const auto& f : m_fields) {
 				if (f) {
 					f->validate();
 				}
@@ -60,14 +60,14 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		/// Definition of the record fields.
 		/// Fields can be scalars or can themself be aggregates such as records, vectors, arrays, or choices.
 		/// </summary>
-		const std::vector<std::unique_ptr<DataComponent>>& getFields() const noexcept { return fields; }
-		void setFields(std::vector<std::unique_ptr<DataComponent>> f) noexcept { fields = std::move(f); }
-		void clearFields() noexcept { fields.clear(); }
-		void addField(std::unique_ptr<DataComponent> field) { if (field) fields.push_back(std::move(field)); }
+		const std::vector<std::unique_ptr<DataComponent>>& getFields() const noexcept { return m_fields; }
+		void setFields(std::vector<std::unique_ptr<DataComponent>> fields) noexcept { m_fields = std::move(fields); }
+		void clearFields() noexcept { m_fields.clear(); }
+		void addField(std::unique_ptr<DataComponent> field) { if (field) m_fields.push_back(std::move(field)); }
 
 		DataModels::Data::DataBlockMixed createDataBlock() const {
 			DataModels::Data::DataBlockMixed dataBlock;
-			for (const auto& field : fields) {
+			for (const auto& field : m_fields) {
 				auto fieldName = field->getName().value_or("");
 				auto fieldValue = DataModels::Data::DataValue();
 				if (field->getType() == "Boolean") {
@@ -119,7 +119,7 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 					std::cerr << "DataRecord::from_json: failed to create field: " << e.what() << std::endl;
 				}
 			}
-			r.fields = std::move(tempFields);
+			r.m_fields = std::move(tempFields);
 		}
 		else {
 			r.clearFields();
@@ -130,7 +130,7 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		to_json(j, static_cast<const DataComponent&>(r));
 
 		j["fields"] = nlohmann::ordered_json::array();
-		for (const auto& fieldPtr : r.fields) {
+		for (const auto& fieldPtr : r.m_fields) {
 			if (fieldPtr) {
 				j["fields"].push_back(fieldPtr->toJson());
 			}

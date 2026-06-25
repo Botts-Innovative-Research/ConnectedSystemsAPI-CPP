@@ -15,10 +15,9 @@
 namespace ConnectedSystemsAPI::DataModels::Component {
 	class SimpleComponent : public DataComponent {
 	private:
-		std::optional<std::string> referenceFrame;
-		std::optional<std::string> axisId;
-		std::optional<std::vector<NilValue>> nilValues;
-		// Todo: constraint
+		std::optional<std::string> m_referenceFrame;
+		std::optional<std::string> m_axisId;
+		std::optional<std::vector<NilValue>> m_nilValues;
 
 	public:
 		SimpleComponent() = default;
@@ -32,8 +31,8 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		void validate() const override {
 			DataComponent::validate();
 
-			if (nilValues) {
-				for (const auto& nv : nilValues.value()) {
+			if (m_nilValues) {
+				for (const auto& nv : m_nilValues.value()) {
 					nv.validate();
 				}
 			}
@@ -43,25 +42,25 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		/// Frame of reference (usually temporal or spatial) with respect to which the value of the component is expressed.
 		/// A reference frame anchors a value to a real world datum.
 		/// </summary>
-		std::optional<std::string> getReferenceFrame() const noexcept { return referenceFrame; }
-		void setReferenceFrame(const std::optional<std::string> referenceFrame) { this->referenceFrame = referenceFrame; }
-		void clearReferenceFrame() noexcept { referenceFrame.reset(); }
+		std::optional<std::string> getReferenceFrame() const noexcept { return m_referenceFrame; }
+		void setReferenceFrame(const std::optional<std::string> referenceFrame) { m_referenceFrame = referenceFrame; }
+		void clearReferenceFrame() noexcept { m_referenceFrame.reset(); }
 
 		/// <summary>
 		/// Specifies the reference axis (refer to CRS axisID).
 		/// The reference frame URI should also be specified unless it is inherited from parent Vector.
 		/// </summary>
-		std::optional<std::string> getAxisId() const noexcept { return axisId; }
-		void setAxisId(const std::optional<std::string> axisId) { this->axisId = axisId; }
-		void clearAxisId() noexcept { axisId.reset(); }
+		std::optional<std::string> getAxisId() const noexcept { return m_axisId; }
+		void setAxisId(const std::optional<std::string> axisId) { m_axisId = axisId; }
+		void clearAxisId() noexcept { m_axisId.reset(); }
 
 		/// <summary>
 		/// Defines reserved values with special meaning (e.g., missing, out-of-range, etc.)
 		/// </summary>		
-		const std::optional<std::vector<NilValue>>& getNilValues() const noexcept { return nilValues; }
-		void setNilValues(const std::optional<std::vector<NilValue>>& nilValues) { this->nilValues = nilValues; }
-		void setNilValues(std::optional<std::vector<NilValue>>&& nilValues) noexcept { this->nilValues = std::move(nilValues); }
-		void clearNilValues() noexcept { nilValues.reset(); }
+		const std::optional<std::vector<NilValue>>& getNilValues() const noexcept { return m_nilValues; }
+		void setNilValues(const std::optional<std::vector<NilValue>>& nilValues) { m_nilValues = nilValues; }
+		void setNilValues(std::optional<std::vector<NilValue>>&& nilValues) noexcept { m_nilValues = std::move(nilValues); }
+		void clearNilValues() noexcept { m_nilValues.reset(); }
 
 		friend void from_json(const nlohmann::json& j, SimpleComponent& v);
 		friend void to_json(nlohmann::ordered_json& j, const SimpleComponent& v);
@@ -79,20 +78,20 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 	inline void from_json(const nlohmann::json& j, SimpleComponent& v) {
 		from_json(j, static_cast<DataComponent&>(v));
 
-		v.referenceFrame = ConnectedSystemsAPI::JsonUtils::tryParseString(j, "refFrame");
-		v.axisId = ConnectedSystemsAPI::JsonUtils::tryParseString(j, "axisID");
+		v.m_referenceFrame = ConnectedSystemsAPI::JsonUtils::tryParseString(j, "refFrame");
+		v.m_axisId = ConnectedSystemsAPI::JsonUtils::tryParseString(j, "axisID");
 
 		if (j.contains("nilValues") && j["nilValues"].is_array())
-			v.nilValues = j.at("nilValues").get<std::vector<NilValue>>();
+			v.m_nilValues = j.at("nilValues").get<std::vector<NilValue>>();
 		else
-			v.nilValues = std::nullopt;
+			v.m_nilValues = std::nullopt;
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const SimpleComponent& s) {
 		to_json(j, static_cast<const DataComponent&>(s));
 
-		if (s.referenceFrame) j["refFrame"] = s.referenceFrame;
-		if (s.axisId) j["axisID"] = s.axisId;
-		if (s.nilValues) j["nilValues"] = s.nilValues.value();
+		if (s.m_referenceFrame) j["refFrame"] = s.m_referenceFrame;
+		if (s.m_axisId) j["axisID"] = s.m_axisId;
+		if (s.m_nilValues) j["nilValues"] = s.m_nilValues.value();
 	}
 }

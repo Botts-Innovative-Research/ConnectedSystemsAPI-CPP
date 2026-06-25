@@ -12,12 +12,12 @@
 namespace ConnectedSystemsAPI::DataModels::Component {
 	class DataRecordBuilder : public DataComponentBuilder<DataRecordBuilder, DataRecord> {
 	private:
-		std::vector<std::unique_ptr<DataComponent>> fields;
+		std::vector<std::unique_ptr<DataComponent>> m_fields;
 
 		void validate() const {
 			this->validateBase();
 
-			for (const auto& field : fields) {
+			for (const auto& field : m_fields) {
 				if (field)
 					field->validate();
 				else
@@ -28,16 +28,16 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 	public:
 		DataRecordBuilder() = default;
 
-		DataRecordBuilder& withFields(std::vector<std::unique_ptr<DataComponent>> f) { fields = std::move(f); return *this; }
-		DataRecordBuilder& addField(std::unique_ptr<DataComponent> field) { if (field) fields.push_back(std::move(field)); return *this; }
-		DataRecordBuilder& clearFields() { fields.clear(); return *this; }
+		DataRecordBuilder& withFields(std::vector<std::unique_ptr<DataComponent>> f) { m_fields = std::move(f); return *this; }
+		DataRecordBuilder& addField(std::unique_ptr<DataComponent> field) { if (field) m_fields.push_back(std::move(field)); return *this; }
+		DataRecordBuilder& clearFields() { m_fields.clear(); return *this; }
 
 		DataRecord build() {
 			validate();
 
 			DataRecord r;
 			this->applyBase(r);
-			r.setFields(std::move(fields));
+			r.setFields(std::move(m_fields));
 
 			return r;
 		}

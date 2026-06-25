@@ -252,27 +252,89 @@ namespace ConnectedSystemsAPI::DataModels {
 
 	inline void from_json(const nlohmann::json& j, ControlStream& v) {
 		std::unique_ptr<CommandSchema> schemaPtr;
-		if (j.contains("schema") && !j["schema"].is_null()) {
+		if (j.contains("schema") && !j["schema"].is_null())
 			schemaPtr = std::make_unique<CommandSchema>(j["schema"].get<CommandSchema>());
-		}
 
-		v.id = j.value("id", std::optional<std::string>{});
-		v.name = j.value("name", std::optional<std::string>{});
-		v.description = j.value("description", std::optional<std::string>{});
-		v.validTime = j.value("validTime", std::optional<TimeExtent>{});
-		v.formats = j.value("formats", std::optional<std::vector<std::string>>{});
-		v.systemLink = j.value("systemLink", std::optional<Link>{});
-		v.inputName = j.value("inputName", std::optional<std::string>{});
-		v.procedureLink = j.value("procedureLink", std::optional<Link>{});
-		v.deploymentLink = j.value("deploymentLink", std::optional<Link>{});
-		v.featureOfInterestLink = j.value("featureOfInterestLink", std::optional<Link>{});
-		v.samplingFeatureLink = j.value("samplingFeatureLink", std::optional<Link>{});
-		v.controlledProperties = j.value("controlledProperties", std::optional<std::vector<ControlledProperty>>{});
-		v.issueTime = j.value("issueTime", std::optional<TimeExtent>{});
-		v.executionTime = j.value("executionTime", std::optional<TimeExtent>{});
-		v.live = j.value("live", std::optional<bool>{});
-		v.async = j.value("async", std::optional<bool>{});
-		v.links = j.value("links", std::optional<std::vector<Link>>{});
+		if (j.contains("id") && !j["id"].is_null())
+			v.id = j["id"].get<std::string>();
+		else
+			v.id.reset();
+
+		if (j.contains("name") && !j["name"].is_null())
+			v.name = j["name"].get<std::string>();
+		else
+			v.name.reset();
+
+		if (j.contains("description") && !j["description"].is_null())
+			v.description = j["description"].get<std::string>();
+		else
+			v.description.reset();
+		if (j.contains("validTime") && !j["validTime"].is_null())
+			v.validTime = j["validTime"].get<TimeExtent>();
+		else
+			v.validTime.reset();
+
+		if (j.contains("formats") && !j["formats"].is_null())
+			v.formats = j["formats"].get<std::vector<std::string>>();
+		else
+			v.formats.reset();
+
+		if (j.contains("systemLink") && !j["systemLink"].is_null())
+			v.systemLink = j["systemLink"].get<Link>();
+		else
+			v.systemLink.reset();
+		if (j.contains("inputName") && !j["inputName"].is_null())
+			v.inputName = j["inputName"].get<std::string>();
+		else
+			v.inputName.reset();
+
+		if (j.contains("procedureLink") && !j["procedureLink"].is_null())
+			v.procedureLink = j["procedureLink"].get<Link>();
+		else
+			v.procedureLink.reset();
+
+		if (j.contains("deploymentLink") && !j["deploymentLink"].is_null())
+			v.deploymentLink = j["deploymentLink"].get<Link>();
+		else
+			v.deploymentLink.reset();
+		if (j.contains("featureOfInterestLink") && !j["featureOfInterestLink"].is_null())
+			v.featureOfInterestLink = j["featureOfInterestLink"].get<Link>();
+		else
+			v.featureOfInterestLink.reset();
+
+		if (j.contains("samplingFeatureLink") && !j["samplingFeatureLink"].is_null())
+			v.samplingFeatureLink = j["samplingFeatureLink"].get<Link>();
+		else
+			v.samplingFeatureLink.reset();
+
+		if (j.contains("controlledProperties") && !j["controlledProperties"].is_null())
+			v.controlledProperties = j["controlledProperties"].get<std::vector<ControlledProperty>>();
+		else
+			v.controlledProperties.reset();
+		if (j.contains("issueTime") && !j["issueTime"].is_null())
+			v.issueTime = j["issueTime"].get<TimeExtent>();
+		else
+			v.issueTime.reset();
+
+		if (j.contains("executionTime") && !j["executionTime"].is_null())
+			v.executionTime = j["executionTime"].get<TimeExtent>();
+		else
+			v.executionTime.reset();
+
+		if (j.contains("live") && !j["live"].is_null())
+			v.live = j["live"].get<bool>();
+		else
+			v.live.reset();
+
+		if (j.contains("async") && !j["async"].is_null())
+			v.async = j["async"].get<bool>();
+		else
+			v.async.reset();
+
+		if (j.contains("links") && !j["links"].is_null())
+			v.links = j["links"].get<std::vector<Link>>();
+		else
+			v.links.reset();
 		v.schema = std::move(schemaPtr);
 	}
 

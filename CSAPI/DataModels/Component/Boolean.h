@@ -18,7 +18,7 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 
 	class Boolean : public ScalarComponent {
 	private:
-		std::optional<bool> value = std::nullopt;
+		std::optional<bool> m_value = std::nullopt;
 
 	public:
 		Boolean() = default;
@@ -38,11 +38,11 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		/// Inline value(s) for the component.
 		/// This property is optional to enable structure to act as a schema for values provided separately (e.g., in a datastream)
 		/// </summary>
-		const std::optional<bool>& getValue() const noexcept { return value; }
-		void setValue(std::optional<bool> v) noexcept { value = std::move(v); }
-		void setValue(bool v) noexcept { value = v; }
-		bool hasValue() const noexcept { return value.has_value(); }
-		void clearValue() noexcept { value.reset(); }
+		const std::optional<bool>& getValue() const noexcept { return m_value; }
+		void setValue(std::optional<bool> value) noexcept { m_value = std::move(value); }
+		void setValue(bool value) noexcept { m_value = value; }
+		bool hasValue() const noexcept { return m_value.has_value(); }
+		void clearValue() noexcept { m_value.reset(); }
 
 		friend void from_json(const nlohmann::json& j, Boolean& v);
 		friend void to_json(nlohmann::ordered_json& j, const Boolean& v);
@@ -60,12 +60,12 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 	inline void from_json(const nlohmann::json& j, Boolean& v) {
 		from_json(j, static_cast<ScalarComponent&>(v));
 
-		v.value = ConnectedSystemsAPI::JsonUtils::tryParseBoolean(j, "value");
+		v.m_value = ConnectedSystemsAPI::JsonUtils::tryParseBoolean(j, "value");
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const Boolean& v) {
 		to_json(j, static_cast<const ScalarComponent&>(v));
 
-		if (v.hasValue()) j["value"] = v.value;
+		if (v.hasValue()) j["value"] = v.m_value;
 	}
 }

@@ -109,13 +109,41 @@ namespace ConnectedSystemsAPI::DataModels {
 		v.id = (j.contains("id") && !j["id"].is_null()) ? std::optional<std::string>{ j["id"].get<std::string>() } : std::optional<std::string>{};
 		v.controlStreamId = (j.contains("controlstream@id") && !j["controlstream@id"].is_null()) ? std::optional<std::string>{ j["controlstream@id"].get<std::string>() } : std::optional<std::string>{};
 		v.samplingFeatureId = (j.contains("samplingFeature@id") && !j["samplingFeature@id"].is_null()) ? std::optional<std::string>{ j["samplingFeature@id"].get<std::string>() } : std::optional<std::string>{};
-		v.procedureLink = j.value("procedure@link", std::optional<Link>{});
-		v.issueTime = j.value("issueTime", std::optional<TimeInstant>{});
-		v.executionTime = j.value("executionTime", std::optional<TimeExtent>{});
-		v.sender = j.value("sender", std::optional<std::string>{});
-		v.currentStatus = j.value("currentStatus", std::optional<std::string>{});
-		v.parameters = (j.contains("parameters") && !j["parameters"].is_null()) ? j["parameters"].get<Data::DataBlockMixed>() : Data::DataBlockMixed{};
-		v.links = j.value("links", std::optional<std::vector<Link>>{});
+
+		if (j.contains("procedure") && !j["procedure"].is_null())
+			v.procedureLink = j["procedure"].get<Link>();
+		else
+			v.procedureLink.reset();
+
+		if (j.contains("issueTime") && !j["issueTime"].is_null())
+			v.issueTime = j["issueTime"].get<TimeInstant>();
+		else
+			v.issueTime.reset();
+
+		if (j.contains("executionTime") && !j["executionTime"].is_null())
+			v.executionTime = j["executionTime"].get<TimeExtent>();
+		else
+			v.executionTime.reset();
+
+		if (j.contains("sender") && !j["sender"].is_null())
+			v.sender = j["sender"].get<std::string>();
+		else
+			v.sender.reset();
+
+		if (j.contains("currentStatus") && !j["currentStatus"].is_null())
+			v.currentStatus = j["currentStatus"].get<std::string>();
+		else
+			v.currentStatus.reset();
+
+		if (j.contains("parameters") && !j["parameters"].is_null())
+			v.parameters = j["parameters"].get<Data::DataBlockMixed>();
+		else
+			v.parameters = Data::DataBlockMixed{};
+
+		if (j.contains("links") && !j["links"].is_null())
+			v.links = j["links"].get<std::vector<Link>>();
+		else
+			v.links.reset();
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const Command& v) {

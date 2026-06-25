@@ -19,9 +19,9 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 
 	class Vector : public DataComponent {
 	private:
-		std::optional<std::string> referenceFrame;
-		std::optional<std::string> localFrame;
-		std::vector<std::unique_ptr<DataComponent>> coordinates;
+		std::optional<std::string> m_referenceFrame;
+		std::optional<std::string> m_localFrame;
+		std::vector<std::unique_ptr<DataComponent>> m_coordinates;
 
 	public:
 		Vector() = default;
@@ -33,7 +33,7 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 
 		void validate() const override {
 			DataComponent::validate();
-			for (const auto& coordPtr : coordinates) {
+			for (const auto& coordPtr : m_coordinates) {
 				if (coordPtr) {
 					coordPtr->validate();
 				}
@@ -50,28 +50,28 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		/// Frame of reference (usually spatial) with respect to which the coordinates of this vector are expressed.
 		/// A reference frame anchors a vector value to a real world datum.
 		/// </summary>
-		std::optional<std::string> getReferenceFrame() const noexcept { return referenceFrame; }
-		void setReferenceFrame(const std::optional<std::string>& referenceFrame) { this->referenceFrame = referenceFrame; }
-		void setReferenceFrame(std::string&& referenceFrame) noexcept { this->referenceFrame = std::move(referenceFrame); }
-		bool hasReferenceFrame() const noexcept { return referenceFrame.has_value(); }
-		void clearReferenceFrame() noexcept { referenceFrame.reset(); }
+		std::optional<std::string> getReferenceFrame() const noexcept { return m_referenceFrame; }
+		void setReferenceFrame(const std::optional<std::string>& referenceFrame) { m_referenceFrame = referenceFrame; }
+		void setReferenceFrame(std::string&& referenceFrame) noexcept { m_referenceFrame = std::move(referenceFrame); }
+		bool hasReferenceFrame() const noexcept { return m_referenceFrame.has_value(); }
+		void clearReferenceFrame() noexcept { m_referenceFrame.reset(); }
 
 		/// <summary>
 		/// Frame of reference whose origin is located by the coordinates of this vector.
 		/// </summary>
-		std::optional<std::string> getLocalFrame() const noexcept { return localFrame; }
-		void setLocalFrame(const std::optional<std::string>& localFrame) { this->localFrame = localFrame; }
-		void setLocalFrame(std::string&& localFrame) noexcept { this->localFrame = std::move(localFrame); }
-		bool hasLocalFrame() const noexcept { return localFrame.has_value(); }
-		void clearLocalFrame() noexcept { localFrame.reset(); }
+		std::optional<std::string> getLocalFrame() const noexcept { return m_localFrame; }
+		void setLocalFrame(const std::optional<std::string>& localFrame) { m_localFrame = localFrame; }
+		void setLocalFrame(std::string&& localFrame) noexcept { m_localFrame = std::move(localFrame); }
+		bool hasLocalFrame() const noexcept { return m_localFrame.has_value(); }
+		void clearLocalFrame() noexcept { m_localFrame.reset(); }
 
 		/// <summary>
 		/// Definition of the coordinate provided as a data component with a numerical representation.
 		/// </summary>
-		const std::vector<std::unique_ptr<DataComponent>>& getCoordinates() const noexcept { return coordinates; }
-		void setCoordinates(std::vector<std::unique_ptr<DataComponent>> f) { coordinates = std::move(f); }
-		bool hasCoordinates() const noexcept { return !coordinates.empty(); }
-		void clearCoordinates() noexcept { coordinates.clear(); }
+		const std::vector<std::unique_ptr<DataComponent>>& getCoordinates() const noexcept { return m_coordinates; }
+		void setCoordinates(std::vector<std::unique_ptr<DataComponent>> f) { m_coordinates = std::move(f); }
+		bool hasCoordinates() const noexcept { return !m_coordinates.empty(); }
+		void clearCoordinates() noexcept { m_coordinates.clear(); }
 
 		friend void from_json(const nlohmann::json& j, Vector& v);
 		friend void to_json(nlohmann::ordered_json& j, const Vector& v);
@@ -91,8 +91,8 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 	inline void from_json(const nlohmann::json& j, Vector& v) {
 		from_json(j, static_cast<DataComponent&>(v));
 
-		v.referenceFrame = ConnectedSystemsAPI::JsonUtils::tryParseString(j, "referenceFrame");
-		v.localFrame = ConnectedSystemsAPI::JsonUtils::tryParseString(j, "localFrame");
+		v.m_referenceFrame = ConnectedSystemsAPI::JsonUtils::tryParseString(j, "referenceFrame");
+		v.m_localFrame = ConnectedSystemsAPI::JsonUtils::tryParseString(j, "localFrame");
 
 		if (j.contains("coordinates") && j["coordinates"].is_array()) {
 			std::vector<std::unique_ptr<DataComponent>> tempFields;
@@ -101,18 +101,18 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 					tempFields.push_back(std::move(ptr));
 				}
 			}
-			v.coordinates = std::move(tempFields);
+			v.m_coordinates = std::move(tempFields);
 		}
 		else {
-			v.coordinates.clear();
+			v.m_coordinates.clear();
 		}
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const Vector& v) {
 		to_json(j, static_cast<const DataComponent&>(v));
 
-		if (v.referenceFrame) j["referenceFrame"] = v.referenceFrame.value();
-		if (v.localFrame) j["localFrame"] = v.localFrame.value();
+		if (v.m_referenceFrame) j["referenceFrame"] = v.m_referenceFrame.value();
+		if (v.m_localFrame) j["localFrame"] = v.m_localFrame.value();
 
 		j["coordinates"] = nlohmann::ordered_json::array();
 		for (const auto& coordPtr : v.getCoordinates()) {

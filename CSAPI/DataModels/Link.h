@@ -95,13 +95,41 @@ namespace ConnectedSystemsAPI::DataModels {
 
 	inline void from_json(const nlohmann::json& j, Link& v) {
 		v.href = j.at("href").get<std::string>();
-		v.relationType = j.value("rel", std::optional<std::string>{});
-		v.mediaType = j.value("type", std::optional<std::string>{});
-		v.hrefLanguage = j.value("hreflang", std::optional<std::string>{});
-		v.title = j.value("title", std::optional<std::string>{});
-		v.uid = j.value("uid", std::optional<std::string>{});
-		v.resourceType = j.value("rt", std::optional<std::string>{});
-		v.interfaceUri = j.value("if", std::optional<std::string>{});
+
+		if (j.contains("rel") && !j["rel"].is_null())
+			v.relationType = j["rel"].get<std::string>();
+		else
+			v.relationType.reset();
+
+		if (j.contains("type") && !j["type"].is_null())
+			v.mediaType = j["type"].get<std::string>();
+		else
+			v.mediaType.reset();
+
+		if (j.contains("hreflang") && !j["hreflang"].is_null())
+			v.hrefLanguage = j["hreflang"].get<std::string>();
+		else
+			v.hrefLanguage.reset();
+
+		if (j.contains("title") && !j["title"].is_null())
+			v.title = j["title"].get<std::string>();
+		else
+			v.title.reset();
+
+		if (j.contains("uid") && !j["uid"].is_null())
+			v.uid = j["uid"].get<std::string>();
+		else
+			v.uid.reset();
+
+		if (j.contains("rt") && !j["rt"].is_null())
+			v.resourceType = j["rt"].get<std::string>();
+		else
+			v.resourceType.reset();
+
+		if (j.contains("if") && !j["if"].is_null())
+			v.interfaceUri = j["if"].get<std::string>();
+		else
+			v.interfaceUri.reset();
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const Link& v) {

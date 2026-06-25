@@ -18,7 +18,7 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 
 	class CountRange : public SimpleComponent {
 	private:
-		std::optional<std::vector<int>> value;
+		std::optional<std::vector<int>> m_value;
 
 	public:
 		CountRange() = default;
@@ -38,13 +38,13 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		/// Inline value(s) for the component.
 		/// This property is optional to enable structure to act as a schema for values provided separately (e.g., in a datastream)
 		/// </summary>
-		const std::optional<std::vector<int>>& getValue() const noexcept { return value; }
-		void setValue(const std::optional<std::vector<int>>& v) { value = v; }
-		void setValue(std::optional<std::vector<int>>&& v) noexcept { value = std::move(v); }
-		void setValue(const std::vector<int>& v) { value = v; }
-		void setValue(std::vector<int>&& v) noexcept { value = std::move(v); }
-		bool hasValue() const noexcept { return value.has_value(); }
-		void clearValue() noexcept { value.reset(); }
+		const std::optional<std::vector<int>>& getValue() const noexcept { return m_value; }
+		void setValue(const std::optional<std::vector<int>>& value) { m_value = value; }
+		void setValue(std::optional<std::vector<int>>&& value) noexcept { m_value = std::move(value); }
+		void setValue(const std::vector<int>& value) { m_value = value; }
+		void setValue(std::vector<int>&& value) noexcept { m_value = std::move(value); }
+		bool hasValue() const noexcept { return m_value.has_value(); }
+		void clearValue() noexcept { m_value.reset(); }
 
 		friend void from_json(const nlohmann::json& j, CountRange& v);
 		friend void to_json(nlohmann::ordered_json& j, const CountRange& v);
@@ -64,12 +64,12 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 	inline void from_json(const nlohmann::json& j, CountRange& v) {
 		from_json(j, static_cast<SimpleComponent&>(v));
 
-		v.value = ConnectedSystemsAPI::JsonUtils::tryParseIntegerArray(j, "value");
+		v.m_value = ConnectedSystemsAPI::JsonUtils::tryParseIntegerArray(j, "value");
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const CountRange& v) {
 		to_json(j, static_cast<const SimpleComponent&>(v));
 
-		if (v.hasValue()) j["value"] = v.value.value();
+		if (v.hasValue()) j["value"] = v.m_value.value();
 	}
 }

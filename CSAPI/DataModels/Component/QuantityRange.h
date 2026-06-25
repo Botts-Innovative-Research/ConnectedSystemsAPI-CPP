@@ -19,8 +19,8 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 
 	class QuantityRange : public SimpleComponent {
 	private:
-		std::optional<std::vector<double>> value;
-		UnitOfMeasure unitOfMeasure;
+		std::optional<std::vector<double>> m_value;
+		UnitOfMeasure m_unitOfMeasure;
 
 	public:
 		QuantityRange() = default;
@@ -38,27 +38,27 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 
 		void validate() const override {
 			SimpleComponent::validate();
-			unitOfMeasure.validate();
+			m_unitOfMeasure.validate();
 		}
 
 		/// <summary>
 		/// Inline value(s) for the component.
 		/// This property is optional to enable structure to act as a schema for values provided separately (e.g., in a datastream)
 		/// </summary>
-		std::optional<std::vector<double>> getValue() const noexcept { return value; }
-		void setValue(const std::optional<std::vector<double>>& value) { this->value = value; }
-		void setValue(std::optional<std::vector<double>>&& value)noexcept { this->value = std::move(value); }
-		void setValue(const std::vector<double>& value) { this->value = value; }
-		void setValue(std::vector<double>&& value)noexcept { this->value = std::move(value); }
-		bool hasValue() const noexcept { return value.has_value(); }
-		void clearValue() noexcept { value.reset(); }
+		const std::optional<std::vector<double>>& getValue() const noexcept { return m_value; }
+		void setValue(const std::optional<std::vector<double>>& value) { m_value = value; }
+		void setValue(std::optional<std::vector<double>>&& value)noexcept { m_value = std::move(value); }
+		void setValue(const std::vector<double>& value) { m_value = value; }
+		void setValue(std::vector<double>&& value)noexcept { m_value = std::move(value); }
+		bool hasValue() const noexcept { return m_value.has_value(); }
+		void clearValue() noexcept { m_value.reset(); }
 
 		/// <summary>
 		/// Unit of measure used to express the value of this data component.
 		/// </summary>
-		const UnitOfMeasure& getUnitOfMeasure() const noexcept { return unitOfMeasure; }
-		void setUnitOfMeasure(const UnitOfMeasure& unitOfMeasure) { this->unitOfMeasure = unitOfMeasure; }
-		void setUnitOfMeasure(UnitOfMeasure&& unitOfMeasure) noexcept { this->unitOfMeasure = std::move(unitOfMeasure); }
+		const UnitOfMeasure& getUnitOfMeasure() const noexcept { return m_unitOfMeasure; }
+		void setUnitOfMeasure(const UnitOfMeasure& unitOfMeasure) { m_unitOfMeasure = unitOfMeasure; }
+		void setUnitOfMeasure(UnitOfMeasure&& unitOfMeasure) noexcept { m_unitOfMeasure = std::move(unitOfMeasure); }
 
 		friend void from_json(const nlohmann::json& j, QuantityRange& v);
 		friend void to_json(nlohmann::ordered_json& j, const QuantityRange& v);
@@ -78,14 +78,14 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 	inline void from_json(const nlohmann::json& j, QuantityRange& v) {
 		from_json(j, static_cast<SimpleComponent&>(v));
 
-		v.value = ConnectedSystemsAPI::JsonUtils::tryParseDoubleArray(j, "value");
-		v.unitOfMeasure = j.at("uom").get<UnitOfMeasure>();
+		v.m_value = ConnectedSystemsAPI::JsonUtils::tryParseDoubleArray(j, "value");
+		v.m_unitOfMeasure = j.at("uom").get<UnitOfMeasure>();
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const QuantityRange& v) {
 		to_json(j, static_cast<const SimpleComponent&>(v));
 
-		if (v.value) j["value"] = v.value.value();
-		j["uom"] = v.unitOfMeasure;
+		if (v.m_value) j["value"] = v.m_value.value();
+		j["uom"] = v.m_unitOfMeasure;
 	}
 }

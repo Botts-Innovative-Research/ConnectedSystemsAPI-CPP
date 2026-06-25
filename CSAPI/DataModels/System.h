@@ -42,6 +42,9 @@ namespace ConnectedSystemsAPI::DataModels {
 		/// <returns>Links to related resources.</returns>
 		const std::optional<std::vector<Link>>& getLinks() const { return links; }
 
+		friend void from_json(const nlohmann::json& j, System& s);
+		friend void to_json(nlohmann::ordered_json& j, const System& s);
+
 		friend std::ostream& operator<<(std::ostream& os, const System& s) {
 			nlohmann::ordered_json j;
 			ConnectedSystemsAPI::DataModels::to_json(j, s);
@@ -50,13 +53,19 @@ namespace ConnectedSystemsAPI::DataModels {
 	};
 
 	inline void from_json(const nlohmann::json& j, System& s) {
-		s = System(
-			j.at("type").get<std::string>(),
-			j.at("id").get<std::string>(),
-			j.at("properties").get<Properties>(),
-			j.value("bbox", std::optional<std::vector<double>>{}),
-			j.value("links", std::optional<std::vector<Link>>{})
-		);
+		s.type = j.at("type").get<std::string>();
+		s.id = j.at("id").get<std::string>();
+		s.properties = j.at("properties").get<Properties>();
+
+		if (j.contains("bbox") && !j["bbox"].is_null())
+			s.bbox = j["bbox"].get<std::vector<double>>();
+		else
+			s.bbox.reset();
+
+		if (j.contains("links") && !j["links"].is_null())
+			s.links = j["links"].get<std::vector<Link>>();
+		else
+			s.links.reset();
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const System& s) {
@@ -64,12 +73,7 @@ namespace ConnectedSystemsAPI::DataModels {
 		j["type"] = s.getType();
 		j["id"] = s.getId();
 		j["properties"] = s.getProperties();
-
-		if (s.getBbox()) {
-			j["bbox"] = s.getBbox().value();
-		}
-		if (s.getLinks()) {
-			j["links"] = s.getLinks().value();
-		}
+		if (s.getBbox()) j["bbox"] = s.getBbox().value();
+		if (s.getLinks()) j["links"] = s.getLinks().value();
 	}
 }

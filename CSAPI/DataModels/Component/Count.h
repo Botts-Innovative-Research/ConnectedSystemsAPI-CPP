@@ -18,7 +18,7 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 
 	class Count : public ScalarComponent {
 	private:
-		std::optional<int> value;
+		std::optional<int> m_value;
 
 	public:
 		Count() = default;
@@ -38,11 +38,11 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		/// Inline value(s) for the component.
 		/// This property is optional to enable structure to act as a schema for values provided separately (e.g., in a datastream)
 		/// </summary>
-		const std::optional<int>& getValue() const noexcept { return value; }
-		void setValue(std::optional<int> v) noexcept { value = std::move(v); }
-		void setValue(int v) noexcept { value = v; }
-		bool hasValue() const noexcept { return value.has_value(); }
-		void clearValue() noexcept { value.reset(); }
+		const std::optional<int>& getValue() const noexcept { return m_value; }
+		void setValue(std::optional<int> value) noexcept { m_value = std::move(value); }
+		void setValue(int value) noexcept { m_value = value; }
+		bool hasValue() const noexcept { return m_value.has_value(); }
+		void clearValue() noexcept { m_value.reset(); }
 
 		friend void from_json(const nlohmann::json& j, Count& v);
 		friend void to_json(nlohmann::ordered_json& j, const Count& v);
@@ -62,12 +62,12 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 	inline void from_json(const nlohmann::json& j, Count& v) {
 		from_json(j, static_cast<ScalarComponent&>(v));
 
-		v.value = ConnectedSystemsAPI::JsonUtils::tryParseInteger(j, "value");
+		v.m_value = ConnectedSystemsAPI::JsonUtils::tryParseInteger(j, "value");
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const Count& v) {
 		to_json(j, static_cast<const ScalarComponent&>(v));
 
-		if (v.hasValue()) j["value"] = v.value.value();
+		if (v.hasValue()) j["value"] = v.m_value.value();
 	}
 }

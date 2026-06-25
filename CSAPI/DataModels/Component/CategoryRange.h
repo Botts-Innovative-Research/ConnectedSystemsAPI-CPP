@@ -19,8 +19,8 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 
 	class CategoryRange : public SimpleComponent {
 	private:
-		std::optional<std::vector<std::string>> value;
-		std::optional<std::string> codeSpace;
+		std::optional<std::vector<std::string>> m_value;
+		std::optional<std::string> m_codeSpace;
 
 	public:
 		CategoryRange() = default;
@@ -40,29 +40,29 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		/// Inline value(s) for the component.
 		/// This property is optional to enable structure to act as a schema for values provided separately (e.g., in a datastream)
 		/// </summary>
-		const std::optional<std::vector<std::string>>& getValue() const noexcept { return value; }
-		void setValue(std::optional<std::vector<std::string>> v) noexcept { value = std::move(v); }
-		void setValue(std::vector<std::string> v) noexcept { value = std::move(v); }
-		void setValue(std::initializer_list<std::string> il) { value = std::vector<std::string>(il); }
-		bool hasValue() const noexcept { return value.has_value(); }
-		void clearValue() noexcept { value = std::nullopt; }
+		const std::optional<std::vector<std::string>>& getValue() const noexcept { return m_value; }
+		void setValue(std::optional<std::vector<std::string>> value) noexcept { m_value = std::move(value); }
+		void setValue(std::vector<std::string> value) noexcept { m_value = std::move(value); }
+		void setValue(std::initializer_list<std::string> il) { m_value = std::vector<std::string>(il); }
+		bool hasValue() const noexcept { return m_value.has_value(); }
+		void clearValue() noexcept { m_value = std::nullopt; }
 		void addValue(const std::string& v) {
-			if (!value) value = std::vector<std::string>{};
-			value->push_back(v);
+			if (!m_value) m_value = std::vector<std::string>{};
+			m_value->push_back(v);
 		}
 		void addValue(std::string&& v) {
-			if (!value) value = std::vector<std::string>{};
-			value->push_back(std::move(v));
+			if (!m_value) m_value = std::vector<std::string>{};
+			m_value->push_back(std::move(v));
 		}
 
 		/// <summary>
 		/// Name of the dictionary where the possible values for this component are listed and defined.
 		/// </summary>
-		const std::optional<std::string>& getCodeSpace() const noexcept { return codeSpace; }
-		void setCodeSpace(std::optional<std::string> cs) noexcept { codeSpace = std::move(cs); }
-		void setCodeSpace(std::string cs) { codeSpace = std::move(cs); }
-		bool hasCodeSpace() const noexcept { return codeSpace.has_value(); }
-		void clearCodeSpace() noexcept { codeSpace = std::nullopt; }
+		const std::optional<std::string>& getCodeSpace() const noexcept { return m_codeSpace; }
+		void setCodeSpace(std::optional<std::string> codeSpace) noexcept { m_codeSpace = std::move(codeSpace); }
+		void setCodeSpace(std::string codeSpace) { m_codeSpace = std::move(codeSpace); }
+		bool hasCodeSpace() const noexcept { return m_codeSpace.has_value(); }
+		void clearCodeSpace() noexcept { m_codeSpace = std::nullopt; }
 
 		friend void from_json(const nlohmann::json& j, CategoryRange& v);
 		friend void to_json(nlohmann::ordered_json& j, const CategoryRange& v);
@@ -82,14 +82,14 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 	inline void from_json(const nlohmann::json& j, CategoryRange& v) {
 		from_json(j, static_cast<SimpleComponent&>(v));
 
-		v.value = ConnectedSystemsAPI::JsonUtils::tryParseStringArray(j, "value");
-		v.codeSpace = ConnectedSystemsAPI::JsonUtils::tryParseString(j, "codeSpace");
+		v.m_value = ConnectedSystemsAPI::JsonUtils::tryParseStringArray(j, "value");
+		v.m_codeSpace = ConnectedSystemsAPI::JsonUtils::tryParseString(j, "codeSpace");
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const CategoryRange& v) {
 		to_json(j, static_cast<const SimpleComponent&>(v));
 
-		if (v.hasValue()) j["value"] = v.value.value();
-		if (v.hasCodeSpace()) j["codeSpace"] = v.codeSpace.value();
+		if (v.hasValue()) j["value"] = v.m_value.value();
+		if (v.hasCodeSpace()) j["codeSpace"] = v.m_codeSpace.value();
 	}
 }

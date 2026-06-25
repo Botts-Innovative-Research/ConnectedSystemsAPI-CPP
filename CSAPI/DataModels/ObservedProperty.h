@@ -59,9 +59,20 @@ namespace ConnectedSystemsAPI::DataModels {
 	};
 
 	inline void from_json(const nlohmann::json& j, ObservedProperty& v) {
-		v.definition = j.value("definition", std::optional<std::string>{});
-		v.label = j.value("label", std::optional<std::string>{});
-		v.description = j.value("description", std::optional<std::string>{});
+		if (j.contains("definition") && !j["definition"].is_null())
+			v.definition = j["definition"].get<std::string>();
+		else
+			v.definition.reset();
+
+		if (j.contains("label") && !j["label"].is_null())
+			v.label = j["label"].get<std::string>();
+		else
+			v.label.reset();
+
+		if (j.contains("description") && !j["description"].is_null())
+			v.description = j["description"].get<std::string>();
+		else
+			v.description.reset();
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const ObservedProperty& v) {

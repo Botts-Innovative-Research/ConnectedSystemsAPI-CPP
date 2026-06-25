@@ -101,14 +101,45 @@ namespace ConnectedSystemsAPI::DataModels {
 	};
 
 	inline void from_json(const nlohmann::ordered_json& j, Observation& o) {
-		o.id = (j.contains("id") && !j["id"].is_null()) ? std::optional<std::string>{ j["id"].get<std::string>() } : std::optional<std::string>{};
-		o.dataStreamId = (j.contains("datastream@id") && !j["datastream@id"].is_null()) ? std::optional<std::string>{ j["datastream@id"].get<std::string>() } : std::optional<std::string>{};
-		o.samplingFeatureId = (j.contains("samplingFeature@id") && !j["samplingFeature@id"].is_null()) ? std::optional<std::string>{ j["samplingFeature@id"].get<std::string>() } : std::optional<std::string>{};
-		o.procedureLink = j.value("procedure@link", std::optional<Link>{});
-		o.phenomenonTime = j.value("phenomenonTime", std::optional<TimeInstant>{});
-		o.resultTime = j.value("resultTime", std::optional<TimeInstant>{});
-		o.resultLink = j.value("result@link", std::optional<Link>{});
-		o.links = j.value("links", std::optional<std::vector<Link>>{});
+		if (j.contains("id") && !j["id"].is_null())
+			o.id = j["id"].get<std::string>();
+		else
+			o.id.reset();
+
+		if (j.contains("datastream@id") && !j["datastream@id"].is_null())
+			o.dataStreamId = j["datastream@id"].get<std::string>();
+		else
+			o.dataStreamId.reset();
+
+		if (j.contains("samplingFeature@id") && !j["samplingFeature@id"].is_null())
+			o.samplingFeatureId = j["samplingFeature@id"].get<std::string>();
+		else
+			o.samplingFeatureId.reset();
+
+		if (j.contains("procedure@link") && !j["procedure@link"].is_null())
+			o.procedureLink = j["procedure@link"].get<Link>();
+		else
+			o.procedureLink.reset();
+
+		if (j.contains("phenomenonTime") && !j["phenomenonTime"].is_null())
+			o.phenomenonTime = j["phenomenonTime"].get<TimeInstant>();
+		else
+			o.phenomenonTime.reset();
+
+		if (j.contains("resultTime") && !j["resultTime"].is_null())
+			o.resultTime = j["resultTime"].get<TimeInstant>();
+		else
+			o.resultTime.reset();
+
+		if (j.contains("result@link") && !j["result@link"].is_null())
+			o.resultLink = j["result@link"].get<Link>();
+		else
+			o.resultLink.reset();
+
+		if (j.contains("links") && !j["links"].is_null())
+			o.links = j["links"].get<std::vector<Link>>();
+		else
+			o.links.reset();
 
 		if (j.contains("result") && !j["result"].is_null()) {
 			o.result = j["result"].get<Data::DataBlockMixed>();

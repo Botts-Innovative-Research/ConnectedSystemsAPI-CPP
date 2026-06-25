@@ -9,7 +9,7 @@
 namespace ConnectedSystemsAPI::DataModels::Component {
 	class BooleanBuilder : public DataComponentBuilder<BooleanBuilder, Boolean> {
 	private:
-		std::optional<bool> value;
+		std::optional<bool> m_value;
 
 		void validate() const {
 			this->validateBase();
@@ -18,9 +18,9 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 	public:
 		BooleanBuilder() = default;
 
-		BooleanBuilder& withValue(std::optional<bool> v) { value = std::move(v); return *this; }
-		BooleanBuilder& withValue(bool v) { value = v; return *this; }
-		BooleanBuilder& clearValue() { value.reset(); return *this; }
+		BooleanBuilder& withValue(std::optional<bool> value) { m_value = std::move(value); return *this; }
+		BooleanBuilder& withValue(bool value) { m_value = value; return *this; }
+		BooleanBuilder& clearValue() { m_value.reset(); return *this; }
 
 		Boolean build() {
 			validate();
@@ -28,7 +28,7 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 			Boolean b;
 			this->applyBase(b);
 
-			if (value) b.setValue(value);
+			if (m_value) b.setValue(m_value);
 
 			return b;
 		}

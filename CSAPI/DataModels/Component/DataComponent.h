@@ -26,14 +26,14 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 	/// </summary>
 	class DataComponent {
 	private:
-		std::string type;
-		std::optional<std::string> id;
-		std::optional<std::string> name;
-		std::optional<std::string> label;
-		std::optional<std::string> description;
-		std::optional<bool> updatable;
-		std::optional<bool> optional;
-		std::optional<std::string> definition;
+		std::string m_type;
+		std::optional<std::string> m_id;
+		std::optional<std::string> m_name;
+		std::optional<std::string> m_label;
+		std::optional<std::string> m_description;
+		std::optional<bool> m_updatable;
+		std::optional<bool> m_optional;
+		std::optional<std::string> m_definition;
 
 	protected:
 		DataComponent() = default;
@@ -43,64 +43,64 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		virtual nlohmann::ordered_json toJson() const = 0;
 
 		virtual	void validate() const {
-			if (type.empty())
+			if (m_type.empty())
 				throw std::invalid_argument("DataComponent.type is required.");
 		}
 
 		/// <summary>
 		/// Type of the component.
 		/// </summary>
-		const std::string& getType() const noexcept { return type; }
-		void setType(std::string t) noexcept { type = std::move(t); }
+		const std::string& getType() const noexcept { return m_type; }
+		void setType(std::string type) noexcept { m_type = std::move(type); }
 
 		/// <summary>
 		/// Name of the component.
 		/// </summary>
-		const std::optional<std::string>& getName() const noexcept { return name; }
-		void setName(std::optional<std::string> n) noexcept { name = std::move(n); }
-		void clearName() noexcept { name.reset(); }
+		const std::optional<std::string>& getName() const noexcept { return m_name; }
+		void setName(std::optional<std::string> name) noexcept { m_name = std::move(name); }
+		void clearName() noexcept { m_name.reset(); }
 
 		/// <summary>
 		/// The ID of the object, referenceable using a URI fragment.
 		/// </summary>
-		const std::optional<std::string>& getId() const noexcept { return id; }
-		void setId(std::optional<std::string> i) noexcept { id = std::move(i); }
-		void clearId() noexcept { id.reset(); }
+		const std::optional<std::string>& getId() const noexcept { return m_id; }
+		void setId(std::optional<std::string> id) noexcept { m_id = std::move(id); }
+		void clearId() noexcept { m_id.reset(); }
 
 		/// <summary>
 		/// Human-readable label for the object.
 		/// </summary>
-		const std::optional<std::string>& getLabel() const noexcept { return label; }
-		void setLabel(std::optional<std::string> l) noexcept { label = std::move(l); }
-		void clearLabel() noexcept { label.reset(); }
+		const std::optional<std::string>& getLabel() const noexcept { return m_label; }
+		void setLabel(std::optional<std::string> label) noexcept { m_label = std::move(label); }
+		void clearLabel() noexcept { m_label.reset(); }
 
 		/// <summary>
 		/// Human-readable description of the object.
 		/// </summary>
-		const std::optional<std::string>& getDescription() const noexcept { return description; }
-		void setDescription(std::optional<std::string> d) noexcept { description = std::move(d); }
-		void clearDescription() noexcept { description.reset(); }
+		const std::optional<std::string>& getDescription() const noexcept { return m_description; }
+		void setDescription(std::optional<std::string> description) noexcept { m_description = std::move(description); }
+		void clearDescription() noexcept { m_description.reset(); }
 
 		/// <summary>
 		/// Specifies if the value of a data component can be updated externally (i.e., is variable).
 		/// </summary>
-		const std::optional<bool>& isUpdatable() const noexcept { return updatable; }
-		void setUpdatable(std::optional<bool> u) noexcept { updatable = std::move(u); }
-		void clearUpdatable() noexcept { updatable.reset(); }
+		const std::optional<bool>& isUpdatable() const noexcept { return m_updatable; }
+		void setUpdatable(std::optional<bool> updatable) noexcept { m_updatable = std::move(updatable); }
+		void clearUpdatable() noexcept { m_updatable.reset(); }
 
 		/// <summary>
 		/// Specifies if the data for this component can be omitted in the data stream.
 		/// </summary>
-		const std::optional<bool>& isOptional() const noexcept { return optional; }
-		void setOptional(std::optional<bool> o) noexcept { optional = std::move(o); }
-		void clearOptional() noexcept { optional.reset(); }
+		const std::optional<bool>& isOptional() const noexcept { return m_optional; }
+		void setOptional(std::optional<bool> optional) noexcept { m_optional = std::move(optional); }
+		void clearOptional() noexcept { m_optional.reset(); }
 
 		/// <summary>
 		/// The definition of the property whose value is provided by this component (semantic link).
 		/// </summary>
-		const std::optional<std::string>& getDefinition() const noexcept { return definition; }
-		void setDefinition(std::optional<std::string> d) noexcept { definition = std::move(d); }
-		void clearDefinition() noexcept { definition.reset(); }
+		const std::optional<std::string>& getDefinition() const noexcept { return m_definition; }
+		void setDefinition(std::optional<std::string> definition) noexcept { m_definition = std::move(definition); }
+		void clearDefinition() noexcept { m_definition.reset(); }
 
 		/// <summary>
 		/// Registrar for DataComponent derived types.

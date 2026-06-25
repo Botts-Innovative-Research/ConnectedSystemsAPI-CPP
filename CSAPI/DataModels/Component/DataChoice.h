@@ -18,8 +18,8 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 
 	class DataChoice : public DataComponent {
 	private:
-		std::optional<Category> choiceValue;
-		std::vector<std::unique_ptr<DataComponent>> items;
+		std::optional<Category> m_choiceValue;
+		std::vector<std::unique_ptr<DataComponent>> m_items;
 
 	public:
 		DataChoice() = default;
@@ -40,9 +40,9 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 
 		void validate() const override {
 			DataComponent::validate();
-			if (choiceValue)
-				choiceValue->validate();
-			for (const auto& item : items) {
+			if (m_choiceValue)
+				m_choiceValue->validate();
+			for (const auto& item : m_items) {
 				if (item) item->validate();
 			}
 		}
@@ -57,19 +57,19 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		/// This category component marks the data stream element that will indicate the actual choice made.
 		/// Possible choices are listed in the Category constraint section as an enumeration and should map to item names.
 		/// </summary>
-		const std::optional<Category>& getChoiceValue() const noexcept { return choiceValue; }
-		void setChoiceValue(const std::optional<Category>& v) { choiceValue = v; }
-		void setChoiceValue(std::optional<Category>&& v) { choiceValue = std::move(v); }
-		void clearChoiceValue() noexcept { choiceValue.reset(); }
+		const std::optional<Category>& getChoiceValue() const noexcept { return m_choiceValue; }
+		void setChoiceValue(const std::optional<Category>& choiceValue) { m_choiceValue = choiceValue; }
+		void setChoiceValue(std::optional<Category>&& choiceValue) { m_choiceValue = std::move(choiceValue); }
+		void clearChoiceValue() noexcept { m_choiceValue.reset(); }
 
 		/// <summary>
 		/// Definition of the choice items.
 		/// Items can be of any component types.
 		/// </summary>				
-		const std::vector<std::unique_ptr<DataComponent>>& getItems() const noexcept { return items; }
-		void setItems(std::vector<std::unique_ptr<DataComponent>> f) { items = std::move(f); }
-		void addItem(std::unique_ptr<DataComponent> item) { items.push_back(std::move(item)); }
-		void clearItems() noexcept { items.clear(); }
+		const std::vector<std::unique_ptr<DataComponent>>& getItems() const noexcept { return m_items; }
+		void setItems(std::vector<std::unique_ptr<DataComponent>> items) { m_items = std::move(items); }
+		void addItem(std::unique_ptr<DataComponent> item) { m_items.push_back(std::move(item)); }
+		void clearItems() noexcept { m_items.clear(); }
 
 		friend void from_json(const nlohmann::json& j, DataChoice& v);
 		friend void to_json(nlohmann::ordered_json& j, const DataChoice& v);
@@ -90,7 +90,7 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		from_json(j, static_cast<DataComponent&>(v));
 
 		if (j.contains("choiceValue"))
-			v.choiceValue = j.at("choiceValue").get<Category>();
+			v.m_choiceValue = j.at("choiceValue").get<Category>();
 
 		if (j.contains("items") && j["items"].is_array()) {
 			std::vector<std::unique_ptr<DataComponent>> items;
@@ -98,19 +98,19 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 				auto created = DataComponentRegistry::createDataComponent(item);
 				if (created) items.push_back(std::move(created));
 			}
-			v.items = std::move(items);
+			v.m_items = std::move(items);
 		}
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const DataChoice& v) {
 		to_json(j, static_cast<const DataComponent&>(v));
 
-		if (v.choiceValue)
-			j["choiceValue"] = v.choiceValue.value();
+		if (v.m_choiceValue)
+			j["choiceValue"] = v.m_choiceValue.value();
 
-		if (!v.items.empty()) {
+		if (!v.m_items.empty()) {
 			j["items"] = nlohmann::ordered_json::array();
-			for (const auto& item : v.items) {
+			for (const auto& item : v.m_items) {
 				j["items"].push_back(item ? item->toJson() : nlohmann::ordered_json(nullptr));
 			}
 		}

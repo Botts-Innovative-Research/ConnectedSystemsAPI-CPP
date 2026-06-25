@@ -92,9 +92,17 @@ namespace ConnectedSystemsAPI::DataModels {
 
 	inline void from_json(const nlohmann::json& j, ObservationSchema& v) {
 		v.observationFormat = j.at("obsFormat").get<std::string>();
-		v.parametersSchema = j.value("parametersSchema", std::optional<Component::DataRecord>{});
 		v.resultSchema = Component::DataComponentRegistry::createDataComponent(j.at("resultSchema"));
-		v.resultLink = j.value("resultLink", std::optional<Link>{});
+
+		if (j.contains("parametersSchema") && !j["parametersSchema"].is_null())
+			v.parametersSchema = j["parametersSchema"].get<Component::DataRecord>();
+		else
+			v.parametersSchema.reset();
+
+		if (j.contains("resultLink") && !j["resultLink"].is_null())
+			v.resultLink = j["resultLink"].get<Link>();
+		else
+			v.resultLink.reset();
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const ObservationSchema& v) {

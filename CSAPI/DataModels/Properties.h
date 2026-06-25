@@ -78,10 +78,26 @@ namespace ConnectedSystemsAPI::DataModels {
 		p.featureType = j.at("featureType").get<std::string>();
 		p.uid = j.at("uid").get<std::string>();
 		p.name = j.at("name").get<std::string>();
-		p.description = j.value("description", std::optional<std::string>{});
-		p.assetType = j.value("assetType", std::optional<std::string>{});
-		p.validTime = j.value("validTime", std::optional<TimeExtent>{});
-		p.systemKind = j.value("systemKind@link", std::optional<Link>{});
+
+		if (j.contains("description") && !j["description"].is_null())
+			p.description = j["description"].get<std::string>();
+		else
+			p.description.reset();
+
+		if (j.contains("assetType") && !j["assetType"].is_null())
+			p.assetType = j["assetType"].get<std::string>();
+		else
+			p.assetType.reset();
+
+		if (j.contains("validTime") && !j["validTime"].is_null())
+			p.validTime = j["validTime"].get<TimeExtent>();
+		else
+			p.validTime.reset();
+
+		if (j.contains("systemKind@link") && !j["systemKind@link"].is_null())
+			p.systemKind = j["systemKind@link"].get<Link>();
+		else
+			p.systemKind.reset();
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const Properties& p) {

@@ -125,83 +125,83 @@ namespace ConnectedSystemsAPI {
 		// Builder inner class
 		class Builder {
 		private:
-			std::string apiRoot;
-			std::string requestMethod = "GET";
-			std::map<std::string, std::string> headers;
-			std::string body;
-			std::string resourcePath;
-			std::string resourceId;
-			std::string subResourcePath;
-			std::string subResourceId;
-			std::string queryString;
+			std::string m_apiRoot;
+			std::string m_requestMethod = "GET";
+			std::map<std::string, std::string> m_headers;
+			std::string m_body;
+			std::string m_resourcePath;
+			std::string m_resourceId;
+			std::string m_subResourcePath;
+			std::string m_subResourceId;
+			std::string m_queryString;
 
 		public:
-			Builder& setApiRoot(const std::string& root) {
-				this->apiRoot = root;
+			Builder& setApiRoot(const std::string& apiRoot) {
+				m_apiRoot = apiRoot;
 				return *this;
 			}
 
 			Builder& setMethod(const std::string& requestMethod) {
-				this->requestMethod = requestMethod;
+				m_requestMethod = requestMethod;
 				return *this;
 			}
 
 			Builder& setAuthHeader(const std::string& authHeader) {
-				this->headers["Authorization"] = authHeader;
+				m_headers["Authorization"] = authHeader;
 				return *this;
 			}
 
 			Builder& addHeader(const std::string& key, const std::string& value) {
-				this->headers[key] = value;
+				m_headers[key] = value;
 				return *this;
 			}
 
 			Builder& setBody(const std::string& body) {
-				this->body = body;
+				m_body = body;
 				return *this;
 			}
 
 			Builder& setResourcePath(const std::string& resourcePath) {
-				this->resourcePath = resourcePath;
+				m_resourcePath = resourcePath;
 				return *this;
 			}
 
 			Builder& setResourceId(const std::string& resourceId) {
-				this->resourceId = resourceId;
+				m_resourceId = resourceId;
 				return *this;
 			}
 
 			Builder& setSubResourcePath(const std::string& subResourcePath) {
-				this->subResourcePath = subResourcePath;
+				m_subResourcePath = subResourcePath;
 				return *this;
 			}
 
 			Builder& setSubResourceId(const std::string& subResourceId) {
-				this->subResourceId = subResourceId;
+				m_subResourceId = subResourceId;
 				return *this;
 			}
 
 			Builder& setQueryString(const std::string& queryString) {
-				this->queryString = queryString;
+				m_queryString = queryString;
 				return *this;
 			}
 
 			APIRequest build() {
-				if (apiRoot.empty()) {
+				if (m_apiRoot.empty()) {
 					throw std::invalid_argument("API root must be set");
 				}
-				if (requestMethod.empty()) {
+				if (m_requestMethod.empty()) {
 					throw std::invalid_argument("Request method must be set.");
 				}
 
-				std::string endpoint;
-				endpoint = appendPath(endpoint, resourcePath);
-				endpoint = appendPath(endpoint, resourceId);
-				endpoint = appendPath(endpoint, subResourcePath);
-				endpoint = appendPath(endpoint, subResourceId);
-				endpoint += queryString;
+				std::string endpointString;
+				endpointString = appendPath(endpointString, m_resourcePath);
+				endpointString = appendPath(endpointString, m_resourceId);
+				endpointString = appendPath(endpointString, m_subResourcePath);
+				endpointString = appendPath(endpointString, m_subResourceId);
+				endpointString += m_queryString;
 
-				return APIRequest(apiRoot, endpoint, requestMethod, headers, body);
+				return APIRequest(m_apiRoot, endpointString, m_requestMethod, m_headers, m_body);
 			}
 
 		private:

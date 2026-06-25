@@ -8,14 +8,14 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 	template<typename Derived, typename Target>
 	class DataComponentBuilder {
 	protected:
-		std::string type;
-		std::optional<std::string> id;
-		std::optional<std::string> name;
-		std::optional<std::string> label;
-		std::optional<std::string> description;
-		std::optional<bool> updatable;
-		std::optional<bool> optional;
-		std::optional<std::string> definition;
+		std::string m_type;
+		std::optional<std::string> m_id;
+		std::optional<std::string> m_name;
+		std::optional<std::string> m_label;
+		std::optional<std::string> m_description;
+		std::optional<bool> m_updatable;
+		std::optional<bool> m_optional;
+		std::optional<std::string> m_definition;
 
 		Derived& self() noexcept { return *reinterpret_cast<Derived*>(this); }
 		const Derived& self() const noexcept { return *reinterpret_cast<const Derived*>(this); }
@@ -24,30 +24,30 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		DataComponentBuilder() = default;
 
 		// Fluent setters for DataComponent base properties
-		Derived& withType(const std::string& v) { type = v; return self(); }
-		Derived& withId(const std::string& v) { id = v; return self(); }
-		Derived& withName(const std::string& v) { name = v; return self(); }
-		Derived& withLabel(const std::string& v) { label = v; return self(); }
-		Derived& withDescription(const std::string& v) { description = v; return self(); }
-		Derived& withUpdatable(bool v) { updatable = v; return self(); }
-		Derived& withOptional(bool v) { optional = v; return self(); }
-		Derived& withDefinition(const std::string& v) { definition = v; return self(); }
+		Derived& withType(const std::string& type) { m_type = type; return self(); }
+		Derived& withId(const std::string& id) { m_id = id; return self(); }
+		Derived& withName(const std::string& name) { m_name = name; return self(); }
+		Derived& withLabel(const std::string& label) { m_label = label; return self(); }
+		Derived& withDescription(const std::string& description) { m_description = description; return self(); }
+		Derived& withUpdatable(bool updatable) { m_updatable = updatable; return self(); }
+		Derived& withOptional(bool optional) { m_optional = optional; return self(); }
+		Derived& withDefinition(const std::string& definition) { m_definition = definition; return self(); }
 
 	protected:
 		void validateBase() const {
-			if (type.empty())
+			if (m_type.empty())
 				throw std::runtime_error("DataComponentBuilder: type is required.");
 		}
 
 		void applyBase(Target& target) const {
-			if (!type.empty()) target.setType(type);
-			if (name) target.setName(name);
-			if (id) target.setId(id);
-			if (label) target.setLabel(label);
-			if (description) target.setDescription(description);
-			if (updatable) target.setUpdatable(updatable);
-			if (optional) target.setOptional(optional);
-			if (definition) target.setDefinition(definition);
+			if (!m_type.empty()) target.setType(m_type);
+			if (m_name) target.setName(m_name);
+			if (m_id) target.setId(m_id);
+			if (m_label) target.setLabel(m_label);
+			if (m_description) target.setDescription(m_description);
+			if (m_updatable) target.setUpdatable(m_updatable);
+			if (m_optional) target.setOptional(m_optional);
+			if (m_definition) target.setDefinition(m_definition);
 		}
 	};
 }
