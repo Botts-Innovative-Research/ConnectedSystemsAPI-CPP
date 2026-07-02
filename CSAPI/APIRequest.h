@@ -5,8 +5,7 @@
 #include <stdexcept>
 #include <map>
 #include <vector>
-#include <curl/curl.h>
-#include <curl/easy.h>
+#include <httplib.h>
 
 #include "APIResponse.h"
 
@@ -38,44 +37,66 @@ namespace ConnectedSystemsAPI {
 		}
 
 		RawHttpResponse execute() const {
-			CURL* curl = curl_easy_init();
 			RawHttpResponse response;
-			if (curl) {
-				std::string url = apiRoot + endpoint;
-				struct curl_slist* header_list = nullptr;
-				for (const auto& h : headers) {
-					header_list = curl_slist_append(header_list, (h.first + ": " + h.second).c_str());
-				}
 
-				curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-				curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header_list);
-				curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-				curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response.responseBody);
+			size_t pathStart = apiRoot.find('/', apiRoot.find("://") + 3);
+			std::string baseUrl = (pathStart != std::string::npos)
+				? apiRoot.substr(0, pathStart)
+				: apiRoot;
 
-				curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, HeaderCallback);
-				curl_easy_setopt(curl, CURLOPT_HEADERDATA, &response);
+			std::string basePath = (pathStart != std::string::npos)
+				? apiRoot.substr(pathStart)
+				: "";
 
-				if (requestMethod == "POST") {
-					curl_easy_setopt(curl, CURLOPT_POST, 1L);
-					curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body.c_str());
-				}
-				else if (requestMethod == "PUT") {
-					curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
-					curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body.c_str());
-				}
-				else if (requestMethod == "DELETE") {
-					curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
-				}
+			httplib::Client cli(baseUrl.c_str());
+			std::string fullEndpoint = basePath + endpoint;
 
-				CURLcode res = curl_easy_perform(curl);
-				if (res != CURLE_OK)
-					std::cerr << "cURL error: " << curl_easy_strerror(res) << std::endl;
-
-				curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response.responseCode);
-
-				curl_slist_free_all(header_list);
-				curl_easy_cleanup(curl);
+			// Build headers
+			httplib::Headers h;
+			for (const auto& kv : headers)
+			{
+				h.insert({ kv.first.c_str(), kv.second.c_str() });
 			}
+
+			// Perform request
+			httplib::Result res;
+
+			if (requestMethod == "POST")
+			{
+				res = cli.Post(fullEndpoint.c_str(), h, body, "application/json");
+			}
+			else if (requestMethod == "PUT")
+			{
+				res = cli.Put(fullEndpoint.c_str(), h, body, "application/json");
+			}
+			else if (requestMethod == "DELETE")
+			{
+				res = cli.Delete(fullEndpoint.c_str(), h);
+			}
+			else // GET
+			{
+				res = cli.Get(fullEndpoint.c_str(), h);
+			}
+
+			// Fill response struct
+			if (res)
+			{
+				response.responseCode = res->status;
+				response.responseBody = res->body;
+
+				// Copy headers
+				for (const auto& kv : res->headers)
+				{
+					response.headers[kv.first].push_back(kv.second);
+				}
+			}
+			else
+			{
+				// httplib error (connection failure, timeout, etc.)
+				response.responseCode = 0;
+				response.responseMessage = "HTTP request failed";
+			}
+
 			return response;
 		}
 
@@ -125,83 +146,83 @@ namespace ConnectedSystemsAPI {
 		// Builder inner class
 		class Builder {
 		private:
-			std::string m_apiRoot;
-			std::string m_requestMethod = "GET";
-			std::map<std::string, std::string> m_headers;
-			std::string m_body;
-			std::string m_resourcePath;
-			std::string m_resourceId;
-			std::string m_subResourcePath;
-			std::string m_subResourceId;
-			std::string m_queryString;
+			std::string apiRoot;
+			std::string requestMethod = "GET";
+			std::map<std::string, std::string> headers;
+			std::string body;
+			std::string resourcePath;
+			std::string resourceId;
+			std::string subResourcePath;
+			std::string subResourceId;
+			std::string queryString;
 
 		public:
-			Builder& setApiRoot(const std::string& apiRoot) {
-				m_apiRoot = apiRoot;
+			Builder& setApiRoot(const std::string& root) {
+				this->apiRoot = root;
 				return *this;
 			}
 
 			Builder& setMethod(const std::string& requestMethod) {
-				m_requestMethod = requestMethod;
+				this->requestMethod = requestMethod;
 				return *this;
 			}
 
 			Builder& setAuthHeader(const std::string& authHeader) {
-				m_headers["Authorization"] = authHeader;
+				this->headers["Authorization"] = authHeader;
 				return *this;
 			}
 
 			Builder& addHeader(const std::string& key, const std::string& value) {
-				m_headers[key] = value;
+				this->headers[key] = value;
 				return *this;
 			}
 
 			Builder& setBody(const std::string& body) {
-				m_body = body;
+				this->body = body;
 				return *this;
 			}
 
 			Builder& setResourcePath(const std::string& resourcePath) {
-				m_resourcePath = resourcePath;
+				this->resourcePath = resourcePath;
 				return *this;
 			}
 
 			Builder& setResourceId(const std::string& resourceId) {
-				m_resourceId = resourceId;
+				this->resourceId = resourceId;
 				return *this;
 			}
 
 			Builder& setSubResourcePath(const std::string& subResourcePath) {
-				m_subResourcePath = subResourcePath;
+				this->subResourcePath = subResourcePath;
 				return *this;
 			}
 
 			Builder& setSubResourceId(const std::string& subResourceId) {
-				m_subResourceId = subResourceId;
+				this->subResourceId = subResourceId;
 				return *this;
 			}
 
 			Builder& setQueryString(const std::string& queryString) {
-				m_queryString = queryString;
+				this->queryString = queryString;
 				return *this;
 			}
 
 			APIRequest build() {
-				if (m_apiRoot.empty()) {
+				if (apiRoot.empty()) {
 					throw std::invalid_argument("API root must be set");
 				}
-				if (m_requestMethod.empty()) {
+				if (requestMethod.empty()) {
 					throw std::invalid_argument("Request method must be set.");
 				}
 
-				std::string endpointString;
-				endpointString = appendPath(endpointString, m_resourcePath);
-				endpointString = appendPath(endpointString, m_resourceId);
-				endpointString = appendPath(endpointString, m_subResourcePath);
-				endpointString = appendPath(endpointString, m_subResourceId);
-				endpointString += m_queryString;
+				std::string endpoint;
+				endpoint = appendPath(endpoint, resourcePath);
+				endpoint = appendPath(endpoint, resourceId);
+				endpoint = appendPath(endpoint, subResourcePath);
+				endpoint = appendPath(endpoint, subResourceId);
+				endpoint += queryString;
 
-				return APIRequest(m_apiRoot, endpointString, m_requestMethod, m_headers, m_body);
+				return APIRequest(apiRoot, endpoint, requestMethod, headers, body);
 			}
 
 		private:
