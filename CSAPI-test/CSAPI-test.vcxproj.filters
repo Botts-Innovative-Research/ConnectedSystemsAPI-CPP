@@ -36,6 +36,9 @@
     <ClCompile Include="IntegrationTests\ControlStreamsTest.cpp">
       <Filter>IntegrationTests</Filter>
     </ClCompile>
+    <ClCompile Include="UnitTests\APIResponseTest.cpp">
+      <Filter>UnitTests</Filter>
+    </ClCompile>
     <ClCompile Include="UnitTests\ConnectedSystemsAPITest.cpp">
       <Filter>UnitTests</Filter>
     </ClCompile>

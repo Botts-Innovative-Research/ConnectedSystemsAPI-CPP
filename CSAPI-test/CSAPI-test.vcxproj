@@ -165,6 +165,7 @@
     <ClCompile Include="IntegrationTests\DataStreamsTest.cpp" />
     <ClCompile Include="IntegrationTests\ObservationsTest.cpp" />
     <ClCompile Include="IntegrationTests\SystemsTest.cpp" />
+    <ClCompile Include="UnitTests\APIResponseTest.cpp" />
     <ClCompile Include="UnitTests\ConnectedSystemsAPITest.cpp" />
     <ClCompile Include="UnitTests\DataArrayTest.cpp" />
     <ClCompile Include="UnitTests\DataBlockMixedTest.cpp" />
