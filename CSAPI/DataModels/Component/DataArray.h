@@ -104,7 +104,7 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 			v.m_elementCount = elementCount.get<Count>();
 			v.m_elementCountLink.reset();
 		}
-		v.m_elementType = DataComponentRegistry::createDataComponent(j.at("elementType"));
+		v.m_elementType = DataComponentRegistry::createDataComponentOrUnparsed(j.at("elementType"));
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const DataArray& v) {

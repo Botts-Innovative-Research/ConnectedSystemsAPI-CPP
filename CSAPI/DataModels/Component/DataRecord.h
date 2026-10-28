@@ -2,8 +2,6 @@
 
 #include <string>
 #include <ostream>
-#include <iostream>
-#include <exception>
 #include <cstdint>
 #include <memory>
 #include <utility>
@@ -126,15 +124,9 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		if (j.contains("fields") && j["fields"].is_array()) {
 			std::vector<std::unique_ptr<DataComponent>> tempFields;
 			tempFields.reserve(j["fields"].size());
+			// Fields that can't be parsed are kept as UnparsedComponents rather than dropped
 			for (const auto& fieldJson : j["fields"]) {
-				try {
-					auto comp = DataComponentRegistry::createDataComponent(fieldJson);
-					if (comp)
-						tempFields.push_back(std::move(comp));
-				}
-				catch (const std::exception& e) {
-					std::cerr << "DataRecord::from_json: failed to create field: " << e.what() << std::endl;
-				}
+				tempFields.push_back(DataComponentRegistry::createDataComponentOrUnparsed(fieldJson));
 			}
 			r.m_fields = std::move(tempFields);
 		}

@@ -8,6 +8,7 @@
 #include <nlohmann/json_fwd.hpp>
 
 #include "ScalarComponent.h"
+#include "AllowedTokens.h"
 #include "../../Util/JsonUtils.h"
 #include "DataComponent.h"
 #include "SimpleComponent.h"
@@ -18,6 +19,7 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 
 	class Text : public ScalarComponent {
 	private:
+		std::optional<AllowedTokens> m_constraint;
 		std::optional<std::string> m_value;
 
 	public:
@@ -46,6 +48,14 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		bool hasValue() const noexcept { return m_value.has_value(); }
 		void clearValue() noexcept { m_value.reset(); }
 
+		/// <summary>
+		/// Constraint on the possible values of the component.
+		/// </summary>
+		const std::optional<AllowedTokens>& getConstraint() const noexcept { return m_constraint; }
+		void setConstraint(std::optional<AllowedTokens> constraint) { m_constraint = std::move(constraint); }
+		bool hasConstraint() const noexcept { return m_constraint.has_value(); }
+		void clearConstraint() noexcept { m_constraint.reset(); }
+
 		friend void from_json(const nlohmann::json& j, Text& v);
 		friend void to_json(nlohmann::ordered_json& j, const Text& v);
 
@@ -64,11 +74,18 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 	inline void from_json(const nlohmann::json& j, Text& v) {
 		from_json(j, static_cast<ScalarComponent&>(v));
 
+		if (j.contains("constraint") && j["constraint"].is_object())
+			v.m_constraint = j["constraint"].get<AllowedTokens>();
+		else
+			v.m_constraint.reset();
+
 		v.m_value = ConnectedSystemsAPI::JsonUtils::tryParseString(j, "value");
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const Text& v) {
 		to_json(j, static_cast<const ScalarComponent&>(v));
+
+		if (v.m_constraint) j["constraint"] = v.m_constraint->toJson();
 
 		if (v.m_value) j["value"] = v.m_value.value();
 	}

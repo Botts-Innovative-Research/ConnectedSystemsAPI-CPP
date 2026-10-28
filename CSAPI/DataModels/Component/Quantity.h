@@ -8,6 +8,7 @@
 #include <nlohmann/json_fwd.hpp>
 
 #include "ScalarComponent.h"
+#include "AllowedValues.h"
 #include "UnitOfMeasure.h"
 #include "../../Util/JsonUtils.h"
 #include "DataComponent.h"
@@ -19,6 +20,7 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 
 	class Quantity : public ScalarComponent {
 	private:
+		std::optional<AllowedValues> m_constraint;
 		std::optional<double> m_value;
 		UnitOfMeasure m_unitOfMeasure;
 
@@ -59,6 +61,14 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		void setUnitOfMeasure(const UnitOfMeasure& unitOfMeasure) { m_unitOfMeasure = unitOfMeasure; }
 		void setUnitOfMeasure(UnitOfMeasure&& unitOfMeasure) noexcept { m_unitOfMeasure = std::move(unitOfMeasure); }
 
+		/// <summary>
+		/// Constraint on the possible values of the component.
+		/// </summary>
+		const std::optional<AllowedValues>& getConstraint() const noexcept { return m_constraint; }
+		void setConstraint(std::optional<AllowedValues> constraint) { m_constraint = std::move(constraint); }
+		bool hasConstraint() const noexcept { return m_constraint.has_value(); }
+		void clearConstraint() noexcept { m_constraint.reset(); }
+
 		friend void from_json(const nlohmann::json& j, Quantity& v);
 		friend void to_json(nlohmann::ordered_json& j, const Quantity& v);
 
@@ -77,12 +87,19 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 	inline void from_json(const nlohmann::json& j, Quantity& v) {
 		from_json(j, static_cast<ScalarComponent&>(v));
 
+		if (j.contains("constraint") && j["constraint"].is_object())
+			v.m_constraint = j["constraint"].get<AllowedValues>();
+		else
+			v.m_constraint.reset();
+
 		v.m_value = ConnectedSystemsAPI::JsonUtils::tryParseDouble(j, "value");
 		v.m_unitOfMeasure = j.at("uom").get<UnitOfMeasure>();
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const Quantity& v) {
 		to_json(j, static_cast<const ScalarComponent&>(v));
+
+		if (v.m_constraint) j["constraint"] = v.m_constraint->toJson();
 
 		if (v.m_value) j["value"] = v.m_value.value();
 		j["uom"] = v.m_unitOfMeasure;

@@ -48,6 +48,9 @@
     <ClCompile Include="UnitTests\QueryParametersTest.cpp">
       <Filter>UnitTests</Filter>
     </ClCompile>
+    <ClCompile Include="UnitTests\SchemaComponentTest.cpp">
+      <Filter>UnitTests</Filter>
+    </ClCompile>
     <ClCompile Include="UnitTests\TimeExtentTest.cpp">
       <Filter>UnitTests</Filter>
     </ClCompile>

@@ -8,6 +8,7 @@
 #include <nlohmann/json_fwd.hpp>
 
 #include "ScalarComponent.h"
+#include "AllowedTokens.h"
 #include "../../Util/JsonUtils.h"
 #include "DataComponent.h"
 #include "SimpleComponent.h"
@@ -18,6 +19,7 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 
 	class Category : public ScalarComponent {
 	private:
+		std::optional<AllowedTokens> m_constraint;
 		std::optional<std::string> m_value;
 		std::optional<std::string> m_codeSpace;
 
@@ -52,6 +54,14 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		bool hasCodeSpace() const noexcept { return m_codeSpace.has_value(); }
 		void clearCodeSpace() noexcept { m_codeSpace.reset(); }
 
+		/// <summary>
+		/// Constraint on the possible values of the component.
+		/// </summary>
+		const std::optional<AllowedTokens>& getConstraint() const noexcept { return m_constraint; }
+		void setConstraint(std::optional<AllowedTokens> constraint) { m_constraint = std::move(constraint); }
+		bool hasConstraint() const noexcept { return m_constraint.has_value(); }
+		void clearConstraint() noexcept { m_constraint.reset(); }
+
 		friend void from_json(const nlohmann::json& j, Category& v);
 		friend void to_json(nlohmann::ordered_json& j, const Category& v);
 
@@ -70,12 +80,19 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 	inline void from_json(const nlohmann::json& j, Category& v) {
 		from_json(j, static_cast<ScalarComponent&>(v));
 
+		if (j.contains("constraint") && j["constraint"].is_object())
+			v.m_constraint = j["constraint"].get<AllowedTokens>();
+		else
+			v.m_constraint.reset();
+
 		v.m_value = ConnectedSystemsAPI::JsonUtils::tryParseString(j, "value");
 		v.m_codeSpace = ConnectedSystemsAPI::JsonUtils::tryParseString(j, "codeSpace");
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const Category& v) {
 		to_json(j, static_cast<const ScalarComponent&>(v));
+
+		if (v.m_constraint) j["constraint"] = v.m_constraint->toJson();
 
 		if (v.hasValue()) j["value"] = v.m_value.value();
 		if (v.hasCodeSpace()) j["codeSpace"] = v.m_codeSpace.value();

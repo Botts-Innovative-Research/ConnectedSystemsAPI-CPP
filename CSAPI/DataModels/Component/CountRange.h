@@ -9,6 +9,7 @@
 #include <nlohmann/json_fwd.hpp>
 
 #include "SimpleComponent.h"
+#include "AllowedValues.h"
 #include "../../Util/JsonUtils.h"
 #include "DataComponent.h"
 
@@ -18,6 +19,7 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 
 	class CountRange : public SimpleComponent {
 	private:
+		std::optional<AllowedValues> m_constraint;
 		std::optional<std::vector<int>> m_value;
 
 	public:
@@ -46,6 +48,14 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		bool hasValue() const noexcept { return m_value.has_value(); }
 		void clearValue() noexcept { m_value.reset(); }
 
+		/// <summary>
+		/// Constraint on the possible values of the component.
+		/// </summary>
+		const std::optional<AllowedValues>& getConstraint() const noexcept { return m_constraint; }
+		void setConstraint(std::optional<AllowedValues> constraint) { m_constraint = std::move(constraint); }
+		bool hasConstraint() const noexcept { return m_constraint.has_value(); }
+		void clearConstraint() noexcept { m_constraint.reset(); }
+
 		friend void from_json(const nlohmann::json& j, CountRange& v);
 		friend void to_json(nlohmann::ordered_json& j, const CountRange& v);
 
@@ -64,11 +74,18 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 	inline void from_json(const nlohmann::json& j, CountRange& v) {
 		from_json(j, static_cast<SimpleComponent&>(v));
 
+		if (j.contains("constraint") && j["constraint"].is_object())
+			v.m_constraint = j["constraint"].get<AllowedValues>();
+		else
+			v.m_constraint.reset();
+
 		v.m_value = ConnectedSystemsAPI::JsonUtils::tryParseIntegerArray(j, "value");
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const CountRange& v) {
 		to_json(j, static_cast<const SimpleComponent&>(v));
+
+		if (v.m_constraint) j["constraint"] = v.m_constraint->toJson();
 
 		if (v.hasValue()) j["value"] = v.m_value.value();
 	}

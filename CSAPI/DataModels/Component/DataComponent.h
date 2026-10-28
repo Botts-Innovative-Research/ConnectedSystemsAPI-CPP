@@ -149,3 +149,6 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		if (c.getDefinition()) j["definition"] = c.getDefinition().value();
 	}
 }
+
+// Defines DataComponentRegistry::createDataComponentOrUnparsed, which needs the complete DataComponent type
+#include "UnparsedComponent.h"

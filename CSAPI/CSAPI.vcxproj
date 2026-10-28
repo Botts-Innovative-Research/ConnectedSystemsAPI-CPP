@@ -157,7 +157,11 @@
     <ClInclude Include="DataModels\Component\DataComponentRegistry.h" />
     <ClInclude Include="DataModels\Component\DataRecord.h" />
     <ClInclude Include="DataModels\Component\DataRecordBuilder.h" />
+    <ClInclude Include="DataModels\Component\AllowedTimes.h" />
+    <ClInclude Include="DataModels\Component\AllowedTokens.h" />
+    <ClInclude Include="DataModels\Component\AllowedValues.h" />
     <ClInclude Include="DataModels\Component\NilValue.h" />
+    <ClInclude Include="DataModels\Component\UnparsedComponent.h" />
     <ClInclude Include="DataModels\Component\Quantity.h" />
     <ClInclude Include="DataModels\Component\QuantityRange.h" />
     <ClInclude Include="DataModels\Component\ScalarComponent.h" />

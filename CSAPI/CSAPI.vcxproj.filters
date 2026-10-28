@@ -108,7 +108,19 @@
     <ClInclude Include="RegistryInit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DataModels\Component\AllowedTimes.h">
+      <Filter>Header Files\DataModels\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Component\AllowedTokens.h">
+      <Filter>Header Files\DataModels\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Component\AllowedValues.h">
+      <Filter>Header Files\DataModels\Component</Filter>
+    </ClInclude>
     <ClInclude Include="DataModels\Component\NilValue.h">
+      <Filter>Header Files\DataModels\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Component\UnparsedComponent.h">
       <Filter>Header Files\DataModels\Component</Filter>
     </ClInclude>
     <ClInclude Include="DataModels\Component\ScalarComponent.h">

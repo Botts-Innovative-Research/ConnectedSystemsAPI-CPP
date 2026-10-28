@@ -95,8 +95,7 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		if (j.contains("items") && j["items"].is_array()) {
 			std::vector<std::unique_ptr<DataComponent>> items;
 			for (const auto& item : j["items"]) {
-				auto created = DataComponentRegistry::createDataComponent(item);
-				if (created) items.push_back(std::move(created));
+				items.push_back(DataComponentRegistry::createDataComponentOrUnparsed(item));
 			}
 			v.m_items = std::move(items);
 		}

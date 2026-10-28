@@ -8,6 +8,7 @@
 #include <nlohmann/json_fwd.hpp>
 
 #include "ScalarComponent.h"
+#include "AllowedTimes.h"
 #include "UnitOfMeasure.h"
 #include "../../Util/JsonUtils.h"
 #include "DataComponent.h"
@@ -19,6 +20,7 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 
 	class Time : public ScalarComponent {
 	private:
+		std::optional<AllowedTimes> m_constraint;
 		std::optional<double> m_value;
 		std::optional<std::string> m_referenceTime;
 		std::optional<std::string> m_localFrame;
@@ -82,6 +84,14 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		bool hasUnitOfMeasure() const noexcept { return m_unitOfMeasure.has_value(); }
 		void clearUnitOfMeasure() noexcept { m_unitOfMeasure.reset(); }
 
+		/// <summary>
+		/// Constraint on the possible values of the component.
+		/// </summary>
+		const std::optional<AllowedTimes>& getConstraint() const noexcept { return m_constraint; }
+		void setConstraint(std::optional<AllowedTimes> constraint) { m_constraint = std::move(constraint); }
+		bool hasConstraint() const noexcept { return m_constraint.has_value(); }
+		void clearConstraint() noexcept { m_constraint.reset(); }
+
 		friend void from_json(const nlohmann::json& j, Time& v);
 		friend void to_json(nlohmann::ordered_json& j, const Time& v);
 
@@ -100,6 +110,11 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 	inline void from_json(const nlohmann::json& j, Time& v) {
 		from_json(j, static_cast<ScalarComponent&>(v));
 
+		if (j.contains("constraint") && j["constraint"].is_object())
+			v.m_constraint = j["constraint"].get<AllowedTimes>();
+		else
+			v.m_constraint.reset();
+
 		v.m_value = ConnectedSystemsAPI::JsonUtils::tryParseDouble(j, "value");
 		v.m_referenceTime = ConnectedSystemsAPI::JsonUtils::tryParseString(j, "referenceTime");
 		v.m_localFrame = ConnectedSystemsAPI::JsonUtils::tryParseString(j, "localFrame");
@@ -112,6 +127,8 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 
 	inline void to_json(nlohmann::ordered_json& j, const Time& v) {
 		to_json(j, static_cast<const ScalarComponent&>(v));
+
+		if (v.m_constraint) j["constraint"] = v.m_constraint->toJson();
 
 		if (v.m_value) j["value"] = v.m_value.value();
 		if (v.m_referenceTime) j["referenceTime"] = v.m_referenceTime.value();

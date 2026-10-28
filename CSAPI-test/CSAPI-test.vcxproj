@@ -169,6 +169,7 @@
     <ClCompile Include="UnitTests\DataArrayTest.cpp" />
     <ClCompile Include="UnitTests\DataBlockMixedTest.cpp" />
     <ClCompile Include="UnitTests\QueryParametersTest.cpp" />
+    <ClCompile Include="UnitTests\SchemaComponentTest.cpp" />
     <ClCompile Include="UnitTests\TimeExtentTest.cpp" />
     <ClCompile Include="UnitTests\TimeUtilsTest.cpp" />
     <ClCompile Include="pch.cpp">

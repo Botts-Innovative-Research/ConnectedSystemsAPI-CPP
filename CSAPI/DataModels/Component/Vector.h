@@ -97,9 +97,7 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		if (j.contains("coordinates") && j["coordinates"].is_array()) {
 			std::vector<std::unique_ptr<DataComponent>> tempFields;
 			for (const auto& fieldJson : j["coordinates"]) {
-				if (auto ptr = DataComponentRegistry::createDataComponent(fieldJson)) {
-					tempFields.push_back(std::move(ptr));
-				}
+				tempFields.push_back(DataComponentRegistry::createDataComponentOrUnparsed(fieldJson));
 			}
 			v.m_coordinates = std::move(tempFields);
 		}

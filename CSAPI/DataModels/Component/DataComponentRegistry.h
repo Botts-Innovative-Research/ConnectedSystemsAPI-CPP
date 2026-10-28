@@ -35,6 +35,13 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 			throw std::runtime_error("DataComponentRegistry: Unknown component type: " + type);
 		}
 
+		/// <summary>
+		/// Creates a DataComponent (or derived) from JSON without throwing.
+		/// If the JSON can't be parsed (e.g., an unknown or missing type), returns an UnparsedComponent
+		/// that keeps the original JSON and the error. Defined in UnparsedComponent.h.
+		/// </summary>
+		static std::unique_ptr<DataComponent> createDataComponentOrUnparsed(const nlohmann::json& j);
+
 	private:
 		static std::unordered_map<std::string, FactoryFunc>& getRegistry() {
 			static std::unordered_map<std::string, FactoryFunc> registry;
