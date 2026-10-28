@@ -124,49 +124,6 @@ namespace ConnectedSystemsAPI {
 			return response;
 		}
 
-	private:
-		static size_t WriteCallback(char* ptr, size_t size, size_t nmemb, void* userdata) {
-			auto* response = static_cast<std::string*>(userdata);
-			response->append(ptr, size * nmemb);
-			return size * nmemb;
-		}
-
-		static size_t HeaderCallback(char* buffer, size_t size, size_t nitems, void* userdata) {
-			size_t totalSize = size * nitems;
-			auto* response = static_cast<RawHttpResponse*>(userdata);
-
-			// Check for the status line (e.g., "HTTP/1.1 200 OK\r\n")
-			if (std::string headerLine(buffer, totalSize); headerLine.find("HTTP/") == 0) {
-				// Remove trailing \r\n
-				headerLine.erase(headerLine.find_last_not_of("\r\n") + 1);
-				// Remove "HTTP/1.1 " prefix to get the status message
-				size_t firstSpace = headerLine.find(' ');
-				if (firstSpace != std::string::npos) {
-					size_t secondSpace = headerLine.find(' ', firstSpace + 1);
-					if (secondSpace != std::string::npos) {
-						response->responseMessage = headerLine.substr(secondSpace + 1);
-					}
-				}
-				else
-					response->responseMessage = headerLine;
-			}
-			else {
-				// Parse header: "Key: Value"
-				auto colonPos = headerLine.find(':');
-				if (colonPos != std::string::npos) {
-					std::string key = headerLine.substr(0, colonPos);
-					std::string value = headerLine.substr(colonPos + 1);
-					// Trim whitespace and trailing \r\n
-					key.erase(key.find_last_not_of(" \t\r\n") + 1);
-					value.erase(0, value.find_first_not_of(" \t"));
-					value.erase(value.find_last_not_of("\r\n") + 1);
-					response->headers[key].push_back(value);
-				}
-			}
-			return totalSize;
-		}
-
-	public:
 		// Builder inner class
 		class Builder {
 		private:
