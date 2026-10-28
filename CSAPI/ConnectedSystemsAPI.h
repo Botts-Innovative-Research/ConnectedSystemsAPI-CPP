@@ -33,7 +33,7 @@ namespace ConnectedSystemsAPI {
 		/// <param name="isBasicAuth">If true, use Basic authentication with the provided base64-encoded "username:password" string. If false, use Bearer token authentication.</param>
 		ConSysAPI(const std::string& apiRoot, const std::string& authenticationToken, bool isBasicAuth)
 			: apiRoot(apiRoot),
-			authHeader(isBasicAuth ? std::string("Authorization: Basic ") + authenticationToken : std::string("Authorization: Bearer ") + authenticationToken),
+			authHeader((isBasicAuth ? "Basic " : "Bearer ") + authenticationToken),
 			systemsAPI(this->apiRoot, authHeader),
 			dataStreamsAPI(this->apiRoot, authHeader),
 			observationsAPI(this->apiRoot, authHeader),
@@ -51,18 +51,22 @@ namespace ConnectedSystemsAPI {
 			: ConSysAPI(apiRoot, Utilities::base64_encode(username + ":" + password), true) {
 		}
 
-		// Overload to accept C-style string literals to avoid list-initialization narrowing issues
+		// Overload for a string literal password. Without it, a const char* password converts to bool
+		// and selects the (apiRoot, authenticationToken, isBasicAuth) constructor instead.
 		/// <summary>
 		/// Constructs a ConnectedSystemsAPI instance, used to access an API endpoint on a server.
 		/// </summary>
 		/// <param name="apiRoot">e.g. "localhost:8181/sensorhub/api". If no protocol is specified, defaults to https://</param>
 		/// <param name="username">Username for Basic authentication</param>
 		/// <param name="password">Password for Basic authentication</param>
-		ConSysAPI(const char* apiRootC, const char* usernameC, const char* passwordC)
-			: ConSysAPI(std::string(apiRootC), std::string(usernameC), std::string(passwordC)) {
+		ConSysAPI(const std::string& apiRoot, const std::string& username, const char* password)
+			: ConSysAPI(apiRoot, username, std::string(password)) {
 		}
 
 		const std::string& getApiRoot() const { return apiRoot; }
+		/// <summary>
+		/// The value of the Authorization header sent with each request, e.g., "Basic dXNlcjpwYXNz" or "Bearer token".
+		/// </summary>
 		const std::string& getAuthHeader() const { return authHeader; }
 		SystemsAPI& getSystemsAPI() { return systemsAPI; }
 		DataStreamsAPI& getDataStreamsAPI() { return dataStreamsAPI; }

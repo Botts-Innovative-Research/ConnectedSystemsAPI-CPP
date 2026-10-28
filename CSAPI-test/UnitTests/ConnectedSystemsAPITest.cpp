@@ -2,6 +2,9 @@
 #include "CppUnitTest.h"
 #include "ConnectedSystemsAPI.h"
 
+#include <thread>
+#include <httplib.h>
+
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace ConnectedSystemsAPI;
 using namespace std::string_literals;
@@ -14,56 +17,56 @@ namespace CSAPItest {
 			ConSysAPI api("localhost:8181/sensorhub/api", "admin", "password");
 
 			std::string authHeader = api.getAuthHeader();
-			Assert::IsTrue(authHeader.find("Authorization: Basic ") == 0);
-			Assert::IsTrue(authHeader.length() > 21);
+			Assert::IsTrue(authHeader.find("Basic ") == 0);
+			Assert::IsTrue(authHeader.length() > 6);
 		}
 
 		TEST_METHOD(Constructor_BasicAuth_WithCStyleStrings_CreatesCorrectAuthHeader) {
 			ConSysAPI api("localhost:8181/sensorhub/api", "admin", "password");
 
 			std::string authHeader = api.getAuthHeader();
-			Assert::IsTrue(authHeader.find("Authorization: Basic ") == 0);
+			Assert::IsTrue(authHeader.find("Basic ") == 0);
 		}
 
 		TEST_METHOD(Constructor_BearerToken_CreatesCorrectAuthHeader) {
 			ConSysAPI api("localhost:8181/sensorhub/api"s, "mytoken123", false);
 
-			std::string expected = "Authorization: Bearer mytoken123"s;
+			std::string expected = "Bearer mytoken123"s;
 			Assert::AreEqual(expected, api.getAuthHeader());
 		}
 
 		TEST_METHOD(Constructor_BearerToken_WithEmptyToken_CreatesHeader) {
 			ConSysAPI api("localhost:8181/sensorhub/api"s, "", false);
 
-			std::string expected = "Authorization: Bearer "s;
+			std::string expected = "Bearer "s;
 			Assert::AreEqual(expected, api.getAuthHeader());
 		}
 
 		TEST_METHOD(Base64Encoding_SimpleCredentials_EncodesCorrectly) {
 			ConSysAPI api("localhost", "admin", "password");
 
-			std::string expected = "Authorization: Basic YWRtaW46cGFzc3dvcmQ=";
+			std::string expected = "Basic YWRtaW46cGFzc3dvcmQ=";
 			Assert::AreEqual(expected, api.getAuthHeader());
 		}
 
 		TEST_METHOD(Base64Encoding_UsernameOnly_EncodesCorrectly) {
 			ConSysAPI api("localhost", "user", "");
 
-			std::string expected = "Authorization: Basic dXNlcjo=";
+			std::string expected = "Basic dXNlcjo=";
 			Assert::AreEqual(expected, api.getAuthHeader());
 		}
 
 		TEST_METHOD(Base64Encoding_PasswordOnly_EncodesCorrectly) {
 			ConSysAPI api("localhost", "", "pass");
 
-			std::string expected = "Authorization: Basic OnBhc3M=";
+			std::string expected = "Basic OnBhc3M=";
 			Assert::AreEqual(expected, api.getAuthHeader());
 		}
 
 		TEST_METHOD(Base64Encoding_EmptyCredentials_EncodesCorrectly) {
 			ConSysAPI api("localhost", "", "");
 
-			std::string expected = "Authorization: Basic Og==";
+			std::string expected = "Basic Og==";
 			Assert::AreEqual(expected, api.getAuthHeader());
 		}
 
@@ -71,8 +74,8 @@ namespace CSAPItest {
 			ConSysAPI api("localhost", "user@domain.com", "p@ssw0rd!");
 
 			std::string authHeader = api.getAuthHeader();
-			Assert::IsTrue(authHeader.find("Authorization: Basic ") == 0);
-			Assert::AreEqual("Authorization: Basic dXNlckBkb21haW4uY29tOnBAc3N3MHJkIQ=="s, authHeader);
+			Assert::IsTrue(authHeader.find("Basic ") == 0);
+			Assert::AreEqual("Basic dXNlckBkb21haW4uY29tOnBAc3N3MHJkIQ=="s, authHeader);
 		}
 
 		TEST_METHOD(Base64Encoding_LongCredentials_EncodesCorrectly) {
@@ -81,8 +84,8 @@ namespace CSAPItest {
 			ConSysAPI api("localhost", longUsername, longPassword);
 
 			std::string authHeader = api.getAuthHeader();
-			Assert::IsTrue(authHeader.find("Authorization: Basic ") == 0);
-			Assert::IsTrue(authHeader.length() > 21);
+			Assert::IsTrue(authHeader.find("Basic ") == 0);
+			Assert::IsTrue(authHeader.length() > 6);
 		}
 
 		TEST_METHOD(GetApiRoot_ReturnsCorrectValue) {
@@ -155,7 +158,7 @@ namespace CSAPItest {
 			std::string longToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
 			ConSysAPI api("localhost", longToken, false);
 
-			std::string expected = "Authorization: Bearer " + longToken;
+			std::string expected = "Bearer " + longToken;
 			Assert::AreEqual(expected, api.getAuthHeader());
 		}
 
@@ -163,8 +166,8 @@ namespace CSAPItest {
 			ConSysAPI api("localhost", "aaa", "bbb");
 
 			std::string authHeader = api.getAuthHeader();
-			Assert::IsTrue(authHeader.find("Authorization: Basic ") == 0);
-			std::string base64Part = authHeader.substr(21);
+			Assert::IsTrue(authHeader.find("Basic ") == 0);
+			std::string base64Part = authHeader.substr(6);
 			Assert::IsTrue((base64Part.length() % 4) == 0);
 		}
 
@@ -172,8 +175,8 @@ namespace CSAPItest {
 			ConSysAPI api("localhost", "aa", "bb");
 
 			std::string authHeader = api.getAuthHeader();
-			Assert::IsTrue(authHeader.find("Authorization: Basic ") == 0);
-			std::string base64Part = authHeader.substr(21);
+			Assert::IsTrue(authHeader.find("Basic ") == 0);
+			std::string base64Part = authHeader.substr(6);
 			Assert::IsTrue((base64Part.length() % 4) == 0);
 		}
 
@@ -181,8 +184,8 @@ namespace CSAPItest {
 			ConSysAPI api("localhost", "a", "b");
 
 			std::string authHeader = api.getAuthHeader();
-			Assert::IsTrue(authHeader.find("Authorization: Basic ") == 0);
-			std::string base64Part = authHeader.substr(21);
+			Assert::IsTrue(authHeader.find("Basic ") == 0);
+			std::string base64Part = authHeader.substr(6);
 			Assert::IsTrue((base64Part.length() % 4) == 0);
 		}
 
@@ -197,6 +200,45 @@ namespace CSAPItest {
 			ConSysAPI api(complexUrl, "admin", "password");
 
 			Assert::AreEqual(complexUrl, api.getApiRoot());
+		}
+
+		TEST_METHOD(Request_BasicAuth_SendsAuthorizationHeaderValue) {
+			Assert::AreEqual("Basic YWRtaW46cGFzc3dvcmQ="s, captureAuthorizationHeader([](const std::string& root) {
+				return ConSysAPI(root, "admin", "password");
+			}));
+		}
+
+		TEST_METHOD(Request_BearerToken_SendsAuthorizationHeaderValue) {
+			Assert::AreEqual("Bearer mytoken123"s, captureAuthorizationHeader([](const std::string& root) {
+				return ConSysAPI(root, "mytoken123"s, false);
+			}));
+		}
+
+	private:
+		/// <summary>
+		/// Sends a request through a ConSysAPI to a local server and returns the Authorization header it received.
+		/// </summary>
+		template<typename MakeApi>
+		static std::string captureAuthorizationHeader(MakeApi makeApi) {
+			httplib::Server server;
+			std::string received;
+			server.Get("/api/systems", [&](const httplib::Request& req, httplib::Response& res) {
+				received = req.get_header_value("Authorization");
+				res.set_content(R"({"items":[]})", "application/json");
+			});
+
+			int port = server.bind_to_any_port("127.0.0.1");
+			std::thread serverThread([&] { server.listen_after_bind(); });
+			server.wait_until_ready();
+
+			auto api = makeApi("http://127.0.0.1:" + std::to_string(port) + "/api");
+			auto response = api.getSystemsAPI().getSystems();
+
+			server.stop();
+			serverThread.join();
+
+			Assert::AreEqual(200, response.getResponseCode());
+			return received;
 		}
 	};
 }

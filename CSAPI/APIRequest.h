@@ -167,6 +167,9 @@ namespace ConnectedSystemsAPI {
 				return *this;
 			}
 
+			/// <summary>
+			/// Sets the value of the Authorization header, e.g., "Basic dXNlcjpwYXNz" (without the "Authorization: " prefix).
+			/// </summary>
 			Builder& setAuthHeader(const std::string& authHeader) {
 				this->headers["Authorization"] = authHeader;
 				return *this;
