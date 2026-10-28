@@ -55,7 +55,7 @@ namespace ConnectedSystemsAPI {
 		/// <param name="query">The query string parameters.</param>
 		/// <returns>A response object containing a list of subsystems.</returns>
 		APIResponse<DataModels::System> getSubsystems(const std::string& systemId, const Query::SystemsQuery& query) const {
-			getSubsystems(systemId, query.toString());
+			return getSubsystems(systemId, query.toString());
 		}
 
 		/// <summary>

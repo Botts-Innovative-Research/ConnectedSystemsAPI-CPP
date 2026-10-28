@@ -214,7 +214,83 @@ namespace CSAPItest {
 			}));
 		}
 
+		TEST_METHOD(Request_NoScheme_UsesHttp) {
+			auto response = requestSystemsFromLocalServer([](int port) { return "127.0.0.1:" + std::to_string(port) + "/api"; });
+			Assert::AreEqual(200, response.getResponseCode());
+		}
+
+		TEST_METHOD(Request_UppercaseScheme_IsAccepted) {
+			auto response = requestSystemsFromLocalServer([](int port) { return "HTTP://127.0.0.1:" + std::to_string(port) + "/api"; });
+			Assert::AreEqual(200, response.getResponseCode());
+		}
+
+		TEST_METHOD(Request_Https_WithoutSslSupport_FailsWithoutThrowing) {
+#if defined(CPPHTTPLIB_SSL_ENABLED) || defined(CPPHTTPLIB_OPENSSL_SUPPORT)
+			Logger::WriteMessage("Skipped: cpp-httplib was built with SSL support");
+#else
+			ConSysAPI api("https://127.0.0.1:1/api", "admin", "password");
+			auto response = api.getSystemsAPI().getSystems();
+
+			Assert::AreEqual(0, response.getResponseCode());
+			Assert::IsTrue(response.getResponseMessage().find("HTTPS is not supported") == 0);
+#endif
+		}
+
+		TEST_METHOD(Request_UnsupportedScheme_FailsWithoutThrowing) {
+			ConSysAPI api("ftp://127.0.0.1:1/api", "admin", "password");
+			auto response = api.getSystemsAPI().getSystems();
+
+			Assert::AreEqual(0, response.getResponseCode());
+			Assert::AreEqual("Unsupported URL scheme: ftp"s, response.getResponseMessage());
+		}
+
+		TEST_METHOD(GetSubsystems_WithQuery_ReturnsResponse) {
+			httplib::Server server;
+			std::string receivedQ;
+			server.Get("/api/systems/sys1/subsystems", [&](const httplib::Request& req, httplib::Response& res) {
+				receivedQ = req.get_param_value("q");
+				res.set_content(R"({"items":[{"type":"Feature","id":"sub1","properties":{"featureType":"http://www.w3.org/ns/sosa/Sensor","uid":"urn:test:sub1","name":"Sub"}}]})", "application/json");
+			});
+
+			int port = server.bind_to_any_port("127.0.0.1");
+			std::thread serverThread([&] { server.listen_after_bind(); });
+			server.wait_until_ready();
+
+			ConSysAPI api("http://127.0.0.1:" + std::to_string(port) + "/api", "admin", "password");
+			auto response = api.getSystemsAPI().getSubsystems("sys1", Query::SystemsQuery().setQ("gps"));
+
+			server.stop();
+			serverThread.join();
+
+			Assert::AreEqual(200, response.getResponseCode());
+			Assert::AreEqual("gps"s, receivedQ);
+			Assert::AreEqual(size_t(1), response.getItems().size());
+			Assert::AreEqual("sub1"s, response.getItems()[0].getId());
+		}
+
 	private:
+		/// <summary>
+		/// Requests /systems from a local server, using an API root built from the server's port.
+		/// </summary>
+		template<typename MakeRoot>
+		static APIResponse<DataModels::System> requestSystemsFromLocalServer(MakeRoot makeRoot) {
+			httplib::Server server;
+			server.Get("/api/systems", [](const httplib::Request&, httplib::Response& res) {
+				res.set_content(R"({"items":[]})", "application/json");
+			});
+
+			int port = server.bind_to_any_port("127.0.0.1");
+			std::thread serverThread([&] { server.listen_after_bind(); });
+			server.wait_until_ready();
+
+			ConSysAPI api(makeRoot(port), "admin", "password");
+			auto response = api.getSystemsAPI().getSystems();
+
+			server.stop();
+			serverThread.join();
+			return response;
+		}
+
 		/// <summary>
 		/// Sends a request through a ConSysAPI to a local server and returns the Authorization header it received.
 		/// </summary>

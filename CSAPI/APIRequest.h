@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+#include <cctype>
 #include <string>
 #include <iostream>
 #include <stdexcept>
@@ -39,16 +41,37 @@ namespace ConnectedSystemsAPI {
 		RawHttpResponse execute() const {
 			RawHttpResponse response;
 
-			size_t pathStart = apiRoot.find('/', apiRoot.find("://") + 3);
-			std::string baseUrl = (pathStart != std::string::npos)
-				? apiRoot.substr(0, pathStart)
-				: apiRoot;
+			// Split the API root into scheme, host[:port], and base path. No scheme means http.
+			size_t schemeEnd = apiRoot.find("://");
+			std::string scheme = schemeEnd == std::string::npos ? "http" : apiRoot.substr(0, schemeEnd);
+			std::transform(scheme.begin(), scheme.end(), scheme.begin(),
+				[](unsigned char c) { return static_cast<char>(std::tolower(c)); });
 
-			std::string basePath = (pathStart != std::string::npos)
-				? apiRoot.substr(pathStart)
-				: "";
+			size_t hostStart = schemeEnd == std::string::npos ? 0 : schemeEnd + 3;
+			size_t pathStart = apiRoot.find('/', hostStart);
+			std::string hostAndPort = pathStart == std::string::npos
+				? apiRoot.substr(hostStart)
+				: apiRoot.substr(hostStart, pathStart - hostStart);
+			std::string basePath = pathStart == std::string::npos ? "" : apiRoot.substr(pathStart);
 
-			httplib::Client cli(baseUrl.c_str());
+			// httplib throws for schemes it can't handle, so report them as a failed request instead
+#if defined(CPPHTTPLIB_SSL_ENABLED) || defined(CPPHTTPLIB_OPENSSL_SUPPORT)
+			const bool httpsSupported = true;
+#else
+			const bool httpsSupported = false;
+#endif
+			if (scheme != "http" && !(scheme == "https" && httpsSupported)) {
+				response.responseMessage = scheme == "https"
+					? "HTTPS is not supported: cpp-httplib was built without SSL support (define CPPHTTPLIB_OPENSSL_SUPPORT)"
+					: "Unsupported URL scheme: " + scheme;
+				return response;
+			}
+
+			httplib::Client cli(scheme + "://" + hostAndPort);
+			if (!cli.is_valid()) {
+				response.responseMessage = "Invalid API root: " + apiRoot;
+				return response;
+			}
 			std::string fullEndpoint = basePath + endpoint;
 
 			// Build headers

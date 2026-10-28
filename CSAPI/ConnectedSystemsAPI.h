@@ -28,7 +28,7 @@ namespace ConnectedSystemsAPI {
 		/// <summary>
 		/// Constructs a ConnectedSystemsAPI instance, used to access an API endpoint on a server.
 		/// </summary>
-		/// <param name="apiRoot">e.g. "localhost:8181/sensorhub/api". If no protocol is specified, defaults to https://</param>
+		/// <param name="apiRoot">e.g. "http://localhost:8181/sensorhub/api". If no protocol is specified, http:// is used. https:// requires cpp-httplib built with SSL support.</param>
 		/// <param name="authenticationToken">If isBasicAuth is true, this should be a base64-encoded "username:password" string. If isBasicAuth is false, this should be a bearer token.</param>
 		/// <param name="isBasicAuth">If true, use Basic authentication with the provided base64-encoded "username:password" string. If false, use Bearer token authentication.</param>
 		ConSysAPI(const std::string& apiRoot, const std::string& authenticationToken, bool isBasicAuth)
@@ -44,7 +44,7 @@ namespace ConnectedSystemsAPI {
 		/// <summary>
 		/// Constructs a ConnectedSystemsAPI instance, used to access an API endpoint on a server.
 		/// </summary>
-		/// <param name="apiRoot">e.g. "localhost:8181/sensorhub/api". If no protocol is specified, defaults to https://</param>
+		/// <param name="apiRoot">e.g. "http://localhost:8181/sensorhub/api". If no protocol is specified, http:// is used. https:// requires cpp-httplib built with SSL support.</param>
 		/// <param name="username">Username for Basic authentication</param>
 		/// <param name="password">Password for Basic authentication</param>
 		ConSysAPI(const std::string& apiRoot, const std::string& username, const std::string& password)
@@ -56,7 +56,7 @@ namespace ConnectedSystemsAPI {
 		/// <summary>
 		/// Constructs a ConnectedSystemsAPI instance, used to access an API endpoint on a server.
 		/// </summary>
-		/// <param name="apiRoot">e.g. "localhost:8181/sensorhub/api". If no protocol is specified, defaults to https://</param>
+		/// <param name="apiRoot">e.g. "http://localhost:8181/sensorhub/api". If no protocol is specified, http:// is used. https:// requires cpp-httplib built with SSL support.</param>
 		/// <param name="username">Username for Basic authentication</param>
 		/// <param name="password">Password for Basic authentication</param>
 		ConSysAPI(const std::string& apiRoot, const std::string& username, const char* password)
