@@ -45,6 +45,12 @@
     <ClCompile Include="UnitTests\DataBlockMixedTest.cpp">
       <Filter>UnitTests</Filter>
     </ClCompile>
+    <ClCompile Include="UnitTests\TimeExtentTest.cpp">
+      <Filter>UnitTests</Filter>
+    </ClCompile>
+    <ClCompile Include="UnitTests\TimeUtilsTest.cpp">
+      <Filter>UnitTests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">

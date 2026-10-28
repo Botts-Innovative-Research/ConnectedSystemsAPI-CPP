@@ -58,7 +58,7 @@ namespace ConnectedSystemsAPI::DataModels {
 		/// <returns>True if the time interval ends at 'now'.</returns>
 		bool endsNow() const { return !end.has_value(); }
 		/// <returns>True if the time interval represents 'now' (both start and end are 'now').</returns>
-		bool isNow() const { return (!startsNow() && !endsNow()); }
+		bool isNow() const { return startsNow() && endsNow(); }
 
 		/// <summary>
 		/// Returns a string representation of the time extent in the format "start/end", or "instant" if the time extent represents a single instant.
@@ -121,8 +121,9 @@ namespace ConnectedSystemsAPI::DataModels {
 				throw std::invalid_argument("TimeExtent JSON must be an array of two elements.");
 			}
 
-			startStr = j.at(0).get<std::string>();
-			endStr = j.at(1).get<std::string>();
+			// A null end is unbounded
+			startStr = j.at(0).is_null() ? TimeExtent::SPECIAL_VALUE_UNBOUNDED : j.at(0).get<std::string>();
+			endStr = j.at(1).is_null() ? TimeExtent::SPECIAL_VALUE_UNBOUNDED : j.at(1).get<std::string>();
 		}
 		else if (j.is_string()) {
 			std::string timeStr = j.get<std::string>();
@@ -142,28 +143,28 @@ namespace ConnectedSystemsAPI::DataModels {
 			throw std::invalid_argument("TimeExtent JSON must be either an array of two elements or a string.");
 		}
 
-		std::optional<std::chrono::system_clock::time_point> start;
-		if (startStr == TimeExtent::SPECIAL_VALUE_NOW) {
-			start = std::nullopt; // 'now' is represented as nullopt
-		}
-		else if (startStr != TimeExtent::SPECIAL_VALUE_UNBOUNDED) {
-			start = TimeUtils::parseTimeStringUTC(startStr);
-		}
+		using TimePoint = std::chrono::system_clock::time_point;
 
-		std::optional<std::chrono::system_clock::time_point> end;
-		if (endStr == TimeExtent::SPECIAL_VALUE_NOW) {
-			end = std::nullopt; // 'now' is represented as nullopt
-		}
-		else if (endStr != TimeExtent::SPECIAL_VALUE_UNBOUNDED) {
-			end = TimeUtils::parseTimeStringUTC(endStr);
-		}
+		// 'now' is represented as nullopt, an unbounded start as min(), and an unbounded end as max()
+		auto parseBound = [](const std::string& str, TimePoint unbounded) -> std::optional<TimePoint> {
+			if (str == TimeExtent::SPECIAL_VALUE_NOW) return std::nullopt;
+			if (str == TimeExtent::SPECIAL_VALUE_UNBOUNDED || str.empty()) return unbounded;
+			return TimeUtils::parseTimeStringUTC(str);
+		};
 
-		t = TimeExtent(start, end);
+		t = TimeExtent(parseBound(startStr, (TimePoint::min)()), parseBound(endStr, (TimePoint::max)()));
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const TimeExtent& t) {
-		std::string startStr = t.getStart() ? TimeUtils::timePointToString(t.getStart().value()) : TimeExtent::SPECIAL_VALUE_NOW;
-		std::string endStr = t.getEnd() ? TimeUtils::timePointToString(t.getEnd().value()) : TimeExtent::SPECIAL_VALUE_NOW;
-		j = nlohmann::json::array({ startStr, endStr });
+		auto formatBound = [](const std::optional<std::chrono::system_clock::time_point>& bound, bool isUnbounded) -> std::string {
+			if (!bound) return TimeExtent::SPECIAL_VALUE_NOW;
+			if (isUnbounded) return TimeExtent::SPECIAL_VALUE_UNBOUNDED;
+			return TimeUtils::timePointToString(bound.value());
+		};
+
+		j = nlohmann::ordered_json::array({
+			formatBound(t.getStart(), t.isUnboundedStart()),
+			formatBound(t.getEnd(), t.isUnboundedEnd())
+		});
 	}
 }

@@ -168,6 +168,8 @@
     <ClCompile Include="UnitTests\ConnectedSystemsAPITest.cpp" />
     <ClCompile Include="UnitTests\DataArrayTest.cpp" />
     <ClCompile Include="UnitTests\DataBlockMixedTest.cpp" />
+    <ClCompile Include="UnitTests\TimeExtentTest.cpp" />
+    <ClCompile Include="UnitTests\TimeUtilsTest.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
