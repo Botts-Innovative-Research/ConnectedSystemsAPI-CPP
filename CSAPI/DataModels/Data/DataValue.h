@@ -105,7 +105,7 @@ namespace ConnectedSystemsAPI::DataModels::Data {
 		/// </summary>
 		std::string toString() const;
 
-		friend void from_json(const nlohmann::json& j, DataValue& v);
+		friend void from_json(const nlohmann::ordered_json& j, DataValue& v);
 		friend void to_json(nlohmann::ordered_json& j, const DataValue& v);
 	};
 }

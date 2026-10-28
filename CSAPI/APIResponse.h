@@ -19,7 +19,7 @@ namespace ConnectedSystemsAPI {
 		bool isSingleItem;
 		std::map<std::string, std::vector<std::string>> headers;
 
-		T deserializeItem(const nlohmann::json& jsonElement) {
+		T deserializeItem(const nlohmann::ordered_json& jsonElement) {
 			return jsonElement.get<T>();
 		}
 
@@ -31,7 +31,7 @@ namespace ConnectedSystemsAPI {
 				return;
 			}
 
-			auto jsonObj = nlohmann::json::parse(responseBody);
+			auto jsonObj = nlohmann::ordered_json::parse(responseBody);
 			if (jsonObj.contains(JSON_ARRAY_ITEMS)) {
 				isSingleItem = false;
 				for (const auto& itemElement : jsonObj[JSON_ARRAY_ITEMS]) {

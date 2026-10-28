@@ -39,6 +39,9 @@
     <ClCompile Include="UnitTests\ConnectedSystemsAPITest.cpp">
       <Filter>UnitTests</Filter>
     </ClCompile>
+    <ClCompile Include="UnitTests\DataArrayTest.cpp">
+      <Filter>UnitTests</Filter>
+    </ClCompile>
     <ClCompile Include="UnitTests\DataBlockMixedTest.cpp">
       <Filter>UnitTests</Filter>
     </ClCompile>

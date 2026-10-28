@@ -1,6 +1,8 @@
 #pragma once
 
 #include <memory>
+#include <optional>
+#include <string>
 #include <stdexcept>
 #include <utility>
 #include <nlohmann/json.hpp>
@@ -17,6 +19,7 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 	class DataArray : public DataComponent {
 	private:
 		Count m_elementCount;
+		std::optional<std::string> m_elementCountLink;
 		std::unique_ptr<DataComponent> m_elementType;
 
 	public:
@@ -44,7 +47,13 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 
 		void validate() const override {
 			DataComponent::validate();
-			m_elementCount.validate();
+			if (m_elementCountLink) {
+				if (m_elementCountLink->empty())
+					throw std::invalid_argument("DataArray.elementCount link href is required");
+			}
+			else {
+				m_elementCount.validate();
+			}
 			if (!m_elementType)
 				throw std::invalid_argument("DataArray.elementType is required");
 			m_elementType->validate();
@@ -52,9 +61,20 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 
 		/// <summary>
 		/// Specifies the size of the array (i.e., the number of elements of the defined type it contains).
+		/// Only meaningful when the element count is given inline; see hasElementCountLink().
+		/// Setting it clears any element count link.
 		/// </summary>
 		const Count& getElementCount() const { return m_elementCount; }
-		void setElementCount(const Count& elementCount) { m_elementCount = elementCount; }
+		void setElementCount(const Count& elementCount) { m_elementCount = elementCount; m_elementCountLink.reset(); }
+
+		/// <summary>
+		/// Link to a Count component, elsewhere in the structure, that provides the size of the array.
+		/// The href is usually a URI fragment referencing that component's ID, e.g., "#packetMetadataCount".
+		/// Setting it clears any inline element count.
+		/// </summary>
+		const std::optional<std::string>& getElementCountLink() const noexcept { return m_elementCountLink; }
+		void setElementCountLink(const std::string& href) { m_elementCountLink = href; m_elementCount = Count(); }
+		bool hasElementCountLink() const noexcept { return m_elementCountLink.has_value(); }
 
 		/// <summary>
 		/// Defines the structure of the element that will be repeated in the array.
@@ -74,14 +94,26 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 	inline void from_json(const nlohmann::json& j, DataArray& v) {
 		from_json(j, static_cast<DataComponent&>(v));
 
-		v.m_elementCount = j.at("elementCount").get<Count>();
+		// The element count is either an inline Count or a link to a Count elsewhere in the structure
+		const auto& elementCount = j.at("elementCount");
+		if (elementCount.is_object() && !elementCount.contains("type") && elementCount.contains("href")) {
+			v.m_elementCountLink = elementCount["href"].get<std::string>();
+			v.m_elementCount = Count();
+		}
+		else {
+			v.m_elementCount = elementCount.get<Count>();
+			v.m_elementCountLink.reset();
+		}
 		v.m_elementType = DataComponentRegistry::createDataComponent(j.at("elementType"));
 	}
 
 	inline void to_json(nlohmann::ordered_json& j, const DataArray& v) {
 		to_json(j, static_cast<const DataComponent&>(v));
 
-		j["elementCount"] = v.m_elementCount;
+		if (v.m_elementCountLink)
+			j["elementCount"] = nlohmann::ordered_json{ { "href", v.m_elementCountLink.value() } };
+		else
+			j["elementCount"] = v.m_elementCount;
 		j["elementType"] = v.m_elementType ? v.m_elementType->toJson() : nullptr;
 	}
 }

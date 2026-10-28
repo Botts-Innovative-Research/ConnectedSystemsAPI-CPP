@@ -125,7 +125,7 @@ namespace ConnectedSystemsAPI::DataModels::Data {
 		}
 	}
 
-	inline void from_json(const nlohmann::json& j, DataValue& v) {
+	inline void from_json(const nlohmann::ordered_json& j, DataValue& v) {
 		if (j.is_boolean()) {
 			v.value = j.get<bool>();
 		}

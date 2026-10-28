@@ -3,6 +3,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include "APIResponse.h"
 #include "DataModels/Observation.h"
 #include "DataModels/Data/DataBlockMixed.h"
 #include "DataModels/Data/DataValue.h"
@@ -64,6 +65,14 @@ namespace CSAPItest {
 			auto observation = j.get<Observation>();
 
 			Assert::AreEqual(j["result"].dump(), nlohmann::json(observation.toJson()["result"]).dump());
+		}
+
+		TEST_METHOD(APIResponse_NestedResult_PreservesKeyOrder) {
+			std::string body = R"({ "items": [ { "id": "obs1", "result": { "location": { "lat": 34.75, "lon": -86.56, "alt": 193.0 }, "count": 1 } } ] })";
+			ConnectedSystemsAPI::APIResponse<Observation> response(200, "OK", body, {});
+
+			auto expected = nlohmann::ordered_json::parse(body)["items"][0]["result"];
+			Assert::AreEqual(expected.dump(), response.getItems().at(0).toJson()["result"].dump());
 		}
 
 		TEST_METHOD(Copy_NestedDataBlock_IsDeep) {
