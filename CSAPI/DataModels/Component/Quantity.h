@@ -9,7 +9,7 @@
 
 #include "ScalarComponent.h"
 #include "UnitOfMeasure.h"
-#include "Util/JsonUtils.h"
+#include "../../Util/JsonUtils.h"
 #include "DataComponent.h"
 #include "SimpleComponent.h"
 

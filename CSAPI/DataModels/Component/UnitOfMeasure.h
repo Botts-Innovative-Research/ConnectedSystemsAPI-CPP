@@ -8,7 +8,7 @@
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
-#include "Util/JsonUtils.h"
+#include "../../Util/JsonUtils.h"
 
 namespace ConnectedSystemsAPI::DataModels::Component {
 	class UnitOfMeasure;

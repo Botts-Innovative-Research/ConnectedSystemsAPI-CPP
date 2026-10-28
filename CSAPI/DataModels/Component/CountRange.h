@@ -9,7 +9,7 @@
 #include <nlohmann/json_fwd.hpp>
 
 #include "SimpleComponent.h"
-#include "Util/JsonUtils.h"
+#include "../../Util/JsonUtils.h"
 #include "DataComponent.h"
 
 namespace ConnectedSystemsAPI::DataModels::Component {

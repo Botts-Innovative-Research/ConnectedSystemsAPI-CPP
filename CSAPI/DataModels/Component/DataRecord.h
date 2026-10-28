@@ -13,6 +13,7 @@
 
 #include "DataComponent.h"
 #include "DataComponentRegistry.h"
+#include "Vector.h"
 #include "../Data/DataBlockMixed.h"
 #include "../Data/DataValue.h"
 
@@ -66,27 +67,43 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 		void addField(std::unique_ptr<DataComponent> field) { if (field) m_fields.push_back(std::move(field)); }
 
 		DataModels::Data::DataBlockMixed createDataBlock() const {
+			return createDataBlock(m_fields);
+		}
+
+	private:
+		static DataModels::Data::DataBlockMixed createDataBlock(const std::vector<std::unique_ptr<DataComponent>>& fields) {
 			DataModels::Data::DataBlockMixed dataBlock;
-			for (const auto& field : m_fields) {
+			for (const auto& field : fields) {
 				auto fieldName = field->getName().value_or("");
-				auto fieldValue = DataModels::Data::DataValue();
-				if (field->getType() == "Boolean") {
-					fieldValue = DataModels::Data::DataValue(false);
-				}
-				else if (field->getType() == "Count") {
-					fieldValue = DataModels::Data::DataValue(int64_t(0));
-				}
-				else if (field->getType() == "Quantity") {
-					fieldValue = DataModels::Data::DataValue(0.0);
-				}
-				else if (field->getType() == "Text") {
-					fieldValue = DataModels::Data::DataValue(std::string(""));
-				}
 				if (fieldName.empty()) continue;
-				dataBlock.setField(fieldName, fieldValue);
+				dataBlock.setField(fieldName, createDataValue(*field));
 			}
 			return dataBlock;
 		}
+
+		static DataModels::Data::DataValue createDataValue(const DataComponent& field) {
+			if (field.getType() == "Boolean") {
+				return DataModels::Data::DataValue(false);
+			}
+			else if (field.getType() == "Count") {
+				return DataModels::Data::DataValue(int64_t(0));
+			}
+			else if (field.getType() == "Quantity") {
+				return DataModels::Data::DataValue(0.0);
+			}
+			else if (field.getType() == "Text") {
+				return DataModels::Data::DataValue(std::string(""));
+			}
+			else if (auto record = dynamic_cast<const DataRecord*>(&field)) {
+				return DataModels::Data::DataValue(record->createDataBlock());
+			}
+			else if (auto vector = dynamic_cast<const Vector*>(&field)) {
+				return DataModels::Data::DataValue(createDataBlock(vector->getCoordinates()));
+			}
+			return DataModels::Data::DataValue();
+		}
+
+	public:
 
 		friend void from_json(const nlohmann::json& j, DataRecord& v);
 		friend void to_json(nlohmann::ordered_json& j, const DataRecord& v);

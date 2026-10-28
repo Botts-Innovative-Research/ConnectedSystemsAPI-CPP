@@ -11,7 +11,7 @@
 
 #include "DataComponent.h"
 #include "DataComponentRegistry.h"
-#include "Util/JsonUtils.h"
+#include "../../Util/JsonUtils.h"
 
 namespace ConnectedSystemsAPI::DataModels::Component {
 	class Vector;

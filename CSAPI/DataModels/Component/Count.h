@@ -8,7 +8,7 @@
 #include <nlohmann/json_fwd.hpp>
 
 #include "ScalarComponent.h"
-#include "Util/JsonUtils.h"
+#include "../../Util/JsonUtils.h"
 #include "DataComponent.h"
 #include "SimpleComponent.h"
 
