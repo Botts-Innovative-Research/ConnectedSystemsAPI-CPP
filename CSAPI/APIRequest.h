@@ -105,6 +105,7 @@ namespace ConnectedSystemsAPI {
 			if (res)
 			{
 				response.responseCode = res->status;
+				response.responseMessage = res->reason;
 				response.responseBody = res->body;
 
 				// Copy headers
@@ -117,7 +118,7 @@ namespace ConnectedSystemsAPI {
 			{
 				// httplib error (connection failure, timeout, etc.)
 				response.responseCode = 0;
-				response.responseMessage = "HTTP request failed";
+				response.responseMessage = "HTTP request failed: " + httplib::to_string(res.error());
 			}
 
 			return response;

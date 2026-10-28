@@ -219,6 +219,41 @@ namespace CSAPItest {
 			Assert::AreEqual(200, response.getResponseCode());
 		}
 
+		TEST_METHOD(Request_Success_SetsReasonPhrase) {
+			auto response = requestSystemsFromLocalServer([](int port) { return "http://127.0.0.1:" + std::to_string(port) + "/api"; });
+			Assert::AreEqual("OK"s, response.getResponseMessage());
+		}
+
+		TEST_METHOD(Request_ErrorStatus_SetsReasonPhrase) {
+			httplib::Server server;
+			server.Get("/api/systems/missing", [](const httplib::Request&, httplib::Response& res) { res.status = 404; });
+
+			int port = server.bind_to_any_port("127.0.0.1");
+			std::thread serverThread([&] { server.listen_after_bind(); });
+			server.wait_until_ready();
+
+			ConSysAPI api("http://127.0.0.1:" + std::to_string(port) + "/api", "admin", "password");
+			auto response = api.getSystemsAPI().getSystemById("missing");
+
+			server.stop();
+			serverThread.join();
+
+			Assert::AreEqual(404, response.getResponseCode());
+			Assert::AreEqual("Not Found"s, response.getResponseMessage());
+		}
+
+		TEST_METHOD(Request_ConnectionRefused_DescribesError) {
+			// Nothing listens on port 1
+			ConSysAPI api("http://127.0.0.1:1/api", "admin", "password");
+			auto response = api.getSystemsAPI().getSystems();
+
+			Assert::AreEqual(0, response.getResponseCode());
+			const auto& message = response.getResponseMessage();
+			Logger::WriteMessage((message + "\n").c_str());
+			Assert::IsTrue(message.find("HTTP request failed: ") == 0);
+			Assert::IsTrue(message.size() > std::string("HTTP request failed: ").size());
+		}
+
 		TEST_METHOD(Request_UppercaseScheme_IsAccepted) {
 			auto response = requestSystemsFromLocalServer([](int port) { return "HTTP://127.0.0.1:" + std::to_string(port) + "/api"; });
 			Assert::AreEqual(200, response.getResponseCode());
