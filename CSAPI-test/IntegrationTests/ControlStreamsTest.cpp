@@ -1,7 +1,8 @@
-#include <string>
-
 #include "pch.h"
 #include "CppUnitTest.h"
+
+#include <string>
+
 #include "ConnectedSystemsAPI.h"
 #include "TestHelper.h"
 #include "DataModels/ControlStream.h"
