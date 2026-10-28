@@ -46,3 +46,6 @@
 /CSAPI-test/x64/Debug
 
 */vcpkg_installed/*
+
+# Visual Studio per-user project settings
+*.vcxproj.user
