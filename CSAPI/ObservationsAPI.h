@@ -28,8 +28,8 @@ namespace ConnectedSystemsAPI {
 		/// </summary>
 		/// <param name="query">The query string parameters.</param>
 		/// <returns>A response object containing a list of observations.</returns>
-		APIResponse<DataModels::Observation> fetchObservations(const Query::ObservationsQuery& query) const {
-			return fetchObservations(query.toString());
+		APIResponse<DataModels::Observation> getObservations(const Query::ObservationsQuery& query) const {
+			return getObservations(query.toString());
 		}
 
 		/// <summary>
@@ -37,7 +37,7 @@ namespace ConnectedSystemsAPI {
 		/// </summary>
 		/// <param name="query">The query string.</param>
 		/// <returns>A response object containing a list of observations.</returns>
-		APIResponse<DataModels::Observation> fetchObservations(const std::string& queryString = "") const {
+		APIResponse<DataModels::Observation> getObservations(const std::string& queryString = "") const {
 			auto response = APIRequest::Builder()
 				.setApiRoot(apiRoot)
 				.setMethod("GET")
@@ -54,8 +54,8 @@ namespace ConnectedSystemsAPI {
 		/// </summary>
 		/// <param name="query">The query string parameters.</param>
 		/// <returns>A response object containing a list of observations.</returns>
-		APIResponse<DataModels::Observation> fetchObservationsOfDataStream(const std::string& dataStreamId, const Query::ObservationsOfDataStreamQuery& query) const {
-			return fetchObservationsOfDataStream(dataStreamId, query.toString());
+		APIResponse<DataModels::Observation> getObservationsOfDataStream(const std::string& dataStreamId, const Query::ObservationsOfDataStreamQuery& query) const {
+			return getObservationsOfDataStream(dataStreamId, query.toString());
 		}
 
 		/// <summary>
@@ -63,7 +63,7 @@ namespace ConnectedSystemsAPI {
 		/// </summary>
 		/// <param name="query">The query string.</param>
 		/// <returns>A response object containing a list of observations.</returns>
-		APIResponse<DataModels::Observation> fetchObservationsOfDataStream(const std::string& dataStreamId, const std::string& queryString = "") const {
+		APIResponse<DataModels::Observation> getObservationsOfDataStream(const std::string& dataStreamId, const std::string& queryString = "") const {
 			if (dataStreamId.empty())
 				return APIResponse<DataModels::Observation>(400, "Invalid dataStreamId", "", {});
 
@@ -85,7 +85,7 @@ namespace ConnectedSystemsAPI {
 		/// </summary>
 		/// <param name="observationId">The ID of the observation to retrieve.</param>
 		/// <returns>A response object containing the requested observation.</returns>
-		APIResponse<DataModels::Observation> fetchObservationById(const std::string& observationId) const {
+		APIResponse<DataModels::Observation> getObservationById(const std::string& observationId) const {
 			if (observationId.empty())
 				return APIResponse<DataModels::Observation>(400, "Invalid observationId", "", {});
 

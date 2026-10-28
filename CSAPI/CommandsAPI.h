@@ -28,8 +28,8 @@ namespace ConnectedSystemsAPI {
 		/// </summary>
 		/// <param name="query">The query string parameters.</param>
 		/// <returns>A response object containing a list of commands.</returns>
-		APIResponse<DataModels::Command> fetchCommands(const Query::CommandsQuery& query) const {
-			return fetchCommands(query.toString());
+		APIResponse<DataModels::Command> getCommands(const Query::CommandsQuery& query) const {
+			return getCommands(query.toString());
 		}
 
 		/// <summary>
@@ -37,7 +37,7 @@ namespace ConnectedSystemsAPI {
 		/// </summary>
 		/// <param name="queryString">The query string.</param>
 		/// <returns>A response object containing a list of commands.</returns>
-		APIResponse<DataModels::Command> fetchCommands(const std::string& queryString = "") const {
+		APIResponse<DataModels::Command> getCommands(const std::string& queryString = "") const {
 			auto response = APIRequest::Builder()
 				.setApiRoot(apiRoot)
 				.setMethod("GET")
@@ -55,8 +55,8 @@ namespace ConnectedSystemsAPI {
 		/// <param name="controlStreamId">The local identifier of the control stream.</param>
 		/// <param name="query">The query string parameters.</param>
 		/// <returns>A response object containing a list of commands.</returns>
-		APIResponse<DataModels::Command> fetchCommandsOfControlStream(const std::string& controlStreamId, const Query::CommandsOfControlStreamQuery& query) const {
-			return fetchCommandsOfControlStream(controlStreamId, query.toString());
+		APIResponse<DataModels::Command> getCommandsOfControlStream(const std::string& controlStreamId, const Query::CommandsOfControlStreamQuery& query) const {
+			return getCommandsOfControlStream(controlStreamId, query.toString());
 		}
 
 		/// <summary>
@@ -65,7 +65,7 @@ namespace ConnectedSystemsAPI {
 		/// <param name="controlStreamId">The local identifier of the control stream.</param>
 		/// <param name="queryString">The query string.</param>
 		/// <returns>A response object containing a list of commands.</returns>
-		APIResponse<DataModels::Command> fetchCommandsOfControlStream(const std::string& controlStreamId, const std::string& queryString = "") const {
+		APIResponse<DataModels::Command> getCommandsOfControlStream(const std::string& controlStreamId, const std::string& queryString = "") const {
 			if (controlStreamId.empty())
 				return APIResponse<DataModels::Command>(400, "Invalid controlStreamId", "", {});
 
@@ -87,7 +87,7 @@ namespace ConnectedSystemsAPI {
 		/// </summary>
 		/// <param name="commandId">The ID of the command to retrieve.</param>
 		/// <returns>A response object containing the requested command.</returns>
-		APIResponse<DataModels::Command> fetchCommandById(const std::string& commandId) const {
+		APIResponse<DataModels::Command> getCommandById(const std::string& commandId) const {
 			if (commandId.empty())
 				return APIResponse<DataModels::Command>(400, "Invalid commandId", "", {});
 

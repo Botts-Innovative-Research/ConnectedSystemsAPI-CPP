@@ -105,7 +105,7 @@ namespace CSAPItest {
 				.setFoi("a&b=c +#d")
 				.setPhenomenonTime(TimeExtent(parse(START), (TimePoint::max)()))
 				.setLimit(5);
-			auto response = api.getObservationsAPI().fetchObservationsOfDataStream("ds1", query);
+			auto response = api.getObservationsAPI().getObservationsOfDataStream("ds1", query);
 
 			server.stop();
 			serverThread.join();
