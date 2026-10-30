@@ -92,11 +92,11 @@ namespace ConnectedSystemsAPI::DataModels::Component {
 			else if (field.getType() == "Text") {
 				return DataModels::Data::DataValue(std::string(""));
 			}
-			else if (auto record = dynamic_cast<const DataRecord*>(&field)) {
-				return DataModels::Data::DataValue(record->createDataBlock());
+			else if (field.getType() == "DataRecord") {
+				return DataModels::Data::DataValue(static_cast<const DataRecord&>(field).createDataBlock());
 			}
-			else if (auto vector = dynamic_cast<const Vector*>(&field)) {
-				return DataModels::Data::DataValue(createDataBlock(vector->getCoordinates()));
+			else if (field.getType() == "Vector") {
+				return DataModels::Data::DataValue(createDataBlock(static_cast<const Vector&>(field).getCoordinates()));
 			}
 			return DataModels::Data::DataValue();
 		}
