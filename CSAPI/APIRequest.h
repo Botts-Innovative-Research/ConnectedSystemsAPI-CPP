@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <cctype>
+#include <chrono>
+#include <optional>
 #include <string>
 #include <iostream>
 #include <stdexcept>
@@ -26,9 +28,11 @@ namespace ConnectedSystemsAPI {
 		std::string requestMethod;
 		std::map<std::string, std::string> headers;
 		std::string body;
+		std::optional<std::chrono::milliseconds> timeout;
 
-		APIRequest(const std::string& apiRoot, const std::string& endpoint, const std::string& requestMethod, const std::map<std::string, std::string>& headers, const std::string& body)
-			: apiRoot(apiRoot), endpoint(endpoint), requestMethod(requestMethod), headers(headers), body(body) {
+		APIRequest(const std::string& apiRoot, const std::string& endpoint, const std::string& requestMethod, const std::map<std::string, std::string>& headers, const std::string& body,
+			std::optional<std::chrono::milliseconds> timeout)
+			: apiRoot(apiRoot), endpoint(endpoint), requestMethod(requestMethod), headers(headers), body(body), timeout(timeout) {
 		}
 
 	public:
@@ -73,6 +77,14 @@ namespace ConnectedSystemsAPI {
 				return response;
 			}
 			std::string fullEndpoint = basePath + endpoint;
+
+			// Without a timeout, httplib waits up to 300 seconds to connect and to read
+			if (timeout) {
+				cli.set_connection_timeout(timeout.value());
+				cli.set_read_timeout(timeout.value());
+				cli.set_write_timeout(timeout.value());
+				cli.set_max_timeout(timeout.value());
+			}
 
 			// Build headers
 			httplib::Headers h;
@@ -136,6 +148,7 @@ namespace ConnectedSystemsAPI {
 			std::string subResourcePath;
 			std::string subResourceId;
 			std::string queryString;
+			std::optional<std::chrono::milliseconds> timeout;
 
 		public:
 			Builder& setApiRoot(const std::string& root) {
@@ -191,6 +204,15 @@ namespace ConnectedSystemsAPI {
 				return *this;
 			}
 
+			/// <summary>
+			/// Limits how long the request may take in total, including connecting.
+			/// Without it, httplib's defaults apply (up to 300 seconds to connect and to read).
+			/// </summary>
+			Builder& setTimeout(std::chrono::milliseconds timeout) {
+				this->timeout = timeout;
+				return *this;
+			}
+
 			APIRequest build() {
 				if (apiRoot.empty()) {
 					throw std::invalid_argument("API root must be set");
@@ -206,7 +228,7 @@ namespace ConnectedSystemsAPI {
 				endpoint = appendPath(endpoint, subResourceId);
 				endpoint += queryString;
 
-				return APIRequest(apiRoot, endpoint, requestMethod, headers, body);
+				return APIRequest(apiRoot, endpoint, requestMethod, headers, body, timeout);
 			}
 
 		private:

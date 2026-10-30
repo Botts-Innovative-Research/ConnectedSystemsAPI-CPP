@@ -171,6 +171,7 @@
     <ClCompile Include="IntegrationTests\SystemsTest.cpp" />
     <ClCompile Include="UnitTests\APIResponseTest.cpp" />
     <ClCompile Include="UnitTests\ConnectedSystemsAPITest.cpp" />
+    <ClCompile Include="UnitTests\ConnectionStatusTest.cpp" />
     <ClCompile Include="UnitTests\DataArrayTest.cpp" />
     <ClCompile Include="UnitTests\DataBlockMixedTest.cpp" />
     <ClCompile Include="UnitTests\QueryParametersTest.cpp" />

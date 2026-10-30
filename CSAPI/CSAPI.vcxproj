@@ -144,8 +144,10 @@
     <ClInclude Include="APIResponse.h" />
     <ClInclude Include="CommandsAPI.h" />
     <ClInclude Include="ConnectedSystemsAPI.h" />
+    <ClInclude Include="ConnectionStatus.h" />
     <ClInclude Include="ControlStreamsAPI.h" />
     <ClInclude Include="DataModels\Command.h" />
+    <ClInclude Include="DataModels\Conformance.h" />
     <ClInclude Include="DataModels\CommandSchema.h" />
     <ClInclude Include="DataModels\CommandSchemaBuilder.h" />
     <ClInclude Include="DataModels\Component\Boolean.h" />

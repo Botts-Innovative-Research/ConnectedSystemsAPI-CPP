@@ -42,6 +42,9 @@
     <ClInclude Include="ConnectedSystemsAPI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ConnectionStatus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="SystemsAPI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -52,6 +55,9 @@
       <Filter>Header Files\DataModels</Filter>
     </ClInclude>
     <ClInclude Include="DataModels\Link.h">
+      <Filter>Header Files\DataModels</Filter>
+    </ClInclude>
+    <ClInclude Include="DataModels\Conformance.h">
       <Filter>Header Files\DataModels</Filter>
     </ClInclude>
     <ClInclude Include="DataModels\Properties.h">
